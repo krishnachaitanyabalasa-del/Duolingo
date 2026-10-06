@@ -3,9 +3,9 @@ def test_get_course(client):
     response = client.get("/api/course")
     assert response.status_code == 200
     data = response.json()
-    assert data["title"] == "English Course"
-    assert len(data["units"]) >= 1
-    assert data["units"][0]["title"] == "Unit 1: Basics"
+    assert data["title"] == "English Foundations"
+    assert len(data["units"]) == 2
+    assert data["units"][0]["title"] == "UNIT 1 — BASICS"
 
 
 def test_get_units(client):
@@ -14,7 +14,7 @@ def test_get_units(client):
     assert response.status_code == 200
     data = response.json()
     assert isinstance(data, list)
-    assert len(data) >= 2
+    assert len(data) == 2
 
 
 def test_get_skill_detail(client):

@@ -56,6 +56,15 @@ def start_lesson(db: Session, lesson_id: int, user_id: int) -> LessonStartRespon
     )
 
 
+def _clean_str(val: Any) -> str:
+    """Normalizes string or list of words for flexible answer matching."""
+    if isinstance(val, (list, tuple)):
+        val = " ".join(str(v) for v in val)
+    s = str(val or "").strip().lower()
+    s = s.rstrip(".!?")
+    return " ".join(s.split())
+
+
 def _validate_exercise_answer(exercise: Exercise, answer: Any) -> tuple[bool, Any]:
     """
     Helper function to validate answers across all exercise types:
@@ -64,32 +73,21 @@ def _validate_exercise_answer(exercise: Exercise, answer: Any) -> tuple[bool, An
     """
     correct_ans = exercise.correct_answer
 
-    if exercise.type in ["MULTIPLE_CHOICE", "TRANSLATE", "FILL_BLANK", "TYPE_ANSWER"]:
-        if isinstance(correct_ans, list):
-            # Multiple acceptable answers
-            normalized_answer = str(answer).strip().lower()
-            is_correct = any(str(ca).strip().lower() == normalized_answer for ca in correct_ans)
-            display_answer = ", ".join(str(ca) for ca in correct_ans)
-            return is_correct, display_answer
-        else:
-            is_correct = str(answer).strip().lower() == str(correct_ans).strip().lower()
-            return is_correct, str(correct_ans)
-
-    elif exercise.type == "MATCH_PAIRS":
+    if exercise.type == "MATCH_PAIRS":
         # Handle pair matching answer structures
         # Standard format: list of dicts [{'left': 'A', 'right': '1'}, ...]
         def normalize_pairs(pairs_data):
             if isinstance(pairs_data, dict):
-                return sorted([(str(k).strip().lower(), str(v).strip().lower()) for k, v in pairs_data.items()])
+                return sorted([(_clean_str(k), _clean_str(v)) for k, v in pairs_data.items()])
             elif isinstance(pairs_data, list):
                 result = []
                 for item in pairs_data:
                     if isinstance(item, dict):
-                        left = str(item.get("left", "")).strip().lower()
-                        right = str(item.get("right", "")).strip().lower()
+                        left = _clean_str(item.get("left", ""))
+                        right = _clean_str(item.get("right", ""))
                         result.append((left, right))
                     elif isinstance(item, (list, tuple)) and len(item) == 2:
-                        result.append((str(item[0]).strip().lower(), str(item[1]).strip().lower()))
+                        result.append((_clean_str(item[0]), _clean_str(item[1])))
                 return sorted(result)
             return []
 
@@ -99,8 +97,27 @@ def _validate_exercise_answer(exercise: Exercise, answer: Any) -> tuple[bool, An
         is_correct = user_pairs == expected_pairs and len(user_pairs) > 0
         return is_correct, correct_ans
 
+    elif exercise.type in ["MULTIPLE_CHOICE", "TRANSLATE", "FILL_BLANK", "TYPE_ANSWER"]:
+        clean_user_answer = _clean_str(answer)
+
+        # Check if correct_ans is a list of alternative acceptable answers
+        if isinstance(correct_ans, list) and len(correct_ans) > 0 and not isinstance(correct_ans[0], dict):
+            # Check if correct_ans is a list of words (single answer) or list of alternative full sentences
+            # If all items are short single words that join to form sentence, treat as 1 answer.
+            # Otherwise check if any alternative matches clean_user_answer.
+            joined_correct = _clean_str(correct_ans)
+            is_correct = clean_user_answer == joined_correct or any(
+                _clean_str(ca) == clean_user_answer for ca in correct_ans
+            )
+            display_answer = correct_ans if isinstance(correct_ans, str) else joined_correct
+            return is_correct, display_answer
+        else:
+            clean_expected = _clean_str(correct_ans)
+            is_correct = clean_user_answer == clean_expected
+            return is_correct, str(correct_ans)
+
     # Fallback comparison
-    return str(answer).strip().lower() == str(correct_ans).strip().lower(), str(correct_ans)
+    return _clean_str(answer) == _clean_str(correct_ans), str(correct_ans)
 
 
 def validate_and_submit_answer(

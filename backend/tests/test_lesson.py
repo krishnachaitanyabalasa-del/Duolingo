@@ -5,7 +5,7 @@ def test_get_lesson_detail(client):
     data = response.json()
     assert data["id"] == 1
     assert data["title"] == "Basic Greetings"
-    assert len(data["exercises"]) == 2
+    assert len(data["exercises"]) == 8
 
 
 def test_start_lesson(client):
