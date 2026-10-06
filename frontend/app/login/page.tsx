@@ -18,7 +18,13 @@ export default function LoginPage() {
       router.push('/learn');
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err?.message || 'Failed to sign in with Google. Check console or try dev mode.');
+      if (err?.code === 'auth/unauthorized-domain' || err?.message?.includes('unauthorized-domain')) {
+        setError(
+          '127.0.0.1 is not added to Authorized Domains in Firebase Console. Add 127.0.0.1 in Firebase Console -> Authentication -> Settings -> Authorized domains, or click "Continue as Default Learner" below.'
+        );
+      } else {
+        setError(err?.message || 'Failed to sign in with Google. Click "Continue as Default Learner" below.');
+      }
     } finally {
       setLoading(false);
     }

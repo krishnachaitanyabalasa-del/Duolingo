@@ -95,8 +95,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginWithGoogle = async () => {
-    await signInWithPopup(auth, googleProvider);
-    await loadData();
+    try {
+      await signInWithPopup(auth, googleProvider);
+      await loadData();
+    } catch (err: any) {
+      console.warn('Google Login popup error:', err?.message || err);
+    }
   };
 
   const logout = async () => {
