@@ -32,6 +32,7 @@ def init_and_migrate_db():
         inspector = inspect(engine)
         with engine.connect() as conn:
             _add_missing_columns(conn, inspector, "users", [
+                ("firebase_uid", "VARCHAR"),
                 ("display_name", "VARCHAR"),
                 ("avatar_id", "VARCHAR DEFAULT 'avatar_01'"),
                 ("bio", "VARCHAR"),
@@ -40,6 +41,9 @@ def init_and_migrate_db():
                 ("top_three_finishes", "INTEGER DEFAULT 0"),
                 ("following_count", "INTEGER DEFAULT 0"),
                 ("followers_count", "INTEGER DEFAULT 0"),
+            ])
+            _add_missing_columns(conn, inspector, "user_lesson_progress", [
+                ("status", "VARCHAR DEFAULT 'LOCKED'"),
             ])
             _add_missing_columns(conn, inspector, "achievements", [
                 ("reward_xp", "INTEGER NOT NULL DEFAULT 0"),

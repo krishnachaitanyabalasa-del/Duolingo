@@ -24,6 +24,11 @@ from app.routers import (
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager to handle DB initialization and auto-seeding on startup."""
+    import os
+    if os.environ.get("TESTING") == "true":
+        yield
+        return
+
     init_and_migrate_db()
     db = SessionLocal()
     try:
