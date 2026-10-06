@@ -3,6 +3,10 @@ import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateProfile as updateFirebaseProfile,
+  sendPasswordResetEmail,
   signOut,
   onAuthStateChanged,
   User,
@@ -58,4 +62,14 @@ export async function getFirebaseToken(): Promise<string | null> {
   }
 }
 
-export { signInWithPopup, signOut, onAuthStateChanged, type User };
+export {
+  signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  updateFirebaseProfile,
+  sendPasswordResetEmail,
+  signOut,
+  onAuthStateChanged,
+  type User,
+};
+

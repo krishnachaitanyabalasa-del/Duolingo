@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Duolingo Clone API"
     API_V1_STR: str = "/api"
     DATABASE_URL: str = "sqlite:///./duolingo.db"
-    ALLOWED_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001"
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,https://duolingo-cbdd2.web.app,https://duolingo-cbdd2.firebaseapp.com"
     DEFAULT_USER_ID: int = 1
 
     model_config = SettingsConfigDict(
