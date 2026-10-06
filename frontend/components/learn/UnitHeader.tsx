@@ -5,16 +5,19 @@ import { Unit } from '@/types/course';
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import { GuidebookModal } from './GuidebookModal';
 
+import { getUnitTheme } from '@/lib/unitTheme';
+
 interface UnitHeaderProps {
   unit: Unit;
 }
 
 export const UnitHeader: React.FC<UnitHeaderProps> = ({ unit }) => {
   const [showGuidebook, setShowGuidebook] = useState(false);
+  const theme = getUnitTheme(unit.number);
 
   return (
     <>
-      <div className="w-full max-w-xl mx-auto rounded-3xl p-5 text-white bg-[#ff9600] border-b-4 border-[#e07300] shadow-lg mb-8 flex items-center justify-between">
+      <div className={`w-full max-w-xl mx-auto rounded-3xl p-5 text-white ${theme.headerBg} border-b-4 ${theme.headerBorder} shadow-lg mb-8 flex items-center justify-between`}>
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-white/90 text-xs font-black uppercase tracking-wider">
             <ArrowLeft className="w-4 h-4 cursor-pointer hover:scale-110 transition-transform" />

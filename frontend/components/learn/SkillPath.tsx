@@ -27,6 +27,7 @@ export const SkillPath: React.FC<SkillPathProps> = ({ course }) => {
               <React.Fragment key={skill.id}>
                 <SkillNode
                   skill={skill}
+                  unitNumber={unit.number}
                   onClick={() => setSelectedSkill(skill)}
                 />
                 {/* Insert a Reward Treasure Chest Node after 3rd skill */}

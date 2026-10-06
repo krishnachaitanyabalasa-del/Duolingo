@@ -7,9 +7,12 @@ import { motion } from 'framer-motion';
 import { Check, Lock, BookOpen, Headphones, Star, MessageSquare, Utensils, Users, Compass, ShoppingBag, Smile, Home as HomeIcon, UserCheck } from 'lucide-react';
 import { DuoMascot } from '../mascot/DuoMascot';
 
+import { getUnitTheme } from '@/lib/unitTheme';
+
 interface SkillNodeProps {
   skill: SkillNodeType;
   onClick: () => void;
+  unitNumber?: number;
 }
 
 const ICON_MAP: Record<string, React.ElementType> = {
@@ -25,9 +28,10 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Home: HomeIcon,
 };
 
-export const SkillNode: React.FC<SkillNodeProps> = ({ skill, onClick }) => {
+export const SkillNode: React.FC<SkillNodeProps> = ({ skill, onClick, unitNumber = 1 }) => {
   const isEmoji = skill.icon && /\p{Extended_Pictographic}/u.test(skill.icon);
   const IconComponent = !isEmoji ? (ICON_MAP[skill.icon] || Star) : null;
+  const theme = getUnitTheme(unitNumber);
 
   const isLocked = skill.status === 'LOCKED';
   const isCompleted = skill.status === 'COMPLETED';
@@ -53,9 +57,9 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ skill, onClick }) => {
           disabled={isLocked}
           className={clsx(
             'w-20 h-20 rounded-full flex items-center justify-center transition-all shadow-xl cursor-pointer border-b-4',
-            isCurrent && 'bg-[#ff9600] border-[#e07300] text-white ring-4 ring-[#ff9600]/40 animate-pulse',
-            isCompleted && 'bg-[#ff9600] border-[#e07300] text-white',
-            skill.status === 'AVAILABLE' && 'bg-[#ff9600] border-[#e07300] text-white',
+            isCurrent && `${theme.bg} ${theme.border} text-white ring-4 ${theme.ring} animate-pulse`,
+            isCompleted && `${theme.bg} ${theme.border} text-white`,
+            skill.status === 'AVAILABLE' && `${theme.bg} ${theme.border} text-white`,
             isLocked && 'bg-[#e5e5e5] dark:bg-[#182730] border-[#d0d0d0] dark:border-[#20323d] text-[#afafaf] dark:text-[#52656d] cursor-not-allowed'
           )}
         >
