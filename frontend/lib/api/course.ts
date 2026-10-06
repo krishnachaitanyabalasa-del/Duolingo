@@ -52,7 +52,7 @@ export async function getCourse(): Promise<Course> {
           const totalLessons = s.lessons?.length || 4;
           const completedLessons = s.lessons?.filter((l) => l.is_completed).length || (s.status === 'COMPLETED' ? totalLessons : 0);
 
-          const offsets = [0, 35, 15, -25, -45, -20, 25, 40];
+          const offsets = [0, 52, 75, 48, 0, -48, -75, -52];
           const positionOffset = offsets[sIdx % offsets.length];
 
           return {
