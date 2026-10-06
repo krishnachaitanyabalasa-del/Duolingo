@@ -1,6 +1,7 @@
 import { getFirebaseToken } from '../firebase';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+const rawBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://duolingo-backend-hbn0.onrender.com';
+const BASE_URL = rawBaseUrl.replace(/\/+$/, '');
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
 function isLocalhost(): boolean {
