@@ -160,21 +160,34 @@ export const DuoMascot: React.FC<DuoMascotProps> = ({
   if (variant === 'sleeping') {
     return (
       <div className={clsx('relative flex items-center justify-center select-none', className)} style={{ width: size, height: size }}>
-        <div className="absolute bottom-1 w-3/4 h-2.5 bg-black/15 rounded-full" />
+        {/* Soft Pillow & Shadow */}
+        <div className="absolute bottom-1 w-5/6 h-4 bg-sky-100 dark:bg-[#131f24] rounded-full border-2 border-sky-200 dark:border-[#20323d] shadow-xs" />
 
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/mascot/duo_owl_official.svg"
-          alt="Sleeping Duo Owl"
-          className="w-full h-full object-contain relative z-10 opacity-90 scale-95"
-        />
+        {/* Sleeping Duo Owl SVG */}
+        <svg viewBox="0 0 100 80" className="w-full h-full overflow-visible relative z-10 drop-shadow-md">
+          {/* Main Sleeping Owl Body */}
+          <ellipse cx="50" cy="46" rx="28" ry="22" fill="#58cc02" />
+          <ellipse cx="50" cy="51" rx="20" ry="14" fill="#8ee000" />
 
+          {/* Sleeping Nightcap */}
+          <path d="M 32 38 C 25 18, 55 12, 68 38 Z" fill="#1cb0f6" />
+          <circle cx="68" cy="38" r="4" fill="#ffc800" />
+
+          {/* Closed Sleeping Eyes ^ ^ */}
+          <path d="M 38 43 Q 43 48 48 43" stroke="#2c3e50" strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M 52 43 Q 57 48 62 43" stroke="#2c3e50" strokeWidth="3" fill="none" strokeLinecap="round" />
+
+          {/* Beak */}
+          <polygon points="50,46 46,51 54,51" fill="#ffb700" />
+        </svg>
+
+        {/* Z z Z Sleeping floating text */}
         <motion.span
-          animate={{ opacity: [0.2, 1, 0.2], y: [-5, -18, -5], scale: [0.8, 1.15, 0.8] }}
+          animate={{ opacity: [0.2, 1, 0.2], y: [-6, -20, -6], scale: [0.8, 1.2, 0.8] }}
           transition={{ repeat: Infinity, duration: 2.2 }}
-          className="absolute -top-2 -right-1 font-black text-sm text-[#1cb0f6] drop-shadow-xs z-20"
+          className="absolute -top-3 -right-1 font-black text-base text-[#1cb0f6] drop-shadow-xs z-20"
         >
-          Z z
+          Z z Z
         </motion.span>
       </div>
     );
