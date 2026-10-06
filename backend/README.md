@@ -308,7 +308,7 @@ Returns XP leaderboard sorted descending with user ranks.
 **Response `200 OK`**:
 ```json
 [
-  { "rank": 1, "user_id": 2, "username": "Alex", "xp": 1250, "is_current_user": false },
+  { "rank": 1, "user_id": 2, "username": "Orion", "xp": 1250, "is_current_user": false },
   { "rank": 2, "user_id": 3, "username": "Sarah", "xp": 980, "is_current_user": false },
   { "rank": 3, "user_id": 4, "username": "Rahul", "xp": 750, "is_current_user": false },
   { "rank": 4, "user_id": 1, "username": "learner", "xp": 120, "is_current_user": true }

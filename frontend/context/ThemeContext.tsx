@@ -17,9 +17,32 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const THEME_STORAGE_KEY = 'duo-theme';
 
+function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return 'light';
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
+    return stored === 'dark' || stored === 'light' || stored === 'system' ? stored : 'light';
+  } catch {
+    return 'light';
+  }
+}
+
+function getInitialResolvedTheme(theme: Theme): ResolvedTheme {
+  if (typeof window === 'undefined') return 'light';
+  if (theme === 'dark') return 'dark';
+  if (theme === 'light') return 'light';
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  } catch {
+    return 'light';
+  }
+}
+
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setThemeState] = useState<Theme>('light');
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('light');
+  const [theme, setThemeState] = useState<Theme>(() => getInitialTheme());
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() =>
+    getInitialResolvedTheme(getInitialTheme())
+  );
   const [mounted, setMounted] = useState(false);
 
   // Helper to determine system preference
@@ -43,22 +66,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     root.style.colorScheme = currentResolved;
   }, []);
 
-  // Initialize theme from localStorage or system on mount
+  // Apply theme on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
-      const initialTheme: Theme = stored === 'dark' || stored === 'light' || stored === 'system' ? stored : 'light';
-      setThemeState(initialTheme);
-
-      const resolved = initialTheme === 'system' ? getSystemTheme() : initialTheme;
-      setResolvedTheme(resolved);
-      applyThemeToDOM(resolved);
-    } catch {
-      // localStorage may fail in private mode
-      applyThemeToDOM('light');
-    }
+    applyThemeToDOM(resolvedTheme);
     setMounted(true);
-  }, [getSystemTheme, applyThemeToDOM]);
+  }, [applyThemeToDOM, resolvedTheme]);
 
   // Listen to system preference changes when theme is set to 'system'
   useEffect(() => {

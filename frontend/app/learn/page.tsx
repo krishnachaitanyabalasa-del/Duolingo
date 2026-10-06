@@ -12,7 +12,7 @@ export default function LearnPage() {
     return (
       <div className="h-[70vh] flex flex-col items-center justify-center gap-3">
         <Loader2 className="w-10 h-10 text-green-500 animate-spin" />
-        <p className="font-extrabold text-gray-500">Loading learning path...</p>
+        <p className="font-extrabold text-gray-500 dark:text-gray-400">Loading learning path...</p>
       </div>
     );
   }

@@ -41,7 +41,7 @@ def seed_database(db: Session = None):
 
         leaderboard_users = [
             learner,
-            User(id=2, username="Alex", email="alex@example.com", xp=1250, streak=14, longest_streak=14, hearts=5, gems=350, last_activity_date=date.today()),
+            User(id=2, username="Orion", email="orion@example.com", xp=1250, streak=14, longest_streak=14, hearts=5, gems=350, last_activity_date=date.today()),
             User(id=3, username="Sarah", email="sarah@example.com", xp=980, streak=9, longest_streak=12, hearts=4, gems=200, last_activity_date=date.today()),
             User(id=4, username="Rahul", email="rahul@example.com", xp=750, streak=7, longest_streak=7, hearts=5, gems=150, last_activity_date=yesterday),
             User(id=5, username="Elena", email="elena@example.com", xp=90, streak=2, longest_streak=3, hearts=3, gems=80, last_activity_date=yesterday),

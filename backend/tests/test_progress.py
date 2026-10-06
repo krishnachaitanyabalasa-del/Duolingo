@@ -30,7 +30,7 @@ def test_leaderboard(client):
     assert isinstance(data, list)
     assert len(data) >= 6
     assert data[0]["rank"] == 1
-    assert data[0]["username"] == "Alex"
+    assert data[0]["username"] == "Orion"
     assert data[0]["xp"] == 1250
 
     # Ensure current user is in leaderboard
