@@ -5,7 +5,7 @@ import { UserCourse } from '@/types/user';
 import { X, BookOpen, Award, CheckCircle } from 'lucide-react';
 
 interface CourseModalProps {
-  course: UserCourse;
+  course: UserCourse | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -56,7 +56,7 @@ export const CourseModal: React.FC<CourseModalProps> = ({
                 Course Progress
               </div>
               <div className="text-[11px] font-bold text-gray-400 dark:text-[#52656d]">
-                6 of 18 skills mastered (33%)
+                Active on Duolingo
               </div>
             </div>
           </div>

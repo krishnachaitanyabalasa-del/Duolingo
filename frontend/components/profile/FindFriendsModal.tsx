@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Search, UserPlus, UserCheck } from 'lucide-react';
-import { clsx } from 'clsx';
+import { X, Search } from 'lucide-react';
+import { CartoonAvatar } from './Avatars';
 
 interface FindFriendsModalProps {
   isOpen: boolean;
@@ -15,97 +15,100 @@ export const FindFriendsModal: React.FC<FindFriendsModalProps> = ({
   onClose,
   onToggleFollow,
 }) => {
-  const [query, setQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [mockFriends, setMockFriends] = useState([
+    { id: 2, username: 'Orion', display_name: 'Orion Star', avatar_id: 'avatar_03', xp: 1250, is_following: false },
+    { id: 3, username: 'Sarah', display_name: 'Sarah Miller', avatar_id: 'avatar_02', xp: 980, is_following: true },
+    { id: 4, username: 'Rahul', display_name: 'Rahul Sharma', avatar_id: 'avatar_04', xp: 750, is_following: false },
+    { id: 5, username: 'Elena', display_name: 'Elena Rostova', avatar_id: 'avatar_05', xp: 90, is_following: false },
+    { id: 6, username: 'David', display_name: 'David Chen', avatar_id: 'avatar_06', xp: 45, is_following: false },
+  ]);
 
   if (!isOpen) return null;
 
-  const mockUsers = [
-    { id: 2, username: 'Orion', displayName: 'Orion Star', xp: 1250, isFollowing: false },
-    { id: 3, username: 'Sarah', displayName: 'Sarah Parker', xp: 980, isFollowing: true },
-    { id: 4, username: 'Rahul', displayName: 'Rahul Sharma', xp: 750, isFollowing: false },
-  ];
-
-  const filteredUsers = mockUsers.filter(
-    (u) =>
-      u.username.toLowerCase().includes(query.toLowerCase()) ||
-      u.displayName.toLowerCase().includes(query.toLowerCase())
+  const filtered = mockFriends.filter(
+    (f) =>
+      f.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      f.display_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleFollowClick = (id: number) => {
+    setMockFriends((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, is_following: !f.is_following } : f))
+    );
+    if (onToggleFollow) {
+      onToggleFollow(id);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 select-none">
-      <div className="w-full max-w-md bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-3xl shadow-2xl p-6 space-y-5">
-        <div className="flex items-center justify-between border-b-2 border-gray-100 dark:border-[#20323d] pb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-150">
+      <div className="bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-3xl w-full max-w-md overflow-hidden shadow-xl space-y-0">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b-2 border-gray-100 dark:border-[#20323d]">
           <h2 className="text-xl font-black text-gray-900 dark:text-white">
             Find Friends
           </h2>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-2xl bg-gray-100 dark:bg-[#20323d] hover:bg-gray-200 dark:hover:bg-[#283b47] flex items-center justify-center text-gray-500 dark:text-[#93a7b1] transition-all cursor-pointer"
+            className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#131f24] hover:bg-gray-200 dark:hover:bg-[#20323d] flex items-center justify-center text-gray-500 dark:text-[#93a7b1] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="relative">
-          <Search className="absolute left-4 top-3.5 w-5 h-5 text-gray-400 dark:text-[#52656d]" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search by name or username..."
-            className="w-full pl-12 pr-4 py-3 rounded-2xl bg-gray-50 dark:bg-[#131f24] border-2 border-gray-200 dark:border-[#20323d] focus:border-[#1cb0f6] dark:focus:border-[#1cb0f6] text-gray-900 dark:text-white font-bold text-sm outline-none transition-all"
-          />
-        </div>
+        {/* Content */}
+        <div className="p-5 space-y-4">
+          {/* Search Box */}
+          <div className="relative">
+            <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-gray-400 dark:text-[#52656d]" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name or username..."
+              className="w-full pl-10 pr-4 py-3 rounded-2xl bg-gray-50 dark:bg-[#131f24] border-2 border-gray-200 dark:border-[#20323d] text-sm font-bold text-gray-900 dark:text-white focus:outline-none focus:border-[#1cb0f6] dark:focus:border-[#1cb0f6] transition-colors"
+            />
+          </div>
 
-        <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
-          {filteredUsers.length === 0 ? (
-            <div className="py-6 text-center text-xs font-bold text-gray-400">
-              No matching learners found.
-            </div>
-          ) : (
-            filteredUsers.map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center justify-between p-3 rounded-2xl bg-gray-50 dark:bg-[#131f24] border-2 border-gray-200 dark:border-[#20323d]"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#1cb0f6] flex items-center justify-center text-white font-black text-sm">
-                    {user.displayName[0]}
-                  </div>
-                  <div>
-                    <div className="font-extrabold text-xs text-gray-900 dark:text-white">
-                      {user.displayName}
-                    </div>
-                    <div className="text-[11px] font-bold text-gray-400 dark:text-[#52656d]">
-                      @{user.username} • {user.xp} XP
-                    </div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => onToggleFollow?.(user.id)}
-                  className={clsx(
-                    'px-3 py-1.5 rounded-xl font-black text-[11px] tracking-wider transition-all border-2 cursor-pointer flex items-center gap-1.5',
-                    user.isFollowing
-                      ? 'bg-gray-100 dark:bg-[#20323d] text-gray-600 dark:text-[#93a7b1] border-gray-200 dark:border-[#2b3d49]'
-                      : 'bg-[#1cb0f6] text-white border-transparent'
-                  )}
-                >
-                  {user.isFollowing ? (
-                    <>
-                      <UserCheck className="w-3.5 h-3.5" />
-                      <span>FOLLOWING</span>
-                    </>
-                  ) : (
-                    <>
-                      <UserPlus className="w-3.5 h-3.5" />
-                      <span>FOLLOW</span>
-                    </>
-                  )}
-                </button>
+          {/* User List */}
+          <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+            {filtered.length === 0 ? (
+              <div className="py-6 text-center text-xs font-bold text-gray-400">
+                No matching learners found.
               </div>
-            ))
-          )}
+            ) : (
+              filtered.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-[#131f24] border border-gray-200 dark:border-[#20323d]"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <CartoonAvatar avatarId={user.avatar_id} size={40} />
+                    <div className="min-w-0">
+                      <div className="font-extrabold text-sm text-gray-900 dark:text-white truncate">
+                        {user.display_name}
+                      </div>
+                      <div className="text-xs font-bold text-gray-400 dark:text-[#52656d]">
+                        @{user.username} • {user.xp} XP
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleFollowClick(user.id)}
+                    className={`px-3.5 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                      user.is_following
+                        ? 'bg-gray-200 dark:bg-[#20323d] text-gray-600 dark:text-[#93a7b1]'
+                        : 'bg-[#1cb0f6] hover:bg-[#1899d6] text-white shadow-[0_2px_0_0_#1899d6]'
+                    }`}
+                  >
+                    {user.is_following ? 'Following' : '+ Follow'}
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </div>

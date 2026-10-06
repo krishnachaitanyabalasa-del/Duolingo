@@ -55,7 +55,7 @@ export const AnswerFeedback: React.FC<AnswerFeedbackProps> = ({
               <CheckCircle2 className="w-9 h-9 text-[#58cc02] fill-[#58cc02]/20 shrink-0" />
               <div>
                 <h4 className="text-xl font-black text-[#58cc02]">Great job!</h4>
-                <p className="text-xs font-bold text-[#2c7a00] dark:text-green-300">+10 XP</p>
+                <p className="text-xs font-bold text-[#2c7a00] dark:text-green-300">+{result?.xpEarned || 1} XP</p>
               </div>
             </motion.div>
           ) : (

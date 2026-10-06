@@ -47,21 +47,23 @@ export const TypeAnswer: React.FC<TypeAnswerProps> = ({
     handleChange(newText);
   };
 
+  const displayPromptText = exercise.prompt || exercise.question || exercise.audioText || '';
+
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col items-start px-4">
       <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-8 tracking-tight">
-        Type in Spanish
+        {exercise.question || 'Type your answer'}
       </h1>
 
-      {/* Audio Text Prompt */}
-      {exercise.audioText && (
+      {/* Text/Audio Prompt Card */}
+      {displayPromptText ? (
         <div className="flex items-center gap-4 mb-6 p-4 bg-gray-50 dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-2xl w-full">
-          <SpeakButton text={exercise.audioText} />
+          {exercise.audioText ? <SpeakButton text={exercise.audioText} /> : null}
           <span className="font-extrabold text-xl text-gray-900 dark:text-white">
-            {exercise.prompt || exercise.audioText}
+            {displayPromptText}
           </span>
         </div>
-      )}
+      ) : null}
 
       {/* Input Area + Microphone Button */}
       <div className="w-full space-y-4 mb-6">

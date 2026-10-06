@@ -2,6 +2,81 @@ import { apiFetch } from './client';
 import { Course, SkillStatus } from '@/types/course';
 import { MOCK_COURSE } from '../mockData';
 
+export interface LessonSummary {
+  id: number;
+  skill_id: number;
+  title: string;
+  order: number;
+  xp_reward: number;
+  is_completed: boolean;
+}
+
+export interface CoursePathSkill {
+  id: number;
+  name: string;
+  status: 'LOCKED' | 'AVAILABLE' | 'IN_PROGRESS' | 'COMPLETED';
+  progress_percent: number;
+  lessons: LessonSummary[];
+}
+
+export interface UnitTestInfo {
+  id: number;
+  name: string;
+  status: 'LOCKED' | 'AVAILABLE' | 'PASSED' | 'FAILED';
+  locked: boolean;
+}
+
+export interface CoursePathUnit {
+  id: number;
+  name: string;
+  description?: string;
+  status: 'LOCKED' | 'AVAILABLE' | 'IN_PROGRESS' | 'COMPLETED';
+  progress_percent: number;
+  skills: CoursePathSkill[];
+  test?: UnitTestInfo;
+}
+
+export interface CoursePathResponse {
+  course: {
+    id: number;
+    name: string;
+  };
+  units: CoursePathUnit[];
+}
+
+export interface TestQuestion {
+  id: number;
+  type: string; // MULTIPLE_CHOICE, TRANSLATE, MATCH_PAIRS, FILL_BLANK, TYPE_ANSWER
+  question: string;
+  options?: string[];
+  word_bank?: string[];
+  pairs?: { left: string; right: string }[];
+  sentence_prefix?: string;
+  sentence_suffix?: string;
+}
+
+export interface UnitTestDetail {
+  id: number;
+  unit_id: number;
+  name: string;
+  questions: TestQuestion[];
+}
+
+export interface TestAnswerSubmission {
+  question_id: number;
+  answer: any;
+}
+
+export interface TestSubmitResponse {
+  test_id: number;
+  score: number;
+  total: number;
+  percentage: number;
+  passed: boolean;
+  xp_earned: number;
+  next_unit_unlocked?: number;
+}
+
 interface RawBackendCourse {
   id: number;
   title: string;
@@ -35,7 +110,7 @@ export async function getCourse(): Promise<Course> {
       id: data.id,
       name: data.title,
       code: data.language_code || 'es',
-      flag: data.icon || '🇪🇸',
+      flag: data.icon || '🇺🇸',
       units: data.units.map((u, uIdx) => ({
         id: u.id,
         number: u.order || uIdx + 1,
@@ -49,7 +124,7 @@ export async function getCourse(): Promise<Course> {
             status = sIdx === 0 || s.status === 'IN_PROGRESS' ? 'CURRENT' : 'AVAILABLE';
           }
 
-          const totalLessons = s.lessons?.length || 4;
+          const totalLessons = s.lessons?.length || 2;
           const completedLessons = s.lessons?.filter((l) => l.is_completed).length || (s.status === 'COMPLETED' ? totalLessons : 0);
 
           const offsets = [0, 85, -85, 90, -90, 85, -85, 90];
@@ -58,7 +133,7 @@ export async function getCourse(): Promise<Course> {
           return {
             id: s.id.toString(),
             title: s.title,
-            description: s.description || `Learn ${s.title} in Spanish`,
+            description: s.description || `Learn ${s.title}`,
             icon: s.icon || (sIdx === 0 ? 'MessageSquare' : sIdx === 1 ? 'UserCheck' : 'Utensils'),
             status,
             totalLessons,
@@ -74,4 +149,22 @@ export async function getCourse(): Promise<Course> {
     console.warn('Error parsing backend course data:', err);
     return MOCK_COURSE;
   }
+}
+
+export async function getCoursePath(): Promise<CoursePathResponse | null> {
+  return await apiFetch<CoursePathResponse>('/api/course/path');
+}
+
+export async function getUnitTest(testId: number): Promise<UnitTestDetail | null> {
+  return await apiFetch<UnitTestDetail>(`/api/tests/${testId}`);
+}
+
+export async function submitUnitTest(
+  testId: number,
+  answers: TestAnswerSubmission[]
+): Promise<TestSubmitResponse | null> {
+  return await apiFetch<TestSubmitResponse>(`/api/tests/${testId}/submit`, {
+    method: 'POST',
+    body: JSON.stringify({ answers }),
+  });
 }

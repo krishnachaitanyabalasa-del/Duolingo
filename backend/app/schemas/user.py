@@ -19,10 +19,10 @@ class UserRead(UserBase):
     longest_streak: int
     hearts: int
     gems: int
-    league: Optional[str] = "Amethyst"
-    top_three_finishes: Optional[int] = 7
+    league: Optional[str] = "Bronze"
+    top_three_finishes: Optional[int] = 0
     following_count: int = 0
-    followers_count: int = 1
+    followers_count: int = 0
     last_activity_date: Optional[date] = None
     created_at: datetime
 

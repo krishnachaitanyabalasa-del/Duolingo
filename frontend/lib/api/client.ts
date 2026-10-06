@@ -1,3 +1,5 @@
+import { getFirebaseToken } from '../firebase';
+
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 
@@ -7,9 +9,16 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
   }
 
   try {
+    const token = await getFirebaseToken();
+    const authHeaders: Record<string, string> = {};
+    if (token) {
+      authHeaders['Authorization'] = `Bearer ${token}`;
+    }
+
     const res = await fetch(`${BASE_URL}${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
+        ...authHeaders,
         ...options?.headers,
       },
       ...options,
@@ -26,3 +35,4 @@ export async function apiFetch<T>(endpoint: string, options?: RequestInit): Prom
     return null;
   }
 }
+

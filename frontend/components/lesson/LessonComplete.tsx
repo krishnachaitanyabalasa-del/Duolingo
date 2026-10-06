@@ -10,9 +10,15 @@ import { DuoMascot } from '../mascot/DuoMascot';
 
 interface LessonCompleteProps {
   xpEarned: number;
+  streak?: number;
+  accuracy?: number;
 }
 
-export const LessonComplete: React.FC<LessonCompleteProps> = ({ xpEarned }) => {
+export const LessonComplete: React.FC<LessonCompleteProps> = ({
+  xpEarned,
+  streak = 1,
+  accuracy = 100,
+}) => {
   useEffect(() => {
     // Launch celebratory confetti burst
     try {
@@ -25,6 +31,10 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({ xpEarned }) => {
       // Confetti fallback
     }
   }, []);
+
+  const displayStreak = Math.max(1, streak);
+  const displayAccuracy = Math.min(100, Math.max(0, Math.round(accuracy)));
+  const displayXp = Math.max(0, xpEarned);
 
   return (
     <div className="fixed inset-0 z-50 bg-white dark:bg-[#131f24] flex flex-col items-center justify-center p-6 text-center transition-colors duration-150">
@@ -42,24 +52,29 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({ xpEarned }) => {
         <h1 className="text-3xl sm:text-4xl font-black text-amber-500 mb-2">Lesson Complete!</h1>
         <p className="text-gray-500 dark:text-[#93a7b1] font-extrabold text-base mb-8">You achieved fantastic progress today!</p>
 
-        {/* Gamified Reward Cards */}
+        {/* Calculated Gamified Reward Cards */}
         <div className="grid grid-cols-3 gap-3 w-full mb-10">
+          {/* 1. Total Calculated Session XP */}
           <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border-2 border-b-4 border-amber-300 dark:border-amber-700/60 rounded-2xl flex flex-col items-center">
             <Zap className="w-7 h-7 text-amber-500 fill-amber-400 mb-1" />
             <span className="text-xs font-extrabold text-amber-800 dark:text-amber-300">TOTAL XP</span>
-            <span className="text-xl font-black text-amber-900 dark:text-amber-100">+{xpEarned}</span>
+            <span className="text-xl font-black text-amber-900 dark:text-amber-100">+{displayXp}</span>
           </div>
 
+          {/* 2. Real Persistent User Streak */}
           <div className="p-4 bg-rose-50 dark:bg-rose-950/30 border-2 border-b-4 border-rose-300 dark:border-rose-700/60 rounded-2xl flex flex-col items-center">
             <Flame className="w-7 h-7 text-rose-500 fill-rose-400 mb-1" />
             <span className="text-xs font-extrabold text-rose-800 dark:text-rose-300">STREAK</span>
-            <span className="text-xl font-black text-rose-900 dark:text-rose-100">15 Days</span>
+            <span className="text-xl font-black text-rose-900 dark:text-rose-100">
+              {displayStreak} {displayStreak === 1 ? 'Day' : 'Days'}
+            </span>
           </div>
 
+          {/* 3. Calculated Session Accuracy */}
           <div className="p-4 bg-green-50 dark:bg-green-950/30 border-2 border-b-4 border-green-300 dark:border-green-700/60 rounded-2xl flex flex-col items-center">
             <Target className="w-7 h-7 text-green-600 dark:text-green-400 mb-1" />
             <span className="text-xs font-extrabold text-green-800 dark:text-green-300">ACCURACY</span>
-            <span className="text-xl font-black text-green-900 dark:text-green-100">100%</span>
+            <span className="text-xl font-black text-green-900 dark:text-green-100">{displayAccuracy}%</span>
           </div>
         </div>
 

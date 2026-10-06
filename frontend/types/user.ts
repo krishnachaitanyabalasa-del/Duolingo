@@ -75,3 +75,33 @@ export interface FollowerUser {
   xp: number;
   is_following: boolean;
 }
+
+export interface DailyQuest {
+  id: number;
+  user_id: number;
+  type: string;
+  title: string;
+  description: string;
+  icon?: string;
+  target: number;
+  current_progress: number;
+  reward_xp: number;
+  reward_gems: number;
+  completed: boolean;
+  claimed: boolean;
+  state: 'IN_PROGRESS' | 'COMPLETED' | 'CLAIMED';
+  quest_date: string;
+  completed_at?: string;
+  claimed_at?: string;
+}
+
+export interface QuestClaimResponse {
+  success: boolean;
+  claimed: boolean;
+  quest_id: number;
+  reward_gems: number;
+  reward_xp: number;
+  total_gems: number;
+  total_xp: number;
+  message: string;
+}

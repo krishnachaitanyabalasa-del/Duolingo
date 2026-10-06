@@ -40,3 +40,6 @@ class LessonCompleteResponse(BaseModel):
     skill_completed: bool
     next_skill_unlocked: Optional[dict] = None
     current_streak: int
+    accuracy: Optional[float] = None
+    session_xp: Optional[int] = None
+

@@ -7,8 +7,8 @@ import { HeartsDisplay } from '../gamification/HeartsDisplay';
 import { GemsDisplay } from '../gamification/GemsDisplay';
 import { usePathname } from 'next/navigation';
 import { ProfileRightPanel } from '../profile/ProfileRightPanel';
-import { getFullProfile, getFollowers, getFollowing, toggleFollow } from '@/lib/api/user';
-import type { FullProfile, FollowerUser, UserProfile } from '@/types/user';
+import { getFullProfile, getFollowers, getFollowing, toggleFollow, getDailyQuests } from '@/lib/api/user';
+import type { FullProfile, FollowerUser, UserProfile, DailyQuest } from '@/types/user';
 import { Zap, Shield, Sparkles } from 'lucide-react';
 
 import { DuoMascot } from '../mascot/DuoMascot';
@@ -24,6 +24,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
   const [profile, setProfile] = React.useState<FullProfile | null>(null);
   const [followers, setFollowers] = React.useState<FollowerUser[]>([]);
   const [following, setFollowing] = React.useState<FollowerUser[]>([]);
+  const [dailyQuest, setDailyQuest] = React.useState<DailyQuest | null>(null);
 
   React.useEffect(() => {
     if (isProfile) {
@@ -34,8 +35,14 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
           setFollowing(flg);
         }
       );
+    } else {
+      getDailyQuests().then((qs) => {
+        if (qs && qs.length > 0) {
+          setDailyQuest(qs[0]);
+        }
+      }).catch(() => {});
     }
-  }, [isProfile]);
+  }, [isProfile, user.xp]);
 
   const handleToggleFollow = async (userId: number | string) => {
     await toggleFollow(userId);
@@ -93,10 +100,12 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
         </button>
       </div>
 
-      {/* 2. League Card (Amethyst League) */}
+      {/* 2. League Card */}
       <div className="duo-card p-5 rounded-3xl space-y-3.5 bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d]">
         <div className="flex items-center justify-between">
-          <h4 className="font-black text-base text-gray-900 dark:text-white">Amethyst League</h4>
+          <h4 className="font-black text-base text-gray-900 dark:text-white">
+            {user.league || 'Bronze'} League
+          </h4>
           <Link
             href="/leaderboard"
             className="text-[11px] font-black text-[#1cb0f6] hover:text-[#1899d6] uppercase tracking-wider transition-colors"
@@ -131,14 +140,27 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
               <div className="w-9 h-9 rounded-xl bg-[#ffc800]/15 dark:bg-[#ffc800]/20 border-2 border-[#ffc800]/40 dark:border-[#ffc800] flex items-center justify-center text-[#ffc800] shrink-0">
                 <Zap className="w-5 h-5 fill-[#ffc800]" />
               </div>
-              <span className="font-extrabold text-xs text-gray-900 dark:text-white">Earn 10 XP</span>
+              <span className="font-extrabold text-xs text-gray-900 dark:text-white">
+                {dailyQuest ? dailyQuest.title : 'Earn 30 XP'}
+              </span>
             </div>
-            <span className="font-black text-xs text-gray-400 dark:text-[#52656d]">0 / 10</span>
+            <span className="font-black text-xs text-gray-400 dark:text-[#52656d]">
+              {dailyQuest ? Math.min(dailyQuest.current_progress, dailyQuest.target) : 0} / {dailyQuest ? dailyQuest.target : 30}
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="flex-1 h-3.5 bg-gray-100 dark:bg-[#20323d] border border-gray-200 dark:border-transparent rounded-full overflow-hidden p-0.5">
-              <div className="h-full bg-[#ffc800] rounded-full w-0 transition-all duration-300" />
+              <div
+                className="h-full bg-[#ffc800] rounded-full transition-all duration-300"
+                style={{
+                  width: `${
+                    dailyQuest && dailyQuest.target > 0
+                      ? Math.min(100, Math.round((dailyQuest.current_progress / dailyQuest.target) * 100))
+                      : 0
+                  }%`,
+                }}
+              />
             </div>
             <span className="text-lg">📦</span>
           </div>

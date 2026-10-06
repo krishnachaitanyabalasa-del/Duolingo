@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import type { FullProfile, FollowerUser } from '@/types/user';
-import { UserPlus, Share2, UserCheck, UserX } from 'lucide-react';
-import { clsx } from 'clsx';
+import Link from 'next/link';
+import { Flame, Heart } from 'lucide-react';
+import { FullProfile, FollowerUser } from '@/types/user';
+import { CartoonAvatar } from './Avatars';
 
 interface ProfileRightPanelProps {
   profile: FullProfile;
@@ -30,127 +31,214 @@ export const ProfileRightPanel: React.FC<ProfileRightPanelProps> = ({
   const activeTab = externalTab ?? internalTab;
 
   const handleTabClick = (tab: 'following' | 'followers') => {
-    if (onTabChange) {
-      onTabChange(tab);
-    } else {
-      setInternalTab(tab);
-    }
+    setInternalTab(tab);
+    if (onTabChange) onTabChange(tab);
   };
 
-  const currentList = activeTab === 'following' ? following : followers;
+  const list = activeTab === 'following' ? following : followers;
 
   return (
-    <aside className="w-full lg:w-[360px] flex flex-col space-y-5 select-none">
-      {/* 1. Add Friends Buttons */}
-      <div className="duo-card p-4 rounded-3xl bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] space-y-3">
-        <h3 className="font-extrabold text-base text-gray-900 dark:text-white mb-2">
-          Friends
-        </h3>
+    <aside className="hidden lg:flex flex-col w-[360px] h-screen sticky top-0 p-5 bg-white dark:bg-[#131f24] border-l-2 border-gray-200 dark:border-[#20323d] space-y-5 overflow-y-auto shrink-0 select-none transition-colors duration-150">
+      {/* 1. Top Stats Bar Row matching Screenshot 1 */}
+      <div className="flex items-center justify-between gap-2 p-2 rounded-2xl bg-gray-50 dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d]">
+        {/* Language Progress Badge */}
+        <div className="flex items-center gap-1.5 px-2 py-1 font-extrabold text-xs text-gray-800 dark:text-white">
+          <span className="text-base">🇺🇸</span>
+          <span>63</span>
+        </div>
 
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={onFindFriendsClick}
-            className="flex items-center justify-center gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-[#20323d] hover:bg-gray-100 dark:hover:bg-[#283b47] border-2 border-gray-200 dark:border-[#2b3d49] transition-all cursor-pointer font-black text-xs text-[#1cb0f6]"
-          >
-            <UserPlus className="w-4 h-4" />
-            <span>FIND FRIENDS</span>
-          </button>
+        {/* Streak */}
+        <div className="flex items-center gap-1.5 px-2 py-1 font-extrabold text-xs text-gray-500 dark:text-[#52656d]">
+          <Flame className="w-4 h-4 text-gray-400 dark:text-[#52656d]" />
+          <span>{profile.stats?.streak ?? 0}</span>
+        </div>
 
-          <button
-            onClick={onInviteFriendsClick}
-            className="flex items-center justify-center gap-2 p-3 rounded-2xl bg-gray-50 dark:bg-[#20323d] hover:bg-gray-100 dark:hover:bg-[#283b47] border-2 border-gray-200 dark:border-[#2b3d49] transition-all cursor-pointer font-black text-xs text-[#1cb0f6]"
-          >
-            <Share2 className="w-4 h-4" />
-            <span>INVITE</span>
-          </button>
+        {/* Gems */}
+        <div className="flex items-center gap-1.5 px-2 py-1 font-extrabold text-xs text-[#1cb0f6]">
+          <span className="text-base">💎</span>
+          <span>{profile.stats?.gems ?? 0}</span>
+        </div>
+
+        {/* Hearts */}
+        <div className="flex items-center gap-1.5 px-2 py-1 font-extrabold text-xs text-[#ff4b4b]">
+          <Heart className="w-4 h-4 fill-[#ff4b4b] text-[#ff4b4b]" />
+          <span>{profile.stats?.hearts ?? 5}</span>
         </div>
       </div>
 
-      {/* 2. Followers / Following List */}
-      <div className="duo-card p-5 rounded-3xl bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] space-y-4">
+      {/* 2. Following / Followers Card */}
+      <div className="duo-card bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-3xl overflow-hidden shadow-sm">
         {/* Tab Headers */}
         <div className="flex border-b-2 border-gray-100 dark:border-[#20323d]">
           <button
             onClick={() => handleTabClick('following')}
-            className={clsx(
-              'flex-1 py-2.5 font-black text-xs uppercase tracking-wider text-center transition-colors border-b-2 -mb-[2px]',
+            className={`flex-1 py-3.5 font-black text-xs uppercase tracking-wider transition-colors relative cursor-pointer ${
               activeTab === 'following'
-                ? 'border-[#1cb0f6] text-[#1cb0f6]'
-                : 'border-transparent text-gray-400 dark:text-[#52656d] hover:text-gray-600 dark:hover:text-[#93a7b1]'
-            )}
+                ? 'text-[#1cb0f6]'
+                : 'text-gray-400 dark:text-[#52656d] hover:text-gray-700 dark:hover:text-[#93a7b1]'
+            }`}
           >
-            Following ({following.length || profile.following_count})
+            FOLLOWING ({following?.length || profile.following_count || 0})
+            {activeTab === 'following' && (
+              <div className="absolute bottom-0 left-4 right-4 h-1 bg-[#1cb0f6] rounded-full" />
+            )}
           </button>
 
           <button
             onClick={() => handleTabClick('followers')}
-            className={clsx(
-              'flex-1 py-2.5 font-black text-xs uppercase tracking-wider text-center transition-colors border-b-2 -mb-[2px]',
+            className={`flex-1 py-3.5 font-black text-xs uppercase tracking-wider transition-colors relative cursor-pointer ${
               activeTab === 'followers'
-                ? 'border-[#1cb0f6] text-[#1cb0f6]'
-                : 'border-transparent text-gray-400 dark:text-[#52656d] hover:text-gray-600 dark:hover:text-[#93a7b1]'
-            )}
+                ? 'text-[#1cb0f6]'
+                : 'text-gray-400 dark:text-[#52656d] hover:text-gray-700 dark:hover:text-[#93a7b1]'
+            }`}
           >
-            Followers ({followers.length || profile.followers_count})
+            FOLLOWERS ({followers?.length || profile.followers_count || 0})
+            {activeTab === 'followers' && (
+              <div className="absolute bottom-0 left-4 right-4 h-1 bg-[#1cb0f6] rounded-full" />
+            )}
           </button>
         </div>
 
-        {/* User Items */}
-        <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
-          {currentList.length === 0 ? (
-            <div className="py-8 text-center text-xs font-bold text-gray-400 dark:text-[#52656d]">
-              {activeTab === 'following'
-                ? "You aren't following anyone yet."
-                : 'No followers yet.'}
+        {/* Tab Content */}
+        <div className="p-5">
+          {list && list.length > 0 ? (
+            <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+              {list.map((u) => (
+                <div key={u.id} className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <CartoonAvatar avatarId={u.avatar_id} size={40} />
+                    <div className="min-w-0">
+                      <div className="font-extrabold text-sm text-gray-900 dark:text-white truncate">
+                        {u.display_name || u.username}
+                      </div>
+                      <div className="text-xs font-bold text-gray-400 dark:text-[#52656d]">
+                        {u.xp} XP
+                      </div>
+                    </div>
+                  </div>
+
+                  {onToggleFollow && (
+                    <button
+                      onClick={() => onToggleFollow(u.id)}
+                      className={`px-3 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                        u.is_following
+                          ? 'bg-gray-100 dark:bg-[#131f24] text-gray-500 dark:text-[#93a7b1] border border-gray-200 dark:border-[#20323d]'
+                          : 'bg-[#1cb0f6] text-white hover:bg-[#1899d6]'
+                      }`}
+                    >
+                      {u.is_following ? 'Following' : 'Follow'}
+                    </button>
+                  )}
+                </div>
+              ))}
             </div>
           ) : (
-            currentList.map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center justify-between p-2.5 rounded-2xl hover:bg-gray-50 dark:hover:bg-[#20323d] transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#1cb0f6] to-[#58cc02] flex items-center justify-center text-white font-black text-sm shrink-0 shadow-sm">
-                    {user.display_name ? user.display_name[0].toUpperCase() : 'U'}
-                  </div>
+            // Empty State with Friends Illustration
+            <div className="text-center py-4 space-y-4">
+              <div className="flex justify-center">
+                <svg viewBox="0 0 200 90" className="w-48 h-24 select-none">
+                  {/* Friend 1 (Pink) */}
+                  <g transform="translate(20, 20)">
+                    <circle cx="15" cy="15" r="12" fill="#EC4899" />
+                    <rect x="5" y="27" width="20" height="35" rx="5" fill="#DB2777" />
+                    <circle cx="11" cy="13" r="2" fill="#FFFFFF" />
+                    <circle cx="19" cy="13" r="2" fill="#FFFFFF" />
+                  </g>
 
-                  <div>
-                    <div className="font-extrabold text-xs text-gray-900 dark:text-white">
-                      {user.display_name || user.username}
-                    </div>
-                    <div className="text-[11px] font-bold text-gray-400 dark:text-[#52656d]">
-                      {user.xp} XP
-                    </div>
-                  </div>
-                </div>
+                  {/* Friend 2 (Purple) */}
+                  <g transform="translate(48, 15)">
+                    <circle cx="15" cy="15" r="12" fill="#A855F7" />
+                    <rect x="5" y="27" width="20" height="40" rx="5" fill="#7E22CE" />
+                    <circle cx="11" cy="13" r="2" fill="#FFFFFF" />
+                    <circle cx="19" cy="13" r="2" fill="#FFFFFF" />
+                  </g>
 
-                {onToggleFollow && (
-                  <button
-                    onClick={() => onToggleFollow(user.id)}
-                    className={clsx(
-                      'px-3 py-1.5 rounded-xl font-black text-[11px] tracking-wider transition-all border-2 cursor-pointer flex items-center gap-1.5',
-                      user.is_following
-                        ? 'bg-gray-100 dark:bg-[#20323d] text-gray-600 dark:text-[#93a7b1] border-gray-200 dark:border-[#2b3d49] hover:border-red-400 hover:text-red-500'
-                        : 'bg-[#1cb0f6] hover:bg-[#1899d6] text-white border-transparent shadow-[0_2px_0_0_#1899d6]'
-                    )}
-                  >
-                    {user.is_following ? (
-                      <>
-                        <UserCheck className="w-3.5 h-3.5" />
-                        <span>FOLLOWING</span>
-                      </>
-                    ) : (
-                      <>
-                        <UserPlus className="w-3.5 h-3.5" />
-                        <span>FOLLOW</span>
-                      </>
-                    )}
-                  </button>
-                )}
+                  {/* Friend 3 (Cyan Center) */}
+                  <g transform="translate(80, 10)">
+                    <circle cx="18" cy="18" r="14" fill="#38BDF8" />
+                    <rect x="6" y="32" width="24" height="42" rx="6" fill="#0284C7" />
+                    <circle cx="13" cy="16" r="2.5" fill="#FFFFFF" />
+                    <circle cx="23" cy="16" r="2.5" fill="#FFFFFF" />
+                    <path d="M14 22 Q18 27 22 22" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" fill="none" />
+                  </g>
+
+                  {/* Friend 4 (Orange) */}
+                  <g transform="translate(115, 18)">
+                    <circle cx="15" cy="15" r="12" fill="#F97316" />
+                    <rect x="5" y="27" width="20" height="38" rx="5" fill="#EA580C" />
+                    <circle cx="11" cy="13" r="2" fill="#FFFFFF" />
+                    <circle cx="19" cy="13" r="2" fill="#FFFFFF" />
+                  </g>
+
+                  {/* Friend 5 (Yellow) */}
+                  <g transform="translate(145, 22)">
+                    <circle cx="15" cy="15" r="12" fill="#EAB308" />
+                    <rect x="5" y="27" width="20" height="34" rx="5" fill="#CA8A04" />
+                    <circle cx="11" cy="13" r="2" fill="#FFFFFF" />
+                    <circle cx="19" cy="13" r="2" fill="#FFFFFF" />
+                  </g>
+                </svg>
               </div>
-            ))
+
+              <p className="text-xs font-bold text-gray-500 dark:text-[#93a7b1] leading-relaxed max-w-[220px] mx-auto">
+                Learning is more fun and effective when you connect with others.
+              </p>
+            </div>
           )}
         </div>
+      </div>
+
+      {/* 3. Add Friends Card */}
+      <div className="duo-card bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-3xl p-5 space-y-3.5 shadow-sm">
+        <h4 className="font-black text-base text-gray-900 dark:text-white">
+          Add friends
+        </h4>
+
+        <div className="space-y-2">
+          {/* Find Friends Button */}
+          <button
+            onClick={onFindFriendsClick}
+            className="w-full flex items-center justify-between p-3 rounded-2xl bg-gray-50 dark:bg-[#131f24] hover:bg-gray-100 dark:hover:bg-[#182c34] border border-gray-200 dark:border-[#20323d] transition-all cursor-pointer group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="text-xl">🔍</div>
+              <span className="font-extrabold text-xs text-gray-900 dark:text-white group-hover:text-[#1cb0f6] transition-colors">
+                Find friends
+              </span>
+            </div>
+            <span className="font-black text-sm text-gray-400 dark:text-[#52656d] group-hover:translate-x-0.5 transition-transform">
+              ›
+            </span>
+          </button>
+
+          {/* Invite Friends Button */}
+          <button
+            onClick={onInviteFriendsClick}
+            className="w-full flex items-center justify-between p-3 rounded-2xl bg-gray-50 dark:bg-[#131f24] hover:bg-gray-100 dark:hover:bg-[#182c34] border border-gray-200 dark:border-[#20323d] transition-all cursor-pointer group"
+          >
+            <div className="flex items-center gap-3">
+              <div className="text-xl">✉️</div>
+              <span className="font-extrabold text-xs text-gray-900 dark:text-white group-hover:text-[#1cb0f6] transition-colors">
+                Invite friends
+              </span>
+            </div>
+            <span className="font-black text-sm text-gray-400 dark:text-[#52656d] group-hover:translate-x-0.5 transition-transform">
+              ›
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* 4. Footer Links */}
+      <div className="pt-2 px-1 flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] font-extrabold text-gray-400 dark:text-[#52656d] uppercase tracking-wider">
+        <Link href="#" className="hover:text-gray-600 dark:hover:text-[#93a7b1] transition-colors">ABOUT</Link>
+        <Link href="#" className="hover:text-gray-600 dark:hover:text-[#93a7b1] transition-colors">BLOG</Link>
+        <Link href="#" className="hover:text-gray-600 dark:hover:text-[#93a7b1] transition-colors">STORE</Link>
+        <Link href="#" className="hover:text-gray-600 dark:hover:text-[#93a7b1] transition-colors">EFFICACY</Link>
+        <Link href="#" className="hover:text-gray-600 dark:hover:text-[#93a7b1] transition-colors">CAREERS</Link>
+        <Link href="#" className="hover:text-gray-600 dark:hover:text-[#93a7b1] transition-colors">INVESTORS</Link>
+        <Link href="#" className="hover:text-gray-600 dark:hover:text-[#93a7b1] transition-colors">TERMS</Link>
+        <Link href="#" className="hover:text-gray-600 dark:hover:text-[#93a7b1] transition-colors">PRIVACY</Link>
       </div>
     </aside>
   );

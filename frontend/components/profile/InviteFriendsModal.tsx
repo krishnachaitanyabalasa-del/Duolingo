@@ -18,18 +18,24 @@ export const InviteFriendsModal: React.FC<InviteFriendsModalProps> = ({
 
   if (!isOpen) return null;
 
-  const inviteUrl = `https://duolingo.clone/invite/${username}`;
+  const inviteUrl =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/invite/${username}`
+      : `https://duolingo.clone/invite/${username}`;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(inviteUrl);
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(inviteUrl);
+    }
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 2500);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200 select-none">
-      <div className="w-full max-w-md bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-3xl shadow-2xl p-6 space-y-5">
-        <div className="flex items-center justify-between border-b-2 border-gray-100 dark:border-[#20323d] pb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-150">
+      <div className="bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-3xl w-full max-w-md overflow-hidden shadow-xl space-y-0 text-center">
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b-2 border-gray-100 dark:border-[#20323d]">
           <div className="flex items-center gap-2">
             <Share2 className="w-5 h-5 text-[#1cb0f6]" />
             <h2 className="text-xl font-black text-gray-900 dark:text-white">
@@ -38,40 +44,52 @@ export const InviteFriendsModal: React.FC<InviteFriendsModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-2xl bg-gray-100 dark:bg-[#20323d] hover:bg-gray-200 dark:hover:bg-[#283b47] flex items-center justify-center text-gray-500 dark:text-[#93a7b1] transition-all cursor-pointer"
+            className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#131f24] hover:bg-gray-200 dark:hover:bg-[#20323d] flex items-center justify-center text-gray-500 dark:text-[#93a7b1] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <p className="text-xs font-bold text-gray-500 dark:text-[#93a7b1] leading-relaxed">
-          Share your personal invite link to study together and compete on the weekly leaderboards!
-        </p>
+        {/* Content */}
+        <div className="p-6 space-y-5">
+          <div className="w-20 h-20 rounded-full bg-[#1cb0f6]/15 border-2 border-[#1cb0f6]/40 flex items-center justify-center mx-auto text-4xl">
+            ✉️
+          </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            type="text"
-            readOnly
-            value={inviteUrl}
-            className="flex-1 px-4 py-3 rounded-2xl bg-gray-50 dark:bg-[#131f24] border-2 border-gray-200 dark:border-[#20323d] text-gray-700 dark:text-[#93a7b1] font-bold text-xs outline-none"
-          />
+          <div>
+            <h3 className="font-black text-lg text-gray-900 dark:text-white mb-1">
+              Invite your friends to learn together!
+            </h3>
+            <p className="text-xs font-bold text-gray-500 dark:text-[#93a7b1] leading-relaxed max-w-xs mx-auto">
+              Share your personal invite link with friends to compare XP, streak goals, and climb leaderboards together.
+            </p>
+          </div>
 
-          <button
-            onClick={handleCopy}
-            className="px-5 py-3 rounded-2xl bg-[#1cb0f6] hover:bg-[#1899d6] text-white font-black text-xs uppercase tracking-wider shadow-[0_4px_0_0_#1899d6] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
-          >
-            {copied ? (
-              <>
-                <Check className="w-4 h-4" />
-                <span>COPIED</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-4 h-4" />
-                <span>COPY</span>
-              </>
-            )}
-          </button>
+          {/* Shareable Link Box */}
+          <div className="flex items-center gap-2 p-2 rounded-2xl bg-gray-50 dark:bg-[#131f24] border-2 border-gray-200 dark:border-[#20323d]">
+            <input
+              type="text"
+              readOnly
+              value={inviteUrl}
+              className="flex-1 bg-transparent px-2 text-xs font-bold text-gray-700 dark:text-gray-300 focus:outline-none truncate"
+            />
+            <button
+              onClick={handleCopy}
+              className="px-4 py-2.5 rounded-xl bg-[#1cb0f6] hover:bg-[#1899d6] text-white font-black text-xs uppercase tracking-wider shadow-[0_2px_0_0_#1899d6] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-1.5 shrink-0 cursor-pointer"
+            >
+              {copied ? (
+                <>
+                  <Check className="w-4 h-4 stroke-[3]" />
+                  <span>COPIED!</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span>COPY LINK</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

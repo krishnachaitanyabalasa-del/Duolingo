@@ -6,6 +6,7 @@ import { clsx } from 'clsx';
 import { SoundCardData } from './SoundCard';
 import { practiceSound } from '@/lib/api/sounds';
 import { sounds } from '@/lib/sound';
+import { useUserContext } from '@/context/UserContext';
 
 interface SoundPracticeModalProps {
   sound: SoundCardData | null;
@@ -20,6 +21,7 @@ export const SoundPracticeModal: React.FC<SoundPracticeModalProps> = ({
   onClose,
   onProgressUpdated,
 }) => {
+  const { refreshUser } = useUserContext();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -74,6 +76,7 @@ export const SoundPracticeModal: React.FC<SoundPracticeModalProps> = ({
       const res = await practiceSound(sound.id, correct);
       if (res) {
         onProgressUpdated(sound.id, res.progress_percent, res.mastered);
+        refreshUser();
       }
     } catch (err) {
       console.error('Failed to update sound practice:', err);

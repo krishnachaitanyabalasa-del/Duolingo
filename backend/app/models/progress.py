@@ -4,6 +4,22 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 
 
+class UserUnitProgress(Base):
+    __tablename__ = "user_unit_progress"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    unit_id = Column(Integer, ForeignKey("units.id"), nullable=False)
+    status = Column(String, default="LOCKED", nullable=False)  # LOCKED, AVAILABLE, IN_PROGRESS, COMPLETED
+    progress_percentage = Column(Float, default=0.0, nullable=False)
+    unlocked_at = Column(DateTime, nullable=True)
+    completed_at = Column(DateTime, nullable=True)
+
+    # Relationships
+    user = relationship("User", back_populates="unit_progress")
+    unit = relationship("Unit", back_populates="user_progress")
+
+
 class UserSkillProgress(Base):
     __tablename__ = "user_skill_progress"
 
@@ -52,3 +68,22 @@ class LessonAttempt(Base):
     # Relationships
     user = relationship("User", back_populates="lesson_attempts")
     lesson = relationship("Lesson", back_populates="attempts")
+
+
+class UserTestAttempt(Base):
+    __tablename__ = "user_test_attempts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    test_id = Column(Integer, ForeignKey("unit_tests.id"), nullable=False)
+    score = Column(Integer, default=0, nullable=False)
+    total_questions = Column(Integer, default=10, nullable=False)
+    percentage = Column(Float, default=0.0, nullable=False)
+    passed = Column(Boolean, default=False, nullable=False)
+    xp_earned = Column(Integer, default=0, nullable=False)
+    attempted_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    # Relationships
+    user = relationship("User", back_populates="test_attempts")
+    test = relationship("UnitTest", back_populates="user_attempts")
+

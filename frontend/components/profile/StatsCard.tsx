@@ -91,7 +91,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
             <CheckCircle2 className="w-5 h-5 text-[#58cc02]" />
             <div>
               <div className="text-base font-black text-gray-900 dark:text-white">
-                {stats.lessons_completed || 12}
+                {stats.lessons_completed ?? 0}
               </div>
               <div className="text-[11px] font-bold text-gray-400 dark:text-[#52656d]">
                 Lessons completed
@@ -103,7 +103,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
             <Layers className="w-5 h-5 text-[#1cb0f6]" />
             <div>
               <div className="text-base font-black text-gray-900 dark:text-white">
-                {stats.skills_completed || 4}
+                {stats.skills_completed ?? 0}
               </div>
               <div className="text-[11px] font-bold text-gray-400 dark:text-[#52656d]">
                 Skills completed
@@ -115,7 +115,7 @@ export const StatsCard: React.FC<StatsCardProps> = ({ stats }) => {
             <BookOpen className="w-5 h-5 text-[#ff9600]" />
             <div>
               <div className="text-base font-black text-gray-900 dark:text-white">
-                {stats.words_learned || 150}
+                {stats.words_learned ?? 0}
               </div>
               <div className="text-[11px] font-bold text-gray-400 dark:text-[#52656d]">
                 Words learned

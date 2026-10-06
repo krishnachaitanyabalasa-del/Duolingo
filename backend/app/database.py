@@ -14,30 +14,53 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
 
+def _add_missing_columns(conn, inspector, table: str, cols_to_add: list[tuple[str, str]]):
+    """Adds any missing columns to an existing table (SQLite ALTER TABLE ADD COLUMN)."""
+    if table not in inspector.get_table_names():
+        return
+    existing_cols = {c["name"] for c in inspector.get_columns(table)}
+    for col_name, col_type in cols_to_add:
+        if col_name not in existing_cols:
+            conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {col_name} {col_type}"))
+
+
 def init_and_migrate_db():
     """Ensures tables are created and missing columns on existing SQLite tables are added."""
     Base.metadata.create_all(bind=engine)
 
     try:
         inspector = inspect(engine)
-        tables = inspector.get_table_names()
-        if "users" in tables:
-            existing_cols = {c["name"] for c in inspector.get_columns("users")}
-            cols_to_add = [
+        with engine.connect() as conn:
+            _add_missing_columns(conn, inspector, "users", [
                 ("display_name", "VARCHAR"),
                 ("avatar_id", "VARCHAR DEFAULT 'avatar_01'"),
                 ("bio", "VARCHAR"),
                 ("joined_date", "VARCHAR DEFAULT 'Joined April 2025'"),
                 ("league", "VARCHAR DEFAULT 'Amethyst'"),
-                ("top_three_finishes", "INTEGER DEFAULT 7"),
+                ("top_three_finishes", "INTEGER DEFAULT 0"),
                 ("following_count", "INTEGER DEFAULT 0"),
-                ("followers_count", "INTEGER DEFAULT 1"),
-            ]
-            with engine.connect() as conn:
-                for col_name, col_type in cols_to_add:
-                    if col_name not in existing_cols:
-                        conn.execute(text(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}"))
-                conn.commit()
+                ("followers_count", "INTEGER DEFAULT 0"),
+            ])
+            _add_missing_columns(conn, inspector, "achievements", [
+                ("reward_xp", "INTEGER NOT NULL DEFAULT 0"),
+                ("reward_gems", "INTEGER NOT NULL DEFAULT 0"),
+            ])
+            _add_missing_columns(conn, inspector, "user_achievements", [
+                ("reward_awarded", "BOOLEAN NOT NULL DEFAULT 0"),
+                ("reward_awarded_at", "DATETIME"),
+            ])
+            conn.commit()
+
+            # Guarantee one progress row per (user, achievement) on pre-existing databases.
+            if "user_achievements" in inspector.get_table_names():
+                try:
+                    conn.execute(text(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS uq_user_achievement_idx "
+                        "ON user_achievements (user_id, achievement_id)"
+                    ))
+                    conn.commit()
+                except Exception as idx_err:
+                    print(f"Migration notice (unique index skipped): {idx_err}")
     except Exception as e:
         print(f"Migration check notice: {e}")
 

@@ -42,13 +42,25 @@ class SkillRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class UnitTestInfo(BaseModel):
+    id: int
+    name: str
+    status: str = "LOCKED"  # LOCKED, AVAILABLE, PASSED, FAILED
+    locked: bool = True
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class UnitRead(BaseModel):
     id: int
     course_id: int
     title: str
     description: Optional[str] = None
     order: int
+    status: str = "LOCKED"  # LOCKED, AVAILABLE, IN_PROGRESS, COMPLETED
+    progress_percentage: float = 0.0
     skills: list[SkillRead] = []
+    test: Optional[UnitTestInfo] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -62,3 +74,73 @@ class CourseRead(BaseModel):
     units: list[UnitRead] = []
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TestQuestionRead(BaseModel):
+    id: int
+    type: str  # MULTIPLE_CHOICE, TRANSLATE, MATCH_PAIRS, FILL_BLANK, TYPE_ANSWER
+    question: str
+    options: Optional[list[str]] = None
+    word_bank: Optional[list[str]] = None
+    pairs: Optional[list[dict]] = None
+    sentence_prefix: Optional[str] = None
+    sentence_suffix: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UnitTestDetail(BaseModel):
+    id: int
+    unit_id: int
+    name: str
+    questions: list[TestQuestionRead] = []
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class TestAnswerSubmission(BaseModel):
+    question_id: int
+    answer: Any
+
+
+class TestSubmitRequest(BaseModel):
+    answers: list[TestAnswerSubmission]
+
+
+class TestSubmitResponse(BaseModel):
+    test_id: int
+    score: int
+    total: int
+    percentage: float
+    passed: bool
+    xp_earned: int = 0
+    next_unit_unlocked: Optional[int] = None
+
+
+class CoursePathCourse(BaseModel):
+    id: int
+    name: str
+
+
+class CoursePathSkill(BaseModel):
+    id: int
+    name: str
+    status: str = "LOCKED"
+    progress_percent: float = 0.0
+    lessons: list[LessonSummary] = []
+
+
+class CoursePathUnit(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    status: str = "LOCKED"  # LOCKED, AVAILABLE, IN_PROGRESS, COMPLETED
+    progress_percent: float = 0.0
+    skills: list[CoursePathSkill] = []
+    test: Optional[UnitTestInfo] = None
+
+
+class CoursePathResponse(BaseModel):
+    course: CoursePathCourse
+    units: list[CoursePathUnit]
+

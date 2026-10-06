@@ -1,20 +1,28 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
-from app.config import settings
+from app.models.user import User
+from app.utils.auth import get_current_user
 from app.schemas.user import UserRead, UserStats
-from app.services.user_service import get_default_user, get_user_stats
+from app.services.user_service import get_user_stats
 
 router = APIRouter(prefix="/user", tags=["User"])
+me_router = APIRouter(tags=["User"])
 
 
-@router.get("", response_model=UserRead, summary="Get default learner profile")
-def read_current_user(db: Session = Depends(get_db)):
-    """Retrieves profile information for the default logged-in learner."""
-    return get_default_user(db)
+@me_router.get("/me", response_model=UserRead, summary="Get current authenticated learner profile")
+def read_current_me(current_user: User = Depends(get_current_user)):
+    """Retrieves profile and global economy state for the authenticated learner."""
+    return current_user
+
+
+@router.get("", response_model=UserRead, summary="Get current authenticated learner profile")
+def read_current_user(current_user: User = Depends(get_current_user)):
+    """Retrieves profile information for the authenticated learner."""
+    return current_user
 
 
 @router.get("/stats", response_model=UserStats, summary="Get detailed user stats")
-def read_current_user_stats(db: Session = Depends(get_db)):
-    """Retrieves aggregate learning statistics including crowns earned, skills completed, and lessons finished."""
-    return get_user_stats(db, settings.DEFAULT_USER_ID)
+def read_current_user_stats(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Retrieves aggregate learning statistics for the current user."""
+    return get_user_stats(db, current_user.id)
