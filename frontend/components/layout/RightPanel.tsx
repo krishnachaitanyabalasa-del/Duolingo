@@ -17,10 +17,6 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
     <aside className="hidden lg:flex flex-col w-[360px] h-screen sticky top-0 p-5 bg-white dark:bg-[#131f24] border-l-2 border-gray-200 dark:border-[#20323d] space-y-5 overflow-y-auto shrink-0 select-none transition-colors duration-150">
       {/* Top Stats Bar Row */}
       <div className="flex items-center justify-between gap-2 p-1 rounded-2xl">
-        <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[#182730] border border-transparent hover:border-gray-200 dark:hover:border-[#20323d] transition-colors cursor-pointer">
-          <span className="text-2xl">🇺🇸</span>
-          <span className="font-extrabold text-xs text-gray-500 dark:text-[#93a7b1]">63</span>
-        </div>
         <StreakDisplay streak={user.streak} />
         <GemsDisplay gems={user.gems} />
         <HeartsDisplay hearts={user.hearts} />

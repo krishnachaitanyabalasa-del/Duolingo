@@ -22,7 +22,7 @@ export const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 border-r-2 border-gray-200 dark:border-[#20323d] p-4 bg-white dark:bg-[#131f24] z-20 shrink-0 select-none justify-between transition-colors duration-150">
+    <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 border-r-2 border-gray-200 dark:border-[#20323d] p-4 bg-white dark:bg-[#131f24] z-20 shrink-0 select-none justify-between transition-colors duration-150 pb-6">
       <div>
         {/* Duolingo Brand Logo Header */}
         <Link href="/learn" className="flex items-center gap-2 px-3 py-3 mb-2">
