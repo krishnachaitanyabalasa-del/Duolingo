@@ -1,346 +1,381 @@
-# Duolingo Web App — Backend API
+# Duolingo Web App
 
-Production-quality backend service for a Duolingo-style learning platform built with **Python**, **FastAPI**, **SQLite**, **SQLAlchemy ORM**, **Pydantic v2**, and **Uvicorn**.
+A full-stack Duolingo clone built with **Next.js, TypeScript, Tailwind CSS, FastAPI, and SQLite**. The application recreates the core Duolingo learning experience with an interactive learning path, lessons, exercises, XP, streaks, hearts, rewards, achievements, and a learner profile.
 
----
+## 🔗 Live Links
 
-## 🏗️ Architecture & Project Structure
+| Link                    | URL                   |
+| ----------------------- | --------------------- |
+| 🚀 Live Application     | `https://duolingo-cbdd2.web.app`   |
+| 📁 GitHub Repository    | `https://github.com/krishnachaitanyabalasa-del/Duolingo`     |
 
-The backend follows a modular, clean-layered architecture separating Data Access (Models), Data Transfer Objects (Schemas), Business Logic (Services), HTTP Endpoints (Routers), and Utilities.
+## 🛠 Tech Stack
+
+| Technology              | Purpose                           |
+| ----------------------- | --------------------------------- |
+| Next.js 16 (App Router) | Application framework and routing |
+| React 19                | Interactive UI                    |
+| TypeScript              | Type-safe development             |
+| Tailwind CSS            | UI styling and responsive design  |
+| Framer Motion           | Animations and transitions        |
+| Lucide React            | UI icons                          |
+| Canvas Confetti         | Reward and completion effects     |
+| FastAPI                 | Backend REST API                  |
+| Python                  | Backend development               |
+| SQLAlchemy              | Database ORM                      |
+| SQLite                  | Relational database               |
+| Firebase Authentication | User authentication               |
+
+## ✨ Features
+
+### 1. Learning Path
+
+A Duolingo-style learning path with units, skills, lessons, and progression.
+
+- Locked, available, and completed lesson states
+- Skill progress indicators
+- XP, streak, hearts, and gems
+- Sequential lesson unlocking
+- Reward/gift nodes
+- Persistent learner progress
+
+```text
+Unit
+  ↓
+Skill
+  ↓
+Lesson
+  ↓
+Exercises
+  ↓
+Complete
+  ↓
+XP + Progress
+  ↓
+Next Lesson Unlocked
+```
+
+### 2. Lesson Player
+
+The lesson player is the core learning experience and supports multiple exercise types:
+
+- Multiple Choice
+- Translation
+- Word Bank / Tap the Words
+- Match Pairs
+- Fill in the Blank
+- Type the Answer
+
+Each lesson includes:
+
+- Progress bar
+- Immediate correct/incorrect feedback
+- Heart deduction for incorrect answers
+- Lesson completion state
+- XP rewards
+- Skill progress updates
+
+### 3. Gamification
+
+The application implements the main Duolingo-style game mechanics.
+
+| Feature         | Description                          |
+| --------------- | ------------------------------------ |
+| 🔥 Streak       | Tracks consecutive learning activity |
+| ⚡ XP            | Earned by completing lessons         |
+| ❤️ Hearts       | Reduced when answers are incorrect   |
+| 💎 Gems         | Used for mocked rewards              |
+| 🎯 Daily Goal   | Tracks daily XP progress             |
+| 🏆 Leaderboard  | Displays seeded learner rankings     |
+| 🎁 Rewards      | Unlockable reward chests             |
+| 🏅 Achievements | Progress-based learner achievements  |
+
+### 4. Reward Chest System
+
+Reward chests are connected to learning path progression.
+
+- Locked rewards cannot be claimed early
+- Rewards unlock after completing prerequisites
+- XP and gems can be awarded
+- Reward state is persisted
+- Animated reward modal
+
+The reward modal uses React `createPortal()` to render outside the learning-path hierarchy, preventing parent transforms and path styling from affecting the modal.
+
+### 5. Learner Profile
+
+A complete Duolingo-style profile page is available at `/profile`.
+
+Features include:
+
+- Custom cartoon learner avatars
+- Display name and username
+- Bio and join date
+- XP and streak statistics
+- League information
+- Achievement progress
+- Followers and following
+- Add Friends search
+- Course badges
+- Profile editing
+
+The application includes **8 custom SVG learner avatars** with different hairstyles, accessories, glasses, headphones, and clothing.
+
+### 6. Social Features
+
+The profile includes lightweight social functionality:
+
+- Followers / Following lists
+- Follow and unfollow actions
+- User search
+- Add Friends panel
+- Profile invite/share interaction
+
+These features are exposed through the FastAPI backend.
+
+## 🏗 Architecture
+
+```text
+                    Browser
+                       │
+                       ▼
+              ┌─────────────────┐
+              │   Next.js 16    │
+              │ React + TS      │
+              └────────┬────────┘
+                       │
+                    REST API
+                       │
+                       ▼
+              ┌─────────────────┐
+              │     FastAPI     │
+              │     Python      │
+              └────────┬────────┘
+                       │
+                   SQLAlchemy
+                       │
+                       ▼
+                    SQLite
+```
+
+### Frontend Structure
+
+```text
+frontend/
+├── app/
+│   ├── layout.tsx
+│   ├── learn/page.tsx
+│   ├── profile/page.tsx
+│   └── lesson/[id]/page.tsx
+│
+├── components/
+│   ├── layout/
+│   │   ├── Sidebar.tsx
+│   │   └── AppLayoutClient.tsx
+│   ├── lesson/
+│   │   └── RewardNode.tsx
+│   └── profile/
+│       ├── Avatars.tsx
+│       ├── EditProfileModal.tsx
+│       └── ...
+│
+└── lib/
+    └── mockData.ts
+```
+
+### Backend Structure
 
 ```text
 backend/
-├── app/
-│   ├── main.py              # FastAPI app initialization, CORS, exception handlers
-│   ├── config.py            # Environment & app settings (Pydantic Settings)
-│   ├── database.py          # SQLAlchemy SQLite engine & session setup
-│   ├── models/              # SQLAlchemy ORM Database Models
-│   │   ├── user.py          # User entity (xp, streak, hearts, gems, activity)
-│   │   ├── course.py        # Course, Unit, Skill, Lesson, Exercise entities
-│   │   ├── progress.py      # UserSkillProgress, UserLessonProgress, LessonAttempt
-│   │   └── achievement.py   # Achievement, UserAchievement entities
-│   ├── schemas/             # Pydantic Request & Response Schemas
-│   │   ├── user.py
-│   │   ├── course.py
-│   │   ├── lesson.py
-│   │   ├── progress.py
-│   │   ├── gamification.py
-│   │   └── achievement.py
-│   ├── routers/             # REST API Router Endpoints
-│   │   ├── course.py        # /api/course, /api/units, /api/skills, /api/lessons
-│   │   ├── user.py          # /api/user, /api/user/stats
-│   │   ├── progress.py      # /api/progress, /api/progress/skills
-│   │   ├── lesson.py        # /api/lessons/{id}/start, /answer, /complete
-│   │   ├── gamification.py  # /api/stats, /api/leaderboard, /api/hearts/refill, /api/streak/check
-│   │   └── achievement.py   # /api/achievements
-│   ├── services/            # Core Gamification & Business Logic
-│   │   ├── user_service.py
-│   │   ├── course_service.py
-│   │   ├── lesson_service.py
-│   │   ├── progress_service.py
-│   │   ├── gamification_service.py
-│   │   └── achievement_service.py
-│   ├── seed/                # Seed Data Initialization
-│   │   └── seed_data.py     # Initial English course, 5 exercise types, default learner
-│   └── utils/               # Utilities & Helpers
-│       └── date_utils.py    # Testable date & streak calculation rules
-├── tests/                   # Pytest Automated Test Suite
-│   ├── conftest.py
-│   ├── test_course.py
-│   ├── test_lesson.py
-│   ├── test_answer.py
-│   ├── test_hearts.py
-│   ├── test_xp.py
-│   ├── test_streak.py
-│   └── test_progress.py
-├── .env.example             # Environment variable template
-├── requirements.txt         # Python dependencies
-└── README.md                # Project documentation
+├── main.py
+├── models.py
+└── routers/
+    ├── auth.py
+    ├── courses.py
+    ├── profile.py
+    └── user.py
 ```
 
----
+## 🗄 Database Design
 
-## ⚡ Core Features & Systems
+SQLite is used as the application database with SQLAlchemy.
 
-### 1. Database & Seed Data
-- **Engine**: SQLite with SQLAlchemy ORM.
-- **Default Learner Profile**:
-  - Username: `learner`
-  - XP: `120`
-  - Streak: `5` days
-  - Hearts: `5`
-  - Gems: `100`
-- **Seeded English Course**:
-  - **Unit 1: Basics** (Skills: *Greetings* [COMPLETED], *Introductions* [IN_PROGRESS], *Food* [AVAILABLE])
-  - **Unit 2: Everyday Life** (Skills: *Family* [LOCKED], *Places* [LOCKED], *Daily Activities* [LOCKED])
-- **Exercise Types Supported**:
-  1. `MULTIPLE_CHOICE`
-  2. `TRANSLATE`
-  3. `MATCH_PAIRS`
-  4. `FILL_BLANK`
-  5. `TYPE_ANSWER`
+Core relationships:
 
-### 2. Server-Side Answer Validation & XP System
-- **Answer Validation**: Performed strictly on the backend (`POST /api/lessons/{lesson_id}/answer`). Supports text matching, multiple acceptable answers, and paired array matching.
-- **XP Rewards**:
-  - Correct Answer: `+1 XP`
-  - Lesson Completion Bonus: `+10 XP` (idempotent; completion bonus cannot be claimed twice for the same lesson session).
-
-### 3. Hearts System
-- **Max Hearts**: `5`.
-- **Deduction**: `-1 heart` on incorrect answer.
-- **Depletion Prevention**: When hearts reach `0`, users cannot start or continue lessons (`400 Bad Request`).
-- **Refill**: `POST /api/hearts/refill` restores hearts to 5.
-
-### 4. Streak System & Testable Date Logic
-- **Rules**:
-  - **Same Day**: Streak unchanged.
-  - **Next Consecutive Day**: `streak += 1`, updates `longest_streak`.
-  - **Gap > 1 Day**: Resets streak to `1`.
-- Implemented with an injectable date provider (`date_utils.py`), enabling deterministic unit testing without `datetime.now()` flakiness.
-
-### 5. Skill Progression & Automatic Unlocking
-- **Skill States**: `LOCKED`, `AVAILABLE`, `IN_PROGRESS`, `COMPLETED`.
-- **Crown Calculations**:
-  - `0%` -> 0 crowns
-  - `25%` -> 1 crown
-  - `50%` -> 2 crowns
-  - `75%` -> 3 crowns
-  - `100%` -> 4 crowns
-- When a skill reaches `100%` completion, its status transitions to `COMPLETED`, and the next sequential skill in the course automatically transitions from `LOCKED` to `AVAILABLE`.
-
----
-
-## 🚀 Quick Start Guide
-
-### Prerequisites
-- Python 3.10+ installed.
-
-### 1. Install Dependencies
-```bash
-cd backend
-py -m pip install -r requirements.txt
+```text
+User
+ │
+ ├── User Progress
+ ├── Achievements
+ ├── Followers / Following
+ │
+ └── Course
+       │
+       └── Unit
+            │
+            └── Skill
+                 │
+                 └── Lesson
+                      │
+                      └── Exercise
 ```
 
-### 2. Configure Environment Variables
-Copy `.env.example` to `.env`:
-```bash
-cp .env.example .env
+### Main Entities
+
+| Entity              | Purpose                      |
+| ------------------- | ---------------------------- |
+| User                | Learner account and profile  |
+| Course              | Language course              |
+| Unit                | Course section               |
+| Skill               | Learning skill               |
+| Lesson              | Individual lesson            |
+| Exercise            | Question within a lesson     |
+| User Progress       | Learner-specific progression |
+| Achievement         | Achievement tracking         |
+| Follow Relationship | Social connections           |
+
+Course content is seeded so the application is immediately usable after setup.
+
+## 🧠 State Management
+
+React Context is used for global application state.
+
+| Data                 | State               |
+| -------------------- | ------------------- |
+| User                 | UserContext         |
+| Theme                | ThemeContext        |
+| Lesson answers       | Local React state   |
+| Exercise progress    | Local React state   |
+| UI / Modal state     | Local React state   |
+| XP / Streak / Hearts | Backend persistence |
+| Skill completion     | Backend persistence |
+
+No external state-management library was required because React Context and component state are sufficient for the application's scope.
+
+## 🔄 Lesson Flow
+
+```text
+Start Lesson
+     ↓
+Load Exercises
+     ↓
+Answer Exercise
+     ↓
+Correct / Incorrect
+     ↓
+Update Hearts
+     ↓
+Next Exercise
+     ↓
+Lesson Complete
+     ↓
+Award XP
+     ↓
+Update Skill Progress
+     ↓
+Unlock Next Content
 ```
 
-### 3. Seed Database (Optional - Runs automatically on app start)
-```bash
-py -m app.seed.seed_data
+## 🔐 Backend APIs
+
+The FastAPI backend is divided into feature-specific routers.
+
+| Router       | Responsibility                     |
+| ------------ | ---------------------------------- |
+| `auth.py`    | Authentication                     |
+| `courses.py` | Courses, units, skills and lessons |
+| `profile.py` | Profile and social features        |
+| `user.py`    | User progression, XP and hearts    |
+
+Example profile APIs:
+
+```text
+GET  /api/profile
+PUT  /api/profile
 ```
 
-### 4. Start the Server
-```bash
-py -m uvicorn app.main:app --reload --port 8000
-```
+Additional endpoints handle user search and follow/unfollow operations.
 
-The server will be running at: **`http://127.0.0.1:8000`**
+## 🎨 Duolingo Experience
 
----
+The UI was designed to closely follow the original Duolingo visual and interaction patterns:
 
-## 📖 API Documentation & Swagger UI
+- Playful and colorful interface
+- Rounded cards and buttons
+- Learning path with curved progression
+- Animated lesson feedback
+- Progress indicators
+- Reward celebrations
+- Toast notifications
+- Hearts and XP indicators
+- Duolingo-style profile
+- Responsive desktop and mobile layouts
 
-FastAPI automatically generates Interactive API Documentation:
+## 🛠 Important Implementation Details
 
-- **Swagger UI**: [`http://127.0.0.1:8000/docs`](http://127.0.0.1:8000/docs)
-- **ReDoc**: [`http://127.0.0.1:8000/redoc`](http://127.0.0.1:8000/redoc)
+### Reward Locking
 
----
+Reward nodes check their `isUnlocked` state before allowing interaction. Locked rewards display a feedback message instead of allowing users to claim them.
 
-## 🔌 Complete API Contract for Frontend Developers
+### Modal Portaling
 
-### 📚 Course & Content Endpoints
+Reward modals use React's `createPortal()` and are rendered into `document.body`. This prevents CSS transforms and positioning from the learning path from distorting the modal.
 
-#### `GET /api/course`
-Returns active course with unit hierarchy, skill states, crown levels, and lesson summaries.
+### Custom Avatars
 
-**Response `200 OK`**:
-```json
-{
-  "id": 1,
-  "title": "English Course",
-  "description": "Master English from basics to everyday conversations.",
-  "language_code": "en",
-  "icon": "🇬🇧",
-  "units": [
-    {
-      "id": 1,
-      "course_id": 1,
-      "title": "Unit 1: Basics",
-      "order": 1,
-      "skills": [
-        {
-          "id": 1,
-          "title": "Greetings",
-          "status": "COMPLETED",
-          "crown_level": 4,
-          "progress_percentage": 100.0,
-          "lessons": [
-            { "id": 1, "title": "Basic Greetings", "is_completed": true }
-          ]
-        },
-        {
-          "id": 2,
-          "title": "Introductions",
-          "status": "IN_PROGRESS",
-          "crown_level": 2,
-          "progress_percentage": 50.0,
-          "lessons": [
-            { "id": 3, "title": "Names & Titles", "is_completed": true },
-            { "id": 4, "title": "Origins & Countries", "is_completed": false }
-          ]
-        },
-        {
-          "id": 3,
-          "title": "Food",
-          "status": "AVAILABLE",
-          "crown_level": 0,
-          "progress_percentage": 0.0,
-          "lessons": []
-        }
-      ]
-    }
-  ]
-}
-```
+The learner avatars are implemented as SVG components rather than external images, keeping them lightweight and avoiding broken image dependencies.
 
-#### `GET /api/skills/{skill_id}`
-Returns details for a specific skill.
+###
 
-#### `GET /api/lessons/{lesson_id}`
-Returns lesson details and exercise content.
+## 🚀 Getting Started
 
----
-
-### 👤 User & Profile Endpoints
-
-#### `GET /api/user`
-Returns default learner profile.
-
-**Response `200 OK`**:
-```json
-{
-  "id": 1,
-  "username": "learner",
-  "email": "learner@duolingo.clone",
-  "xp": 120,
-  "streak": 5,
-  "longest_streak": 5,
-  "hearts": 5,
-  "gems": 100,
-  "last_activity_date": "2026-10-05"
-}
-```
-
-#### `GET /api/user/stats`
-Returns aggregate statistics (skills finished, crowns earned, etc.).
-
----
-
-### 🎯 Lesson Workflow Endpoints
-
-#### `POST /api/lessons/{lesson_id}/start`
-Starts a lesson session. Checks hearts > 0.
-
-#### `POST /api/lessons/{lesson_id}/answer`
-Submits an answer to an exercise.
-
-**Request Body**:
-```json
-{
-  "exercise_id": 1,
-  "answer": "Hola"
-}
-```
-
-**Response `200 OK` (Correct Answer)**:
-```json
-{
-  "correct": true,
-  "correct_answer": "Hola",
-  "explanation": "'Hola' is the Spanish translation for 'Hello'.",
-  "hearts": 5,
-  "xp_earned": 1
-}
-```
-
-**Response `200 OK` (Incorrect Answer)**:
-```json
-{
-  "correct": false,
-  "correct_answer": "Hola",
-  "explanation": "'Hola' is the Spanish translation for 'Hello'.",
-  "hearts": 4,
-  "xp_earned": 0
-}
-```
-
-#### `POST /api/lessons/{lesson_id}/complete`
-Finalizes lesson completion. Awards +10 XP, updates skill progress %, unlocks next skill if 100% completed.
-
-**Response `200 OK`**:
-```json
-{
-  "completed": true,
-  "xp_awarded": 10,
-  "total_xp": 131,
-  "skill_completed": true,
-  "next_skill_unlocked": {
-    "id": 3,
-    "title": "Food",
-    "status": "AVAILABLE"
-  },
-  "current_streak": 6
-}
-```
-
----
-
-### 🏆 Gamification & Leaderboard Endpoints
-
-#### `GET /api/leaderboard`
-Returns XP leaderboard sorted descending with user ranks.
-
-**Response `200 OK`**:
-```json
-[
-  { "rank": 1, "user_id": 2, "username": "Orion", "xp": 1250, "is_current_user": false },
-  { "rank": 2, "user_id": 3, "username": "Sarah", "xp": 980, "is_current_user": false },
-  { "rank": 3, "user_id": 4, "username": "Rahul", "xp": 750, "is_current_user": false },
-  { "rank": 4, "user_id": 1, "username": "learner", "xp": 120, "is_current_user": true }
-]
-```
-
-#### `POST /api/hearts/refill`
-Restores hearts to 5.
-
-#### `POST /api/streak/check`
-Recalculates streak status.
-
-#### `GET /api/achievements`
-Returns achievements and learner progress.
-
----
-
-## 🧪 Running Automated Tests
-
-Run the complete pytest test suite covering all core backend requirements:
+### Backend
 
 ```bash
 cd backend
-py -m pytest -v
+
+python -m venv venv
+venv\Scripts\activate
+
+pip install -r requirements.txt
+
+uvicorn main:app --reload
 ```
 
----
+Backend runs on:
 
-## 🌐 CORS Configuration
-
-Configured via environment variable `ALLOWED_ORIGINS` in `.env`:
-```env
-ALLOWED_ORIGINS="http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001"
+```text
+http://localhost:8000
 ```
-Allows Next.js frontend calls during local development without CORS restriction issues.
+
+### Frontend
+
+```bash
+cd frontend
+
+npm install
+npm run dev
+```
+
+Frontend runs on:
+
+```text
+http://localhost:3000
+```
+
+## 📌 Scope & Assumptions
+
+The assignment requires only a small seeded course, so the implementation focuses on the core learning and gamification experience.
+
+The following are mocked or simplified where appropriate:
+
+- One language/course
+- Seeded leaderboard users
+- Gems and rewards
+- Social functionality
+- Subscription/purchases
+- Speech/pronunciation exercises
+
+## 👤 Author
+
+**Balasa Krishna Chaitanya**
