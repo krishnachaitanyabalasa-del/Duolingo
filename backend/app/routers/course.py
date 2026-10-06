@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.config import settings
-from app.schemas.course import CourseRead, UnitRead, SkillRead, LessonDetail
+from app.schemas.course import CourseRead, UnitRead, SkillRead
+from app.schemas.lesson import LessonDetail
 from app.services.course_service import (
     get_active_course,
     get_all_courses,

@@ -3,7 +3,8 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app.models.course import Course, Unit, Skill, Lesson, Exercise
 from app.models.progress import UserSkillProgress, UserLessonProgress
-from app.schemas.course import CourseRead, UnitRead, SkillRead, LessonSummary, ExerciseRead, LessonDetail
+from app.schemas.course import CourseRead, UnitRead, SkillRead, LessonSummary, ExerciseRead
+from app.schemas.lesson import LessonDetail
 
 
 def get_all_courses(db: Session) -> list[Course]:

@@ -195,6 +195,7 @@ def complete_lesson(db: Session, lesson_id: int, user_id: int) -> LessonComplete
         # Award lesson completion XP bonus (+10 XP)
         xp_awarded = lesson.xp_reward or 10
         user.xp += xp_awarded
+        db.flush()
 
     # Update active attempt session if exists
     attempt = (
