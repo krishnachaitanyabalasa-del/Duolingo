@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { SkillNode } from '@/types/course';
 import { X, Play, Zap } from 'lucide-react';
@@ -12,11 +13,17 @@ interface LessonModalProps {
 }
 
 export const LessonModal: React.FC<LessonModalProps> = ({ skill, onClose }) => {
-  if (!skill) return null;
+  const [mounted, setMounted] = useState(false);
 
-  return (
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!skill || !mounted) return null;
+
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs select-none">
         <motion.div
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -60,6 +67,8 @@ export const LessonModal: React.FC<LessonModalProps> = ({ skill, onClose }) => {
           </Link>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
+

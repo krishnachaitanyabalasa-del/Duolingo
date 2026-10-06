@@ -260,7 +260,7 @@ export async function submitAnswer(
 
   // Fallback local mock evaluation engine
   const lesson = MOCK_LESSONS[lessonId] || MOCK_LESSONS[numericId.toString()] || MOCK_LESSONS['sk_greetings'] || MOCK_LESSONS['sk_food'];
-  const exercise = currentExerciseObj || lesson?.exercises.find((ex) => ex.id === exerciseId);
+  const exercise = currentExerciseObj || lesson?.exercises.find((ex: { id: number }) => ex.id === exerciseId);
 
   let isCorrect = false;
   let correctAnswerStr = '';

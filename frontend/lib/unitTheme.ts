@@ -7,6 +7,7 @@ export interface UnitTheme {
   headerBg: string;
   headerBorder: string;
   textColor: string;
+  hex: string;
 }
 
 export const UNIT_THEMES: Record<number, UnitTheme> = {
@@ -19,6 +20,7 @@ export const UNIT_THEMES: Record<number, UnitTheme> = {
     headerBg: 'bg-[#58cc02]',
     headerBorder: 'border-[#46a302]',
     textColor: 'text-[#58cc02]',
+    hex: '#58cc02',
   },
   2: {
     id: 2,
@@ -29,6 +31,7 @@ export const UNIT_THEMES: Record<number, UnitTheme> = {
     headerBg: 'bg-[#ff9600]',
     headerBorder: 'border-[#e07300]',
     textColor: 'text-[#ff9600]',
+    hex: '#ff9600',
   },
   3: {
     id: 3,
@@ -39,6 +42,7 @@ export const UNIT_THEMES: Record<number, UnitTheme> = {
     headerBg: 'bg-[#1cb0f6]',
     headerBorder: 'border-[#1899d6]',
     textColor: 'text-[#1cb0f6]',
+    hex: '#1cb0f6',
   },
   4: {
     id: 4,
@@ -49,6 +53,7 @@ export const UNIT_THEMES: Record<number, UnitTheme> = {
     headerBg: 'bg-[#ce82ff]',
     headerBorder: 'border-[#a55eea]',
     textColor: 'text-[#ce82ff]',
+    hex: '#ce82ff',
   },
   5: {
     id: 5,
@@ -59,6 +64,7 @@ export const UNIT_THEMES: Record<number, UnitTheme> = {
     headerBg: 'bg-[#ff4b4b]',
     headerBorder: 'border-[#ea2b2b]',
     textColor: 'text-[#ff4b4b]',
+    hex: '#ff4b4b',
   },
 };
 
@@ -66,3 +72,4 @@ export function getUnitTheme(unitNumber: number): UnitTheme {
   const normalizedIndex = ((unitNumber - 1) % 5) + 1;
   return UNIT_THEMES[normalizedIndex] || UNIT_THEMES[1];
 }
+
