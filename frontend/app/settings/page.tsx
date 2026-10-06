@@ -1,11 +1,15 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Volume2, Moon, Sun, Globe, Target, Bell, Sparkles } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Volume2, Moon, Sun, Globe, Target, Bell, Sparkles, User, LogOut } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
+import { useUserContext } from '@/context/UserContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const { user, firebaseUser, isGuest, logout } = useUserContext();
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [dailyGoal, setDailyGoal] = useState('50');
   const { isDark, resolvedTheme } = useTheme();
@@ -110,6 +114,34 @@ export default function SettingsPage() {
           <span className="font-extrabold text-xs text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-950/40 px-2.5 py-1 rounded-full border border-green-200 dark:border-green-800/60">
             ENABLED
           </span>
+        </div>
+      </div>
+
+      {/* Account & Session Card */}
+      <div className="duo-card space-y-4">
+        <h3 className="text-lg font-extrabold text-gray-900 dark:text-white">Account</h3>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <User className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+            <div>
+              <span className="font-extrabold text-sm text-gray-900 dark:text-white block">
+                {user.displayName || user.username}
+              </span>
+              <span className="text-xs font-medium text-gray-500 dark:text-[#93a7b1]">
+                {firebaseUser?.email || (isGuest ? 'Guest Learner Session' : `@${user.username}`)}
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={async () => {
+              await logout();
+              router.replace('/login');
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 border-2 border-red-200 dark:border-red-900/60 uppercase tracking-wider transition-all cursor-pointer"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Sign Out</span>
+          </button>
         </div>
       </div>
 

@@ -11,6 +11,9 @@ interface UserContextType {
   firebaseUser: FirebaseUser | null;
   achievements: Achievement[];
   loading: boolean;
+  authLoading: boolean;
+  isAuthenticated: boolean;
+  isGuest: boolean;
   addXp: (amount: number) => void;
   deductHeart: () => void;
   refillHearts: () => Promise<void>;
@@ -18,6 +21,7 @@ interface UserContextType {
   updateGemsAndXp: (gems: number, xp: number) => void;
   refreshUser: () => Promise<void>;
   loginWithGoogle: () => Promise<void>;
+  loginAsGuest: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -26,8 +30,10 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile>(MOCK_USER);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
+  const [isGuest, setIsGuest] = useState(false);
   const [achievements, setAchievements] = useState<Achievement[]>(MOCK_ACHIEVEMENTS);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -41,13 +47,39 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
+    // Check local guest mode flag on mount
+    const hasGuestSession =
+      typeof window !== 'undefined' && localStorage.getItem('duo_guest_mode') === 'true';
+    if (hasGuestSession) {
+      setIsGuest(true);
+    }
+
     // Listen to Firebase authentication state changes
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setFirebaseUser(currentUser);
-      await loadData();
+      if (currentUser) {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('duo_guest_mode');
+        }
+        setIsGuest(false);
+      }
+      setAuthLoading(false);
+      if (currentUser || hasGuestSession) {
+        await loadData();
+      } else {
+        setLoading(false);
+      }
     });
 
-    return () => unsubscribe();
+    // Fallback safety timeout in case Firebase auth check is blocked or delayed
+    const timer = setTimeout(() => {
+      setAuthLoading(false);
+    }, 1500);
+
+    return () => {
+      unsubscribe();
+      clearTimeout(timer);
+    };
   }, [loadData]);
 
   const addXp = (amount: number) => {
@@ -95,19 +127,37 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginWithGoogle = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-      await loadData();
-    } catch (err: any) {
-      console.warn('Google Login popup error:', err?.message || err);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('duo_guest_mode');
     }
+    setIsGuest(false);
+    await signInWithPopup(auth, googleProvider);
+    await loadData();
+  };
+
+  const loginAsGuest = async () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('duo_guest_mode', 'true');
+    }
+    setIsGuest(true);
+    await loadData();
   };
 
   const logout = async () => {
-    await signOut(auth);
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.warn('Firebase signout error:', err);
+    }
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('duo_guest_mode');
+    }
+    setIsGuest(false);
     setFirebaseUser(null);
-    await loadData();
+    setUser(MOCK_USER);
   };
+
+  const isAuthenticated = Boolean(firebaseUser || isGuest);
 
   return (
     <UserContext.Provider
@@ -116,6 +166,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         firebaseUser,
         achievements,
         loading,
+        authLoading,
+        isAuthenticated,
+        isGuest,
         addXp,
         deductHeart,
         refillHearts: refillHeartsAction,
@@ -123,6 +176,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateGemsAndXp,
         refreshUser: loadData,
         loginWithGoogle,
+        loginAsGuest,
         logout,
       }}
     >

@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { auth, googleProvider, signInWithPopup } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
+import { useUserContext } from '@/context/UserContext';
 import { LogIn, Sparkles, UserCheck } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { loginWithGoogle, loginAsGuest } = useUserContext();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,8 +15,8 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      await signInWithPopup(auth, googleProvider);
-      router.push('/learn');
+      await loginWithGoogle();
+      router.replace('/learn');
     } catch (err: any) {
       console.error('Login error:', err);
       if (err?.code === 'auth/unauthorized-domain' || err?.message?.includes('unauthorized-domain')) {
@@ -30,9 +31,16 @@ export default function LoginPage() {
     }
   };
 
-  const handleDevBypass = () => {
-    // Navigates directly to /learn using FastAPI backend's fallback default learner
-    router.push('/learn');
+  const handleGuestLogin = async () => {
+    setLoading(true);
+    try {
+      await loginAsGuest();
+      router.replace('/learn');
+    } catch (err: any) {
+      console.error('Guest login error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -85,8 +93,9 @@ export default function LoginPage() {
           </button>
 
           <button
-            onClick={handleDevBypass}
-            className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-[0_4px_0_#15803d] active:translate-y-1 active:shadow-none transition uppercase tracking-wider text-sm"
+            onClick={handleGuestLogin}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-extrabold py-3.5 px-6 rounded-2xl shadow-[0_4px_0_#15803d] active:translate-y-1 active:shadow-none transition uppercase tracking-wider text-sm disabled:opacity-50"
           >
             <UserCheck className="w-5 h-5" />
             <span>Continue as Default Learner</span>

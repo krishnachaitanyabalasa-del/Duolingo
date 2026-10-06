@@ -2,13 +2,21 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home, Volume2, Dumbbell, Shield, Gift, ShoppingBag, User, Settings } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Home, Volume2, Dumbbell, Shield, Gift, ShoppingBag, User, Settings, LogOut } from 'lucide-react';
 import { clsx } from 'clsx';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { useUserContext } from '@/context/UserContext';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useUserContext();
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace('/login');
+  };
 
   const navItems = [
     { label: 'LEARN', href: '/learn', icon: Home },
@@ -67,12 +75,21 @@ export const Sidebar: React.FC = () => {
           </div>
         </div>
 
-        {/* Sidebar Footer with Theme Mode Switch */}
-        <div className="pt-3 border-t-2 border-gray-100 dark:border-[#20323d] flex items-center justify-between px-2">
-          <span className="text-xs font-black uppercase text-gray-400 dark:text-[#52656d] tracking-wider">
-            THEME
-          </span>
-          <ThemeToggle variant="switch" />
+        {/* Sidebar Footer with Theme Mode Switch & Sign Out */}
+        <div className="pt-3 border-t-2 border-gray-100 dark:border-[#20323d] space-y-2">
+          <div className="flex items-center justify-between px-2">
+            <span className="text-xs font-black uppercase text-gray-400 dark:text-[#52656d] tracking-wider">
+              THEME
+            </span>
+            <ThemeToggle variant="switch" />
+          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-black text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all cursor-pointer uppercase tracking-wider"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>SIGN OUT</span>
+          </button>
         </div>
       </div>
     </aside>
