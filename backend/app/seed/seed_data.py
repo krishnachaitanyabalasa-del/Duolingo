@@ -18,22 +18,11 @@ def seed_database(db: Session = None):
     try:
         print("Seeding database with English Foundations course data and Pronunciation Sounds...")
 
-        # Ensure idempotency by safely removing old seed records in reverse dependency order
-        db.query(UserSoundProgress).delete()
-        db.query(Sound).delete()
-        db.query(SoundCategory).delete()
-        db.query(LessonAttempt).delete()
-        db.query(UserLessonProgress).delete()
-        db.query(UserSkillProgress).delete()
-        db.query(UserAchievement).delete()
-        db.query(Exercise).delete()
-        db.query(Lesson).delete()
-        db.query(Skill).delete()
-        db.query(Unit).delete()
-        db.query(Course).delete()
-        db.query(Achievement).delete()
-        db.query(User).delete()
-        db.commit()
+        # Check if database is already seeded with user and sound categories
+        if db.query(User).filter(User.id == 1).first() is not None and db.query(SoundCategory).count() > 0:
+            print("Database already seeded. Preserving existing records.")
+            return
+
 
         # 1. Seed Users (Default Learner + Leaderboard entries)
         yesterday = date.today() - timedelta(days=1)
