@@ -4,9 +4,11 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { UserProfile, Achievement } from '@/types/user';
 import { getUserProfile, getAchievements, refillHearts as apiRefillHearts } from '@/lib/api/user';
 import { MOCK_USER, MOCK_ACHIEVEMENTS } from '@/lib/mockData';
+import { auth, googleProvider, onAuthStateChanged, signInWithPopup, signOut, User as FirebaseUser } from '@/lib/firebase';
 
 interface UserContextType {
   user: UserProfile;
+  firebaseUser: FirebaseUser | null;
   achievements: Achievement[];
   loading: boolean;
   addXp: (amount: number) => void;
@@ -15,12 +17,15 @@ interface UserContextType {
   buyItem: (item: string, cost: number) => boolean;
   updateGemsAndXp: (gems: number, xp: number) => void;
   refreshUser: () => Promise<void>;
+  loginWithGoogle: () => Promise<void>;
+  logout: () => Promise<void>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile>(MOCK_USER);
+  const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>(MOCK_ACHIEVEMENTS);
   const [loading, setLoading] = useState(true);
 
@@ -36,7 +41,13 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    loadData();
+    // Listen to Firebase authentication state changes
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setFirebaseUser(currentUser);
+      await loadData();
+    });
+
+    return () => unsubscribe();
   }, [loadData]);
 
   const addXp = (amount: number) => {
@@ -83,10 +94,22 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }));
   };
 
+  const loginWithGoogle = async () => {
+    await signInWithPopup(auth, googleProvider);
+    await loadData();
+  };
+
+  const logout = async () => {
+    await signOut(auth);
+    setFirebaseUser(null);
+    await loadData();
+  };
+
   return (
     <UserContext.Provider
       value={{
         user,
+        firebaseUser,
         achievements,
         loading,
         addXp,
@@ -95,6 +118,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         buyItem,
         updateGemsAndXp,
         refreshUser: loadData,
+        loginWithGoogle,
+        logout,
       }}
     >
       {children}
