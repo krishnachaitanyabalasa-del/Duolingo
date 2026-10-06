@@ -1,14 +1,17 @@
+import re
 from typing import Any
 
 
 def normalize_answer(val: Any) -> str:
     """
     Reusable answer normalization function.
-    Trims leading/trailing whitespace, converts to lowercase,
-    normalizes spaces, and strips sentence-ending punctuation.
+    Trims whitespace, converts to lowercase, strips punctuation
+    (including punctuation attached to individual words in lists),
+    and normalizes multiple spaces.
     """
-    if isinstance(val, (list, tuple)):
+    if isinstance(val, (list, tuple, set)):
         val = " ".join(str(v) for v in val)
     s = str(val or "").strip().lower()
-    s = s.rstrip(".!?")
+    s = re.sub(r'[!?,.:;\-_"\'“”]', ' ', s)
     return " ".join(s.split())
+

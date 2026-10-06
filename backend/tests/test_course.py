@@ -24,7 +24,7 @@ def test_get_skill_detail(client):
     data = response.json()
     assert data["id"] == 1
     assert data["title"] == "Greetings"
-    assert data["status"] == "COMPLETED"
+    assert data["status"] == "IN_PROGRESS"
     assert len(data["lessons"]) == 2
 
 

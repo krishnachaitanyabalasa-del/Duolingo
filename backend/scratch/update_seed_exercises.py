@@ -1,104 +1,6 @@
-from datetime import date, datetime, timedelta
-from sqlalchemy.orm import Session
-from app.database import engine, Base, SessionLocal
-from app.models.user import User
-from app.models.course import Course, Unit, Skill, Lesson, Exercise
-from app.models.progress import UserSkillProgress, UserLessonProgress, LessonAttempt
-from app.models.achievement import Achievement, UserAchievement
-from app.models.sound import SoundCategory, Sound, UserSoundProgress
+import re
 
-
-def seed_database(db: Session = None):
-    close_db = False
-    if db is None:
-        Base.metadata.create_all(bind=engine)
-        db = SessionLocal()
-        close_db = True
-
-    try:
-        print("Seeding database with English Foundations course data and Pronunciation Sounds...")
-
-        # 1. Seed Users (Default Learner + Leaderboard entries)
-        yesterday = date.today() - timedelta(days=1)
-
-        learner = db.query(User).filter(User.id == 1).first()
-        if not learner:
-            learner = User(
-                id=1,
-                username="learner",
-                email="learner@duolingo.clone",
-                xp=120,
-                streak=5,
-                longest_streak=5,
-                hearts=5,
-                gems=100,
-                last_activity_date=yesterday,
-            )
-
-            leaderboard_users = [
-                learner,
-                User(id=2, username="Orion", email="orion@example.com", xp=1250, streak=14, longest_streak=14, hearts=5, gems=350, last_activity_date=date.today()),
-                User(id=3, username="Sarah", email="sarah@example.com", xp=980, streak=9, longest_streak=12, hearts=4, gems=200, last_activity_date=date.today()),
-                User(id=4, username="Rahul", email="rahul@example.com", xp=750, streak=7, longest_streak=7, hearts=5, gems=150, last_activity_date=yesterday),
-                User(id=5, username="Elena", email="elena@example.com", xp=90, streak=2, longest_streak=3, hearts=3, gems=80, last_activity_date=yesterday),
-                User(id=6, username="David", email="david@example.com", xp=45, streak=1, longest_streak=1, hearts=5, gems=50, last_activity_date=date.today()),
-            ]
-            db.add_all(leaderboard_users)
-            db.commit()
-
-        # 2. Seed Course, Units, Skills, Lessons
-        course = db.query(Course).filter(Course.id == 1).first()
-        if not course:
-            course = Course(
-                id=1,
-                title="English Foundations",
-                description="Master English foundations from basics to everyday communication.",
-                language_code="en",
-                icon="🇬🇧",
-            )
-            db.add(course)
-            db.commit()
-
-        if db.query(Unit).count() == 0:
-            # Units
-            unit1 = Unit(id=1, course_id=course.id, title="UNIT 1 — BASICS", description="Learn greetings, introductions, and essential words.", order=1)
-            unit2 = Unit(id=2, course_id=course.id, title="UNIT 2 — EVERYDAY ENGLISH", description="Talk about food, drinks, and daily activities.", order=2)
-            db.add_all([unit1, unit2])
-            db.commit()
-
-            # Skills (5 total)
-            skill1 = Skill(id=1, unit_id=unit1.id, title="Greetings", description="Basic hello, goodbye, and polite phrases", icon="👋", order=1)
-            skill2 = Skill(id=2, unit_id=unit1.id, title="Introductions", description="Introduce yourself and meet others", icon="🤝", order=2)
-            skill3 = Skill(id=3, unit_id=unit1.id, title="Basic Words", description="Essential everyday vocabulary", icon="📚", order=3)
-
-            skill4 = Skill(id=4, unit_id=unit2.id, title="Food & Drinks", description="Express food preferences and meals", icon="🍎", order=4)
-            skill5 = Skill(id=5, unit_id=unit2.id, title="Daily Activities", description="Talk about daily routines and actions", icon="🏃", order=5)
-
-            skills = [skill1, skill2, skill3, skill4, skill5]
-            db.add_all(skills)
-            db.commit()
-
-            # Lessons (2 per skill = 10 lessons)
-            l1 = Lesson(id=1, skill_id=skill1.id, title="Basic Greetings", order=1, xp_reward=10)
-            l2 = Lesson(id=2, skill_id=skill1.id, title="Greeting Conversations", order=2, xp_reward=10)
-
-            l3 = Lesson(id=3, skill_id=skill2.id, title="Personal Info", order=1, xp_reward=10)
-            l4 = Lesson(id=4, skill_id=skill2.id, title="Meeting People", order=2, xp_reward=10)
-
-            l5 = Lesson(id=5, skill_id=skill3.id, title="Essential Words", order=1, xp_reward=10)
-            l6 = Lesson(id=6, skill_id=skill3.id, title="Objects & Nouns", order=2, xp_reward=10)
-
-            l7 = Lesson(id=7, skill_id=skill4.id, title="Food & Drinks", order=1, xp_reward=10)
-            l8 = Lesson(id=8, skill_id=skill4.id, title="Meals & Orders", order=2, xp_reward=10)
-
-            l9 = Lesson(id=9, skill_id=skill5.id, title="Routines", order=1, xp_reward=10)
-            l10 = Lesson(id=10, skill_id=skill5.id, title="Daily Actions", order=2, xp_reward=10)
-
-            lessons = [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10]
-            db.add_all(lessons)
-            db.commit()
-
-        # 3. Seed 8 Exercises per Lesson (80 total exercises covering ALL 5 types in every lesson)
+new_exercises_code = '''        # 3. Seed 8 Exercises per Lesson (80 total exercises covering ALL 5 types in every lesson)
         if db.query(Exercise).count() == 0:
             print("Seeding 80 course exercises...")
             exercises = [
@@ -127,7 +29,7 @@ def seed_database(db: Session = None):
                     id=4, lesson_id=1, type="TYPE_ANSWER",
                     prompt="Type the English word for 'Hola'.",
                     content={"question": "Type the English word for 'Hola'.", "text": "Hola", "speak_text": "Hello"},
-                    correct_answer="Hello", explanation="'Hola' translates to 'Hello'.", order=4
+                    correct_answer=["Hello", "Hi"], explanation="'Hola' translates to 'Hello' or 'Hi'.", order=4
                 ),
                 Exercise(
                     id=5, lesson_id=1, type="MATCH_PAIRS",
@@ -633,151 +535,20 @@ def seed_database(db: Session = None):
                 ),
             ]
             db.add_all(exercises)
-            db.commit()
+            db.commit()'''
 
-        # 4. Seed Learner Initial Skill & Lesson Progress
-        skill1 = db.query(Skill).filter(Skill.id == 1).first()
-        skill2 = db.query(Skill).filter(Skill.id == 2).first()
-        skill3 = db.query(Skill).filter(Skill.id == 3).first()
-        skill4 = db.query(Skill).filter(Skill.id == 4).first()
-        skill5 = db.query(Skill).filter(Skill.id == 5).first()
+with open('app/seed/seed_data.py', 'r', encoding='utf-8') as f:
+    content = f.read()
 
-        l1 = db.query(Lesson).filter(Lesson.id == 1).first()
-        l2 = db.query(Lesson).filter(Lesson.id == 2).first()
-        l3 = db.query(Lesson).filter(Lesson.id == 3).first()
-        l4 = db.query(Lesson).filter(Lesson.id == 4).first()
-        l5 = db.query(Lesson).filter(Lesson.id == 5).first()
-        l6 = db.query(Lesson).filter(Lesson.id == 6).first()
-        l7 = db.query(Lesson).filter(Lesson.id == 7).first()
-        l8 = db.query(Lesson).filter(Lesson.id == 8).first()
-        l9 = db.query(Lesson).filter(Lesson.id == 9).first()
-        l10 = db.query(Lesson).filter(Lesson.id == 10).first()
+start_marker = '        # 3. Seed 8 Exercises per Lesson'
+end_marker = '        # 4. Seed Learner Initial Skill & Lesson Progress'
 
-        if db.query(UserSkillProgress).filter(UserSkillProgress.user_id == learner.id).count() == 0:
-            # Skill 1 (Greetings): IN_PROGRESS (50%, 2 crowns) — Lesson 1 Completed, Lesson 2 Unlocked & Ready
-            sp1 = UserSkillProgress(user_id=learner.id, skill_id=skill1.id, status="IN_PROGRESS", crown_level=2, progress_percentage=50.0, unlocked_at=datetime.utcnow() - timedelta(days=2))
-            lp1 = UserLessonProgress(user_id=learner.id, lesson_id=l1.id, is_completed=True, attempts_count=1, completed_at=datetime.utcnow() - timedelta(days=2))
-            lp2 = UserLessonProgress(user_id=learner.id, lesson_id=l2.id, is_completed=False, attempts_count=0)
+start_idx = content.find(start_marker)
+end_idx = content.find(end_marker)
 
-            # Skill 2 (Introductions): LOCKED (0%, 0 crowns) — Unlocks after Skill 1 is completed
-            sp2 = UserSkillProgress(user_id=learner.id, skill_id=skill2.id, status="LOCKED", crown_level=0, progress_percentage=0.0)
-            lp3 = UserLessonProgress(user_id=learner.id, lesson_id=l3.id, is_completed=False, attempts_count=0)
-            lp4 = UserLessonProgress(user_id=learner.id, lesson_id=l4.id, is_completed=False, attempts_count=0)
+new_content = content[:start_idx] + new_exercises_code + '\n\n' + content[end_idx:]
 
-            # Skill 3 (Basic Words): LOCKED (0%, 0 crowns)
-            sp3 = UserSkillProgress(user_id=learner.id, skill_id=skill3.id, status="LOCKED", crown_level=0, progress_percentage=0.0)
-            lp5 = UserLessonProgress(user_id=learner.id, lesson_id=l5.id, is_completed=False, attempts_count=0)
-            lp6 = UserLessonProgress(user_id=learner.id, lesson_id=l6.id, is_completed=False, attempts_count=0)
+with open('app/seed/seed_data.py', 'w', encoding='utf-8') as f:
+    f.write(new_content)
 
-            # Skill 4 (Food & Drinks - Unit 2): LOCKED (0%, 0 crowns)
-            sp4 = UserSkillProgress(user_id=learner.id, skill_id=skill4.id, status="LOCKED", crown_level=0, progress_percentage=0.0)
-            lp7 = UserLessonProgress(user_id=learner.id, lesson_id=l7.id, is_completed=False, attempts_count=0)
-            lp8 = UserLessonProgress(user_id=learner.id, lesson_id=l8.id, is_completed=False, attempts_count=0)
-
-            # Skill 5 (Daily Activities - Unit 2): LOCKED (0%, 0 crowns)
-            sp5 = UserSkillProgress(user_id=learner.id, skill_id=skill5.id, status="LOCKED", crown_level=0, progress_percentage=0.0)
-            lp9 = UserLessonProgress(user_id=learner.id, lesson_id=l9.id, is_completed=False, attempts_count=0)
-            lp10 = UserLessonProgress(user_id=learner.id, lesson_id=l10.id, is_completed=False, attempts_count=0)
-
-            db.add_all([sp1, sp2, sp3, sp4, sp5])
-            db.add_all([lp1, lp2, lp3, lp4, lp5, lp6, lp7, lp8, lp9, lp10])
-            db.commit()
-
-        # 5. Seed Achievements & User Achievements
-        if db.query(Achievement).count() == 0:
-            achievements = [
-                Achievement(id=1, code="wildfire", title="Wildfire", description="Reach a 3-day streak", icon="🔥", target_value=3),
-                Achievement(id=2, code="overachiever", title="Overachiever", description="Earn 100 XP", icon="⚡", target_value=100),
-                Achievement(id=3, code="scholar", title="Scholar", description="Complete 5 lessons", icon="🎓", target_value=5),
-                Achievement(id=4, code="sharp_mind", title="Sharp Mind", description="Complete a lesson with full hearts", icon="🎯", target_value=1),
-                Achievement(id=5, code="champion", title="Champion", description="Reach 500 XP", icon="🏆", target_value=500),
-            ]
-            db.add_all(achievements)
-            db.commit()
-
-            ua1 = UserAchievement(user_id=learner.id, achievement_id=1, progress=5, is_unlocked=True, unlocked_at=datetime.utcnow() - timedelta(days=1))
-            ua2 = UserAchievement(user_id=learner.id, achievement_id=2, progress=120, is_unlocked=True, unlocked_at=datetime.utcnow() - timedelta(days=1))
-            ua3 = UserAchievement(user_id=learner.id, achievement_id=3, progress=4, is_unlocked=False)
-            ua4 = UserAchievement(user_id=learner.id, achievement_id=4, progress=1, is_unlocked=True, unlocked_at=datetime.utcnow() - timedelta(days=2))
-            ua5 = UserAchievement(user_id=learner.id, achievement_id=5, progress=120, is_unlocked=False)
-
-            db.add_all([ua1, ua2, ua3, ua4, ua5])
-            db.commit()
-
-        # 6. Seed Pronunciation Sound Categories & Sounds
-        if db.query(SoundCategory).count() == 0:
-            cat_vowels = SoundCategory(id=1, name="Vowels", slug="vowels", display_order=1)
-            cat_consonants = SoundCategory(id=2, name="Consonants", slug="consonants", display_order=2)
-            db.add_all([cat_vowels, cat_consonants])
-            db.commit()
-
-        cat_vowels = db.query(SoundCategory).filter(SoundCategory.id == 1).first()
-        cat_consonants = db.query(SoundCategory).filter(SoundCategory.id == 2).first()
-
-        if db.query(Sound).count() == 0:
-            vowels_data = [
-                ("a", "hot"), ("æ", "cat"), ("ʌ", "but"), ("ɛ", "bed"), ("eɪ", "say"),
-                ("ɝ", "bird"), ("ɪ", "ship"), ("i", "sheep"), ("ə", "about"), ("oʊ", "boat"),
-                ("ʊ", "foot"), ("u", "food"), ("aʊ", "cow"), ("aɪ", "time"), ("ɔɪ", "boy")
-            ]
-
-            consonants_data = [
-                ("b", "book"), ("tʃ", "chair"), ("d", "day"), ("f", "fish"), ("g", "go"),
-                ("h", "home"), ("dʒ", "job"), ("k", "key"), ("l", "lion"), ("m", "moon"),
-                ("n", "nose"), ("ŋ", "sing"), ("p", "pig"), ("r", "red"), ("s", "see"),
-                ("ʒ", "measure"), ("ʃ", "shoe"), ("t", "time"), ("ð", "then"), ("θ", "think"),
-                ("v", "very"), ("w", "water"), ("j", "you"), ("z", "zoo")
-            ]
-
-            vowel_sounds = []
-            for i, (sym, word) in enumerate(vowels_data, start=1):
-                vowel_sounds.append(
-                    Sound(
-                        id=i,
-                        category_id=cat_vowels.id,
-                        symbol=sym,
-                        example_word=word,
-                        audio_text=word,
-                        display_order=i,
-                        is_active=True,
-                    )
-                )
-
-            consonant_sounds = []
-            for j, (sym, word) in enumerate(consonants_data, start=16):
-                consonant_sounds.append(
-                    Sound(
-                        id=j,
-                        category_id=cat_consonants.id,
-                        symbol=sym,
-                        example_word=word,
-                        audio_text=word,
-                        display_order=j,
-                        is_active=True,
-                    )
-                )
-
-            db.add_all(vowel_sounds)
-            db.add_all(consonant_sounds)
-            db.commit()
-
-        if db.query(UserSoundProgress).filter(UserSoundProgress.user_id == learner.id).count() == 0:
-            initial_sound_progress = [
-                UserSoundProgress(user_id=learner.id, sound_id=1, practice_count=1, correct_count=1, incorrect_count=0, progress_percent=20, mastered=False),
-                UserSoundProgress(user_id=learner.id, sound_id=2, practice_count=2, correct_count=2, incorrect_count=0, progress_percent=40, mastered=False),
-                UserSoundProgress(user_id=learner.id, sound_id=3, practice_count=1, correct_count=0, incorrect_count=1, progress_percent=10, mastered=False),
-                UserSoundProgress(user_id=learner.id, sound_id=4, practice_count=2, correct_count=1, incorrect_count=1, progress_percent=30, mastered=False),
-                UserSoundProgress(user_id=learner.id, sound_id=5, practice_count=0, correct_count=0, incorrect_count=0, progress_percent=0, mastered=False),
-            ]
-            db.add_all(initial_sound_progress)
-            db.commit()
-
-        print("Successfully seeded English Foundations course and Pronunciation Sounds (15 Vowels, 24 Consonants).")
-
-    finally:
-        if close_db:
-            db.close()
-
-
-if __name__ == "__main__":
-    seed_database()
+print('Updated seed_data.py successfully!')

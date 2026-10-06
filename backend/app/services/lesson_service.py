@@ -67,8 +67,63 @@ def _validate_exercise_answer(exercise: Exercise, answer: Any) -> tuple[bool, An
     """
     correct_ans = exercise.correct_answer
 
-    if exercise.type == "MATCH_PAIRS":
-        # Handle pair matching answer structures
+    if exercise.type == "MULTIPLE_CHOICE":
+        options = []
+        if isinstance(exercise.content, dict):
+            options = exercise.content.get("options", [])
+
+        user_str = str(answer)
+        if (isinstance(answer, int) or (isinstance(answer, str) and str(answer).isdigit())) and options:
+            idx = int(answer)
+            if 0 <= idx < len(options):
+                user_str = options[idx]
+
+        expected_str = str(correct_ans)
+        if (isinstance(correct_ans, int) or (isinstance(correct_ans, str) and str(correct_ans).isdigit())) and options:
+            idx = int(correct_ans)
+            if 0 <= idx < len(options):
+                expected_str = options[idx]
+
+        is_correct = (
+            normalize_answer(user_str) == normalize_answer(expected_str) or
+            str(answer).strip() == str(correct_ans).strip()
+        )
+        return is_correct, expected_str
+
+    elif exercise.type == "TRANSLATE":
+        user_str = normalize_answer(answer)
+        expected_display = correct_ans
+        expected_str = normalize_answer(correct_ans)
+
+        is_correct = user_str == expected_str
+        return is_correct, expected_display
+
+    elif exercise.type == "FILL_BLANK":
+        options = []
+        if isinstance(exercise.content, dict):
+            options = exercise.content.get("options", [])
+
+        user_str = str(answer)
+        if (isinstance(answer, int) or (isinstance(answer, str) and str(answer).isdigit())) and options:
+            idx = int(answer)
+            if 0 <= idx < len(options):
+                user_str = options[idx]
+
+        expected_str = str(correct_ans)
+        is_correct = normalize_answer(user_str) == normalize_answer(expected_str)
+        return is_correct, expected_str
+
+    elif exercise.type == "TYPE_ANSWER":
+        user_str = normalize_answer(answer)
+        if isinstance(correct_ans, list):
+            is_correct = any(normalize_answer(ca) == user_str for ca in correct_ans)
+            expected_display = correct_ans[0] if correct_ans else ""
+        else:
+            is_correct = user_str == normalize_answer(correct_ans)
+            expected_display = str(correct_ans)
+        return is_correct, expected_display
+
+    elif exercise.type == "MATCH_PAIRS":
         def normalize_pairs(pairs_data):
             if isinstance(pairs_data, dict):
                 return sorted([(normalize_answer(k), normalize_answer(v)) for k, v in pairs_data.items()])
@@ -89,21 +144,6 @@ def _validate_exercise_answer(exercise: Exercise, answer: Any) -> tuple[bool, An
 
         is_correct = user_pairs == expected_pairs and len(user_pairs) > 0
         return is_correct, correct_ans
-
-    elif exercise.type in ["MULTIPLE_CHOICE", "TRANSLATE", "FILL_BLANK", "TYPE_ANSWER"]:
-        clean_user_answer = normalize_answer(answer)
-
-        # Check if correct_ans is a list of acceptable answers or word sequence
-        if isinstance(correct_ans, list) and len(correct_ans) > 0 and not isinstance(correct_ans[0], dict):
-            joined_correct = normalize_answer(correct_ans)
-            is_correct = clean_user_answer == joined_correct or any(
-                normalize_answer(ca) == clean_user_answer for ca in correct_ans
-            )
-            return is_correct, correct_ans
-        else:
-            clean_expected = normalize_answer(correct_ans)
-            is_correct = clean_user_answer == clean_expected
-            return is_correct, correct_ans
 
     # Fallback comparison
     return normalize_answer(answer) == normalize_answer(correct_ans), correct_ans
