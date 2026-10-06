@@ -12,7 +12,7 @@ interface AchievementsGridProps {
 export const AchievementsGrid: React.FC<AchievementsGridProps> = ({ achievements }) => {
   return (
     <div>
-      <h3 className="text-xl font-extrabold text-gray-800 mb-4">Achievements</h3>
+      <h3 className="text-xl font-extrabold text-gray-900 dark:text-white mb-4">Achievements</h3>
       <div className="space-y-4">
         {achievements.map((ach) => {
           const progressPercent = (ach.progress / ach.maxProgress) * 100;
@@ -22,23 +22,23 @@ export const AchievementsGrid: React.FC<AchievementsGridProps> = ({ achievements
               key={ach.id}
               className={clsx(
                 'duo-card flex items-center gap-4 p-4 transition-all',
-                ach.unlocked ? 'bg-white' : 'bg-gray-50 opacity-80'
+                ach.unlocked ? 'opacity-100' : 'opacity-70'
               )}
             >
-              <div className="text-4xl p-3 bg-gray-100 rounded-2xl border-2 border-gray-200">
+              <div className="text-4xl p-3 bg-gray-100 dark:bg-[#131f24] rounded-2xl border-2 border-gray-200 dark:border-[#20323d]">
                 {ach.icon}
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <h4 className="font-extrabold text-base text-gray-800">{ach.title}</h4>
-                  <span className="flex items-center gap-1 text-xs font-black text-sky-600">
+                  <h4 className="font-extrabold text-base text-gray-900 dark:text-white">{ach.title}</h4>
+                  <span className="flex items-center gap-1 text-xs font-black text-sky-600 dark:text-sky-400">
                     <Gem className="w-3.5 h-3.5 fill-sky-400" /> +{ach.rewardGems}
                   </span>
                 </div>
-                <p className="text-xs font-medium text-gray-500 mb-2">{ach.description}</p>
+                <p className="text-xs font-medium text-gray-500 dark:text-[#93a7b1] mb-2">{ach.description}</p>
 
                 {/* Progress bar */}
-                <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div className="w-full h-3 bg-gray-200 dark:bg-[#131f24] rounded-full overflow-hidden border border-gray-200/50 dark:border-[#20323d]">
                   <div
                     className={clsx(
                       'h-full transition-all duration-500',

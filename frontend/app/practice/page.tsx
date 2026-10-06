@@ -10,7 +10,7 @@ export default function PracticePage() {
       title: 'Mistakes Review',
       description: 'Review questions you missed in previous lessons to strengthen weak areas.',
       icon: Target,
-      color: 'bg-rose-500/20 text-rose-400 border-rose-500/40',
+      color: 'bg-rose-500/15 text-rose-500 border-rose-500/30',
       btnColor: 'duo-button-rose',
       reward: '+1 Heart & 15 XP',
       lessonId: 'sk_food',
@@ -19,7 +19,7 @@ export default function PracticePage() {
       title: 'Listening & Pronunciation',
       description: 'Practice text-to-speech listening comprehension and speaking exercises.',
       icon: Headphones,
-      color: 'bg-[#1cb0f6]/20 text-[#1cb0f6] border-[#1cb0f6]/40',
+      color: 'bg-[#1cb0f6]/15 text-[#1cb0f6] border-[#1cb0f6]/30',
       btnColor: 'duo-button-blue',
       reward: '15 XP',
       lessonId: 'sk_greetings',
@@ -28,7 +28,7 @@ export default function PracticePage() {
       title: 'Unit 1 Mastery Review',
       description: 'Complete a rapid review of greetings, introductions, and essential words.',
       icon: Dumbbell,
-      color: 'bg-[#ff9600]/20 text-[#ff9600] border-[#ff9600]/40',
+      color: 'bg-[#ff9600]/15 text-[#ff9600] border-[#ff9600]/30',
       btnColor: 'duo-button-amber',
       reward: '20 XP',
       lessonId: 'sk_introductions',
@@ -38,20 +38,20 @@ export default function PracticePage() {
   return (
     <div className="max-w-3xl mx-auto py-4 space-y-6">
       {/* Header Banner */}
-      <div className="duo-card-dark p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div className="duo-card p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-[#ff9600] text-xs font-black uppercase mb-1">
             <Dumbbell className="w-4 h-4" /> Practice Hub
           </div>
-          <h1 className="text-3xl font-black text-white">Targeted Practice</h1>
-          <p className="text-xs font-bold text-[#93a7b1] mt-1">
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white">Targeted Practice</h1>
+          <p className="text-xs font-bold text-gray-500 dark:text-[#93a7b1] mt-1">
             Earn back lost hearts and boost your XP by practicing key skills.
           </p>
         </div>
 
         <div className="p-4 bg-rose-500/10 border-2 border-rose-500 rounded-2xl shrink-0 text-center flex items-center gap-2">
           <Heart className="w-6 h-6 text-rose-500 fill-rose-500 animate-pulse" />
-          <span className="text-xs font-black text-white">Earn Hearts</span>
+          <span className="text-xs font-black text-gray-900 dark:text-white">Earn Hearts</span>
         </div>
       </div>
 
@@ -62,7 +62,7 @@ export default function PracticePage() {
           return (
             <div
               key={idx}
-              className="duo-card-dark p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:border-[#1cb0f6] transition-all"
+              className="duo-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:border-[#1cb0f6] transition-all"
             >
               <div className="flex items-start gap-4">
                 <div className={`p-4 rounded-2xl border-2 shrink-0 ${mod.color}`}>
@@ -70,12 +70,12 @@ export default function PracticePage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-xl font-extrabold text-white">{mod.title}</h3>
-                    <span className="px-2.5 py-0.5 bg-[#131f24] border border-[#20323d] text-[10px] font-black text-[#58cc02] rounded-md flex items-center gap-1">
+                    <h3 className="text-xl font-extrabold text-gray-900 dark:text-white">{mod.title}</h3>
+                    <span className="px-2.5 py-0.5 bg-gray-100 dark:bg-[#131f24] border border-gray-200 dark:border-[#20323d] text-[10px] font-black text-[#58cc02] rounded-md flex items-center gap-1">
                       <Sparkles className="w-3 h-3" /> {mod.reward}
                     </span>
                   </div>
-                  <p className="text-xs font-bold text-[#93a7b1] max-w-md">{mod.description}</p>
+                  <p className="text-xs font-bold text-gray-500 dark:text-[#93a7b1] max-w-md">{mod.description}</p>
                 </div>
               </div>
 
