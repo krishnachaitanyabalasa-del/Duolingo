@@ -5,13 +5,13 @@ import { usePathname } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { RightPanel } from './RightPanel';
 import { MobileNav } from './MobileNav';
-import { useUser } from '@/hooks/useUser';
+import { UserProvider, useUserContext } from '@/context/UserContext';
 import { OutOfHearts } from '../lesson/OutOfHearts';
 
-export const AppLayoutClient: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const AppLayoutInner: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
   const isLessonRoute = pathname?.startsWith('/lesson/');
-  const { user, refillHearts } = useUser();
+  const { user, refillHearts } = useUserContext();
   const [showRefillModal, setShowRefillModal] = useState(false);
 
   if (isLessonRoute) {
@@ -42,5 +42,13 @@ export const AppLayoutClient: React.FC<{ children: React.ReactNode }> = ({ child
         />
       )}
     </div>
+  );
+};
+
+export const AppLayoutClient: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <UserProvider>
+      <AppLayoutInner>{children}</AppLayoutInner>
+    </UserProvider>
   );
 };

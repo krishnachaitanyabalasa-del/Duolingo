@@ -3,7 +3,13 @@
 class SoundEngine {
   private ctx: AudioContext | null = null;
 
+  private isSoundEnabled(): boolean {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('duo_sound_enabled') !== 'false';
+  }
+
   private getContext(): AudioContext | null {
+    if (!this.isSoundEnabled()) return null;
     if (typeof window === 'undefined') return null;
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -45,7 +51,7 @@ class SoundEngine {
     try {
       const ctx = this.getContext();
       if (!ctx) return;
-      
+
       const now = ctx.currentTime;
       // Note 1: E5
       const osc1 = ctx.createOscillator();
@@ -94,7 +100,7 @@ class SoundEngine {
 
       osc.connect(gain);
       gain.connect(ctx.destination);
-      osc.start(now);
+      osc.start();
       osc.stop(now + 0.25);
     } catch {
       // Audio fallback
@@ -132,6 +138,7 @@ class SoundEngine {
 
   // Synthetic Text-To-Speech for audio pronunciation
   speak(text: string, lang = 'es-ES') {
+    if (!this.isSoundEnabled()) return;
     if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
     try {
       window.speechSynthesis.cancel();

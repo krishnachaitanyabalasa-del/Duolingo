@@ -1,34 +1,59 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Volume2, Moon, Globe, Target, Bell, Sparkles } from 'lucide-react';
 
 export default function SettingsPage() {
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(true);
   const [dailyGoal, setDailyGoal] = useState('50');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedSound = localStorage.getItem('duo_sound_enabled');
+      if (savedSound !== null) setSoundEnabled(savedSound !== 'false');
+
+      const savedGoal = localStorage.getItem('duo_daily_goal');
+      if (savedGoal) setDailyGoal(savedGoal);
+    }
+  }, []);
+
+  const toggleSound = () => {
+    const nextVal = !soundEnabled;
+    setSoundEnabled(nextVal);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('duo_sound_enabled', String(nextVal));
+    }
+  };
+
+  const handleGoalChange = (val: string) => {
+    setDailyGoal(val);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('duo_daily_goal', val);
+    }
+  };
 
   return (
     <div className="max-w-xl mx-auto py-4 space-y-6">
-      <h1 className="text-3xl font-black text-gray-800 mb-6">Settings</h1>
+      <h1 className="text-3xl font-black text-white mb-6">Settings</h1>
 
       {/* Preferences Card */}
-      <div className="duo-card space-y-6">
-        <h3 className="text-lg font-extrabold text-gray-800">Preferences</h3>
+      <div className="duo-card-dark space-y-6">
+        <h3 className="text-lg font-extrabold text-white">Preferences</h3>
 
         {/* Sound Effects */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Volume2 className="w-5 h-5 text-gray-500" />
+            <Volume2 className="w-5 h-5 text-[#93a7b1]" />
             <div>
-              <span className="font-extrabold text-sm text-gray-800 block">Sound Effects</span>
-              <span className="text-xs font-medium text-gray-400">Play cheerful audio feedback during lessons</span>
+              <span className="font-extrabold text-sm text-white block">Sound Effects</span>
+              <span className="text-xs font-bold text-[#52656d]">Play audio chimes during exercises</span>
             </div>
           </div>
           <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
+            onClick={toggleSound}
             className={`w-12 h-6 rounded-full transition-colors relative p-1 cursor-pointer ${
-              soundEnabled ? 'bg-green-500' : 'bg-gray-300'
+              soundEnabled ? 'bg-[#58cc02]' : 'bg-[#20323d]'
             }`}
           >
             <div
@@ -42,16 +67,16 @@ export default function SettingsPage() {
         {/* Dark Mode */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Moon className="w-5 h-5 text-gray-500" />
+            <Moon className="w-5 h-5 text-[#93a7b1]" />
             <div>
-              <span className="font-extrabold text-sm text-gray-800 block">Dark Mode</span>
-              <span className="text-xs font-medium text-gray-400">Switch application theme</span>
+              <span className="font-extrabold text-sm text-white block">Dark Mode</span>
+              <span className="text-xs font-bold text-[#52656d]">Duolingo Dark Theme active</span>
             </div>
           </div>
           <button
             onClick={() => setDarkMode(!darkMode)}
             className={`w-12 h-6 rounded-full transition-colors relative p-1 cursor-pointer ${
-              darkMode ? 'bg-green-500' : 'bg-gray-300'
+              darkMode ? 'bg-[#58cc02]' : 'bg-[#20323d]'
             }`}
           >
             <div
@@ -65,16 +90,16 @@ export default function SettingsPage() {
         {/* Daily Goal */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Target className="w-5 h-5 text-gray-500" />
+            <Target className="w-5 h-5 text-[#93a7b1]" />
             <div>
-              <span className="font-extrabold text-sm text-gray-800 block">Daily Goal</span>
-              <span className="text-xs font-medium text-gray-400">Target XP to earn each day</span>
+              <span className="font-extrabold text-sm text-white block">Daily Goal</span>
+              <span className="text-xs font-bold text-[#52656d]">Target XP to earn each day</span>
             </div>
           </div>
           <select
             value={dailyGoal}
-            onChange={(e) => setDailyGoal(e.target.value)}
-            className="p-2 rounded-xl border-2 border-gray-200 font-extrabold text-sm text-gray-700 bg-white"
+            onChange={(e) => handleGoalChange(e.target.value)}
+            className="p-2.5 rounded-xl border-2 border-[#20323d] font-extrabold text-xs text-white bg-[#131f24] focus:outline-none"
           >
             <option value="10">Casual (10 XP)</option>
             <option value="30">Regular (30 XP)</option>
@@ -86,39 +111,39 @@ export default function SettingsPage() {
         {/* Learning Language */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Globe className="w-5 h-5 text-gray-500" />
+            <Globe className="w-5 h-5 text-[#93a7b1]" />
             <div>
-              <span className="font-extrabold text-sm text-gray-800 block">Active Course</span>
-              <span className="text-xs font-medium text-gray-400">Current language being learned</span>
+              <span className="font-extrabold text-sm text-white block">Active Course</span>
+              <span className="text-xs font-bold text-[#52656d]">Current language course</span>
             </div>
           </div>
-          <span className="font-extrabold text-sm text-gray-700">🇪🇸 Spanish</span>
+          <span className="font-extrabold text-sm text-white">🇪🇸 Spanish</span>
         </div>
 
         {/* Notifications */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Bell className="w-5 h-5 text-gray-500" />
+            <Bell className="w-5 h-5 text-[#93a7b1]" />
             <div>
-              <span className="font-extrabold text-sm text-gray-800 block">Practice Reminders</span>
-              <span className="text-xs font-medium text-gray-400">Receive daily streak notifications</span>
+              <span className="font-extrabold text-sm text-white block">Streak Notifications</span>
+              <span className="text-xs font-bold text-[#52656d]">Receive daily streak reminders</span>
             </div>
           </div>
-          <span className="font-extrabold text-xs text-green-600 bg-green-50 px-2.5 py-1 rounded-full border border-green-200">
+          <span className="font-extrabold text-xs text-[#58cc02] bg-[#58cc02]/10 px-2.5 py-1 rounded-full border border-[#58cc02]">
             ENABLED
           </span>
         </div>
       </div>
 
-      {/* Super Duolingo Subscription Card */}
-      <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-xl flex items-center justify-between">
+      {/* Super Duolingo Promotion Card */}
+      <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-900 via-purple-900 to-indigo-950 border-2 border-indigo-500/40 text-white shadow-xl flex items-center justify-between">
         <div>
           <div className="flex items-center gap-1.5 mb-1">
             <Sparkles className="w-5 h-5 text-amber-300" />
             <span className="font-black text-lg">Super Duolingo</span>
           </div>
-          <p className="text-xs text-indigo-100 max-w-xs">
-            Unlock unlimited hearts, personalized mistake practice, and ad-free learning.
+          <p className="text-xs font-bold text-indigo-200 max-w-xs">
+            Unlock unlimited hearts, mistake practice, and ad-free learning.
           </p>
         </div>
         <button className="duo-button duo-button-amber text-xs py-2.5 px-4 font-black">
