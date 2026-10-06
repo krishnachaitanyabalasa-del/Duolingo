@@ -110,7 +110,7 @@ export const MOCK_COURSE: Course = {
           completedLessons: 4,
           crowns: 3,
           maxCrowns: 3,
-          positionOffset: 30,
+          positionOffset: 52,
         },
         {
           id: 'sk_food',
@@ -122,7 +122,7 @@ export const MOCK_COURSE: Course = {
           completedLessons: 2,
           crowns: 1,
           maxCrowns: 3,
-          positionOffset: 15,
+          positionOffset: 75,
         },
         {
           id: 'sk_family',
@@ -134,7 +134,7 @@ export const MOCK_COURSE: Course = {
           completedLessons: 0,
           crowns: 0,
           maxCrowns: 3,
-          positionOffset: -25,
+          positionOffset: 48,
         },
         {
           id: 'sk_travel',
@@ -146,7 +146,7 @@ export const MOCK_COURSE: Course = {
           completedLessons: 0,
           crowns: 0,
           maxCrowns: 3,
-          positionOffset: -40,
+          positionOffset: 0,
         },
       ],
     },
