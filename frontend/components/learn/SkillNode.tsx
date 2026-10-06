@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { SkillNode as SkillNodeType } from '@/types/course';
-import { Check, Lock, BookOpen, Headphones, Star, MessageSquare, Utensils, Users, Compass, ShoppingBag, Smile, Home as HomeIcon, UserCheck } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion } from 'framer-motion';
+import { Check, Lock, BookOpen, Headphones, Star, MessageSquare, Utensils, Users, Compass, ShoppingBag, Smile, Home as HomeIcon, UserCheck } from 'lucide-react';
+import { DuoMascot } from '../mascot/DuoMascot';
 
 interface SkillNodeProps {
   skill: SkillNodeType;
@@ -37,12 +38,10 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ skill, onClick }) => {
       className="relative flex flex-col items-center my-5 group"
       style={{ transform: `translateX(${skill.positionOffset}px)` }}
     >
-      {/* Animated Mascot riding on active node */}
+      {/* Animated Mascot standing beside active node */}
       {isCurrent && (
-        <div className="absolute -top-12 z-20 flex flex-col items-center animate-bob">
-          <div className="w-12 h-12 bg-amber-400 rounded-full border-2 border-amber-600 flex items-center justify-center text-xl shadow-lg">
-            🏍️
-          </div>
+        <div className="absolute -left-24 top-1/2 -translate-y-1/2 z-20 pointer-events-none hidden sm:block">
+          <DuoMascot variant="standing" size={95} />
         </div>
       )}
 

@@ -11,6 +11,8 @@ import { getFullProfile, getFollowers, getFollowing, toggleFollow } from '@/lib/
 import type { FullProfile, FollowerUser, UserProfile } from '@/types/user';
 import { Zap, Shield, Sparkles } from 'lucide-react';
 
+import { DuoMascot } from '../mascot/DuoMascot';
+
 interface RightPanelProps {
   user: UserProfile;
 }
@@ -76,7 +78,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
           <span className="inline-block bg-gradient-to-r from-[#1cb0f6] via-[#ce82ff] to-[#ff4b4b] text-white font-black text-[10px] uppercase px-2.5 py-0.5 rounded-md tracking-wider">
             SUPER
           </span>
-          <Sparkles className="w-6 h-6 text-[#ce82ff] animate-pulse" />
+          <DuoMascot variant="super" size={52} />
         </div>
 
         <div>
@@ -103,11 +105,9 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
           </Link>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#ce82ff]/15 dark:bg-[#ce82ff]/20 border-2 border-[#ce82ff]/40 dark:border-[#ce82ff] flex items-center justify-center shrink-0">
-            <Shield className="w-6 h-6 text-[#ce82ff] fill-[#ce82ff]" />
-          </div>
-          <p className="text-xs font-bold text-gray-500 dark:text-[#93a7b1] leading-relaxed">
+        <div className="flex items-center gap-3">
+          <DuoMascot variant="sleeping" size={54} />
+          <p className="text-xs font-bold text-gray-500 dark:text-[#93a7b1] leading-relaxed flex-1">
             Complete a lesson to join this week&apos;s leaderboard and compete against other learners
           </p>
         </div>
