@@ -5,20 +5,22 @@ import Link from 'next/link';
 import { Heart, RefreshCw, Gem } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import { DuoMascot } from '../mascot/DuoMascot';
+
 interface OutOfHeartsProps {
   onRefill: () => void;
 }
 
 export const OutOfHearts: React.FC<OutOfHeartsProps> = ({ onRefill }) => {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs select-none">
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-sm bg-white dark:bg-[#182730] rounded-3xl p-6 shadow-2xl text-center border-2 border-gray-200 dark:border-[#20323d]"
+        className="w-full max-w-sm bg-white dark:bg-[#182730] rounded-3xl p-6 shadow-2xl text-center border-2 border-gray-200 dark:border-[#20323d] flex flex-col items-center"
       >
-        <div className="w-20 h-20 bg-rose-100 dark:bg-rose-950/40 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-rose-200 dark:border-rose-700/60">
-          <Heart className="w-10 h-10 text-rose-500 fill-rose-500 animate-bounce" />
+        <div className="mb-4">
+          <DuoMascot variant="crying" size={110} />
         </div>
 
         <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2">You ran out of hearts!</h3>

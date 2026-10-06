@@ -6,6 +6,8 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 
+import { DuoMascot } from '../mascot/DuoMascot';
+
 interface AnswerFeedbackProps {
   hasAnswer: boolean;
   isSubmitted: boolean;
@@ -47,9 +49,10 @@ export const AnswerFeedback: React.FC<AnswerFeedbackProps> = ({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="flex items-center gap-3"
+              className="flex items-center gap-3.5"
             >
-              <CheckCircle2 className="w-10 h-10 text-[#58cc02] fill-[#58cc02]/20 shrink-0" />
+              <DuoMascot variant="happy" size={68} />
+              <CheckCircle2 className="w-9 h-9 text-[#58cc02] fill-[#58cc02]/20 shrink-0" />
               <div>
                 <h4 className="text-xl font-black text-[#58cc02]">Great job!</h4>
                 <p className="text-xs font-bold text-[#2c7a00] dark:text-green-300">+10 XP</p>
@@ -60,9 +63,10 @@ export const AnswerFeedback: React.FC<AnswerFeedbackProps> = ({
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0 }}
-              className="flex items-center gap-3"
+              className="flex items-center gap-3.5"
             >
-              <XCircle className="w-10 h-10 text-[#ff4b4b] fill-[#ff4b4b]/20 shrink-0" />
+              <DuoMascot variant="sad" size={68} />
+              <XCircle className="w-9 h-9 text-[#ff4b4b] fill-[#ff4b4b]/20 shrink-0" />
               <div>
                 <h4 className="text-lg font-black text-[#ff4b4b]">Correct solution:</h4>
                 <p className="text-sm font-bold text-gray-800 dark:text-white">{result?.correctAnswer}</p>
