@@ -10,7 +10,7 @@ interface UserCardProps {
 
 export const UserCard: React.FC<UserCardProps> = ({ user }) => {
   return (
-    <div className="duo-card flex flex-col sm:flex-row items-center gap-6 p-6 mb-8">
+    <div className="duo-card flex flex-col sm:flex-row items-center gap-6 p-6">
       <img
         src={user.avatarUrl}
         alt={user.username}
@@ -18,12 +18,12 @@ export const UserCard: React.FC<UserCardProps> = ({ user }) => {
       />
       <div className="flex-1 text-center sm:text-left">
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
-          <h1 className="text-3xl font-black text-gray-800">{user.username}</h1>
-          <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-800 text-xs font-black rounded-full border border-amber-300 w-fit mx-auto sm:mx-0">
+          <h1 className="text-3xl font-black text-gray-900 dark:text-white">{user.username}</h1>
+          <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-100 dark:bg-amber-950/40 text-amber-800 dark:text-amber-300 text-xs font-black rounded-full border border-amber-200 dark:border-amber-700/50 w-fit mx-auto sm:mx-0">
             <Shield className="w-3.5 h-3.5 fill-amber-500" /> {user.league}
           </span>
         </div>
-        <p className="text-sm font-extrabold text-gray-400 flex items-center justify-center sm:justify-start gap-1.5">
+        <p className="text-sm font-extrabold text-gray-500 dark:text-[#93a7b1] flex items-center justify-center sm:justify-start gap-1.5">
           <Calendar className="w-4 h-4" /> Joined {user.joinedDate}
         </p>
       </div>

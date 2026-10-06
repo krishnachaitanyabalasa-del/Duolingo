@@ -24,14 +24,14 @@ export const Podium: React.FC<PodiumProps> = ({ topThree }) => {
           <img
             src={second.avatarUrl}
             alt={second.username}
-            className="w-16 h-16 rounded-full border-4 border-slate-300 object-cover shadow-md"
+            className="w-16 h-16 rounded-full border-4 border-slate-300 dark:border-slate-500 object-cover shadow-md"
           />
         </div>
-        <span className="font-extrabold text-sm text-gray-800 truncate w-full text-center">{second.username}</span>
-        <span className="text-xs font-black text-amber-600 flex items-center gap-0.5">
+        <span className="font-extrabold text-sm text-gray-900 dark:text-white truncate w-full text-center">{second.username}</span>
+        <span className="text-xs font-black text-amber-600 dark:text-amber-400 flex items-center gap-0.5">
           <Zap className="w-3 h-3 fill-amber-400" /> {second.xp}
         </span>
-        <div className="w-full h-24 bg-gradient-to-t from-slate-200 to-slate-100 rounded-t-2xl border-2 border-b-0 border-slate-300 flex items-center justify-center font-black text-2xl text-slate-400 mt-2">
+        <div className="w-full h-24 bg-gradient-to-t from-slate-200 to-slate-100 dark:from-slate-800 dark:to-slate-700/80 rounded-t-2xl border-2 border-b-0 border-slate-300 dark:border-slate-600 flex items-center justify-center font-black text-2xl text-slate-400 dark:text-slate-300 mt-2 shadow-xs">
           2
         </div>
       </div>
@@ -43,14 +43,14 @@ export const Podium: React.FC<PodiumProps> = ({ topThree }) => {
           <img
             src={first.avatarUrl}
             alt={first.username}
-            className="w-20 h-20 rounded-full border-4 border-amber-400 object-cover shadow-xl ring-4 ring-amber-200"
+            className="w-20 h-20 rounded-full border-4 border-amber-400 object-cover shadow-xl ring-4 ring-amber-200 dark:ring-amber-900/60"
           />
         </div>
-        <span className="font-black text-base text-gray-800 truncate w-full text-center">{first.username}</span>
-        <span className="text-xs font-black text-amber-600 flex items-center gap-0.5">
+        <span className="font-black text-base text-gray-900 dark:text-white truncate w-full text-center">{first.username}</span>
+        <span className="text-xs font-black text-amber-600 dark:text-amber-400 flex items-center gap-0.5">
           <Zap className="w-3.5 h-3.5 fill-amber-400" /> {first.xp}
         </span>
-        <div className="w-full h-32 bg-gradient-to-t from-amber-200 to-amber-100 rounded-t-2xl border-2 border-b-0 border-amber-300 flex items-center justify-center font-black text-3xl text-amber-600 mt-2 shadow-inner">
+        <div className="w-full h-32 bg-gradient-to-t from-amber-200 to-amber-100 dark:from-amber-950/80 dark:to-amber-900/60 rounded-t-2xl border-2 border-b-0 border-amber-300 dark:border-amber-600 flex items-center justify-center font-black text-3xl text-amber-600 dark:text-amber-300 mt-2 shadow-inner">
           1
         </div>
       </div>
@@ -62,14 +62,14 @@ export const Podium: React.FC<PodiumProps> = ({ topThree }) => {
           <img
             src={third.avatarUrl}
             alt={third.username}
-            className="w-16 h-16 rounded-full border-4 border-amber-700/40 object-cover shadow-md"
+            className="w-16 h-16 rounded-full border-4 border-amber-700/40 dark:border-amber-600/60 object-cover shadow-md"
           />
         </div>
-        <span className="font-extrabold text-sm text-gray-800 truncate w-full text-center">{third.username}</span>
-        <span className="text-xs font-black text-amber-600 flex items-center gap-0.5">
+        <span className="font-extrabold text-sm text-gray-900 dark:text-white truncate w-full text-center">{third.username}</span>
+        <span className="text-xs font-black text-amber-600 dark:text-amber-400 flex items-center gap-0.5">
           <Zap className="w-3 h-3 fill-amber-400" /> {third.xp}
         </span>
-        <div className="w-full h-20 bg-gradient-to-t from-amber-900/10 to-amber-900/5 rounded-t-2xl border-2 border-b-0 border-amber-900/20 flex items-center justify-center font-black text-2xl text-amber-800/40 mt-2">
+        <div className="w-full h-20 bg-gradient-to-t from-amber-900/10 to-amber-900/5 dark:from-amber-950/40 dark:to-amber-900/30 rounded-t-2xl border-2 border-b-0 border-amber-900/20 dark:border-amber-800/40 flex items-center justify-center font-black text-2xl text-amber-800/40 dark:text-amber-400/60 mt-2 shadow-xs">
           3
         </div>
       </div>

@@ -14,13 +14,13 @@ export default function ProfilePage() {
     return (
       <div className="h-[70vh] flex flex-col items-center justify-center gap-3">
         <Loader2 className="w-10 h-10 text-green-500 animate-spin" />
-        <p className="font-extrabold text-gray-500">Loading profile...</p>
+        <p className="font-extrabold text-gray-500 dark:text-gray-400">Loading profile...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-4">
+    <div className="max-w-2xl mx-auto py-4 space-y-6">
       <UserCard user={user} />
       <StatsCard user={user} />
       <AchievementsGrid achievements={achievements} />
