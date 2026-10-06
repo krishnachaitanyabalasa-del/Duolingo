@@ -182,7 +182,30 @@ export const SoundsPage: React.FC = () => {
               </button>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Top Header Banner (Matching User Screenshot) */}
+              <div className="text-center py-2 space-y-3">
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                  Let&apos;s learn English sounds!
+                </h1>
+                <p className="text-xs sm:text-sm font-bold text-[#8397a1]">
+                  Train your ear and learn to pronounce English sounds
+                </p>
+
+                <div className="pt-1 flex justify-center">
+                  <button
+                    onClick={() => {
+                      if (allSounds.length > 0) {
+                        setSelectedSound(allSounds[0]);
+                      }
+                    }}
+                    className="w-full max-w-sm bg-[#1cb0f6] hover:bg-[#1899d6] text-white font-black py-3 px-6 rounded-2xl shadow-[0_4px_0_0_#1899d6] active:translate-y-1 active:shadow-none transition-all cursor-pointer text-xs sm:text-sm tracking-wide uppercase"
+                  >
+                    START +10 XP
+                  </button>
+                </div>
+              </div>
+
               {/* Vowels Section */}
               <SoundSection
                 title="Vowels"

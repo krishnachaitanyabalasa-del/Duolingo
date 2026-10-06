@@ -6,7 +6,7 @@ import { StreakDisplay } from '../gamification/StreakDisplay';
 import { HeartsDisplay } from '../gamification/HeartsDisplay';
 import { GemsDisplay } from '../gamification/GemsDisplay';
 import { UserProfile } from '@/types/user';
-import { Zap, Shield } from 'lucide-react';
+import { Zap, Shield, Sparkles } from 'lucide-react';
 
 interface RightPanelProps {
   user: UserProfile;
@@ -28,6 +28,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
           <span className="inline-block bg-gradient-to-r from-[#1cb0f6] via-[#ce82ff] to-[#ff4b4b] text-white font-black text-[10px] uppercase px-2.5 py-0.5 rounded-md tracking-wider">
             SUPER
           </span>
+          <Sparkles className="w-6 h-6 text-[#ce82ff] animate-pulse" />
         </div>
 
         <div>
