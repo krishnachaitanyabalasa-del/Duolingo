@@ -30,6 +30,25 @@ export const AppLayoutClient: React.FC<{ children: React.ReactNode }> = ({ child
     }
   }, [authLoading, isAuthenticated, isLoginRoute, router]);
 
+  // Enforce Duolingo tab icon and bust any stale browser cache
+  useEffect(() => {
+    const applyFavicon = () => {
+      const links = document.querySelectorAll<HTMLLinkElement>("link[rel*='icon']");
+      if (links.length > 0) {
+        links.forEach((link) => {
+          link.href = '/duolingoimg.png?v=duo3';
+        });
+      } else {
+        const link = document.createElement('link');
+        link.rel = 'icon';
+        link.type = 'image/png';
+        link.href = '/duolingoimg.png?v=duo3';
+        document.head.appendChild(link);
+      }
+    };
+    applyFavicon();
+  }, [pathname]);
+
   // Initial loading screen while Firebase/auth initializes
   if (authLoading) {
     return (

@@ -19,9 +19,12 @@ export const metadata: Metadata = {
   title: 'Duolingo - Learn Languages Free',
   description: 'Learn languages with playful, bite-sized lessons inspired by Duolingo.',
   icons: {
-    icon: '/duolingoimg.png',
-    shortcut: '/duolingoimg.png',
-    apple: '/duolingoimg.png',
+    icon: [
+      { url: '/duolingoimg.png?v=duo3', type: 'image/png' },
+      { url: '/duolingoimg.png' },
+    ],
+    shortcut: '/duolingoimg.png?v=duo3',
+    apple: '/duolingoimg.png?v=duo3',
   },
 };
 
@@ -39,6 +42,10 @@ const themeScript = `
         document.documentElement.setAttribute('data-theme', 'light');
         document.documentElement.style.colorScheme = 'light';
       }
+      var links = document.querySelectorAll("link[rel*='icon']");
+      for (var i = 0; i < links.length; i++) {
+        links[i].setAttribute('href', '/duolingoimg.png?v=duo3');
+      }
     } catch (e) {}
   })();
 `;
@@ -51,7 +58,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="icon" href="/duolingoimg.png" type="image/png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/duolingoimg.png?v=duo3" />
+        <link rel="icon" type="image/png" href="/duolingoimg.png?v=duo3" />
+        <link rel="shortcut icon" href="/duolingoimg.png?v=duo3" />
+        <link rel="apple-touch-icon" href="/duolingoimg.png?v=duo3" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-[#131f24] text-[#3c3c3c] dark:text-[#f7f9fa] min-h-screen transition-colors duration-150`}>
