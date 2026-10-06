@@ -27,6 +27,7 @@ interface RawBackendExercise {
   audio_text?: string;
   options?: string[];
   correct_answer?: string | number | unknown;
+  correctAnswer?: string | number | unknown;
   original_text?: string;
   word_bank?: string[];
   pairs?: { id: string; left: string; right: string }[];
@@ -73,7 +74,7 @@ export async function getLesson(lessonId: string): Promise<Lesson | null> {
   const data = await apiFetch<RawBackendLessonDetail>(`/api/lessons/${numericId}`);
 
   if (!data || !data.exercises) {
-    return MOCK_LESSONS[lessonId] || MOCK_LESSONS['sk_food'] || null;
+    return MOCK_LESSONS[lessonId] || MOCK_LESSONS[numericId.toString()] || MOCK_LESSONS['sk_greetings'] || MOCK_LESSONS['sk_food'] || null;
   }
 
   try {
@@ -89,18 +90,41 @@ export async function getLesson(lessonId: string): Promise<Lesson | null> {
 
         const questionText = content.question || ex.prompt || ex.question || 'Answer the question';
         const audioText = content.speak_text || content.text || ex.audio_text || '';
+        const rawCorrect = ex.correct_answer !== undefined ? ex.correct_answer : ex.correctAnswer;
+        const explanation = ex.explanation;
 
         if (typeStr === 'MULTIPLE_CHOICE') {
+          const options = content.options || ex.options || [];
+          let correctIdx = 0;
+          if (typeof rawCorrect === 'number') {
+            correctIdx = rawCorrect;
+          } else if (typeof rawCorrect === 'string') {
+            if (/^\d+$/.test(rawCorrect)) {
+              correctIdx = parseInt(rawCorrect, 10);
+            } else {
+              const foundIdx = options.findIndex(
+                (opt: string) => opt.trim().toLowerCase() === rawCorrect.trim().toLowerCase()
+              );
+              if (foundIdx !== -1) correctIdx = foundIdx;
+            }
+          }
           return {
             id: ex.id,
             type: 'MULTIPLE_CHOICE',
             question: questionText,
             prompt: content.text || ex.prompt,
             audioText: audioText,
-            options: content.options || ex.options || [],
-            correctAnswer: 0, // Server hides correct answer for security until submission
+            options: options,
+            correctAnswer: correctIdx,
+            explanation,
           };
         } else if (typeStr === 'TRANSLATE') {
+          let correctStr = '';
+          if (Array.isArray(rawCorrect)) {
+            correctStr = rawCorrect.join(' ');
+          } else {
+            correctStr = String(rawCorrect || '');
+          }
           return {
             id: ex.id,
             type: 'TRANSLATE',
@@ -108,7 +132,8 @@ export async function getLesson(lessonId: string): Promise<Lesson | null> {
             originalText: content.text || ex.original_text || ex.prompt || '',
             audioText: audioText,
             wordBank: content.word_bank || ex.word_bank || [],
-            correctAnswer: '',
+            correctAnswer: correctStr,
+            explanation,
           };
         } else if (typeStr === 'MATCH_PAIRS') {
           const rawPairs = content.pairs || ex.pairs || [];
@@ -122,6 +147,8 @@ export async function getLesson(lessonId: string): Promise<Lesson | null> {
             type: 'MATCH_PAIRS',
             question: questionText,
             pairs: normalizedPairs,
+            correctAnswer: rawCorrect || 'All pairs matched!',
+            explanation,
           };
         } else if (typeStr === 'FILL_BLANK') {
           let prefix = content.sentence_prefix || ex.sentence_prefix || '';
@@ -133,6 +160,13 @@ export async function getLesson(lessonId: string): Promise<Lesson | null> {
             suffix = parts[1] || '';
           }
 
+          let correctStr = '';
+          if (Array.isArray(rawCorrect)) {
+            correctStr = rawCorrect.join(' ');
+          } else {
+            correctStr = String(rawCorrect || '');
+          }
+
           return {
             id: ex.id,
             type: 'FILL_BLANK',
@@ -140,23 +174,35 @@ export async function getLesson(lessonId: string): Promise<Lesson | null> {
             sentencePrefix: prefix,
             sentenceSuffix: suffix,
             options: content.options || ex.options || [],
-            correctAnswer: '',
+            correctAnswer: correctStr,
+            explanation,
           };
         } else {
+          let correctStr = '';
+          let acceptable: string[] = [];
+          if (Array.isArray(rawCorrect)) {
+            correctStr = String(rawCorrect[0] || '');
+            acceptable = rawCorrect.map(String);
+          } else {
+            correctStr = String(rawCorrect || '');
+            acceptable = [correctStr];
+          }
           return {
             id: ex.id,
             type: 'TYPE_ANSWER',
             question: questionText,
             prompt: content.text || ex.prompt,
             audioText: audioText,
-            correctAnswer: '',
+            correctAnswer: correctStr,
+            acceptableAnswers: acceptable,
+            explanation,
           };
         }
       }),
     };
   } catch (err) {
     console.warn('Error mapping backend lesson payload:', err);
-    return MOCK_LESSONS[lessonId] || MOCK_LESSONS['sk_food'];
+    return MOCK_LESSONS[lessonId] || MOCK_LESSONS[numericId.toString()] || MOCK_LESSONS['sk_greetings'] || MOCK_LESSONS['sk_food'];
   }
 }
 
@@ -172,7 +218,7 @@ export async function startLesson(lessonId: string): Promise<{ success: boolean;
     return { success: true, lesson: parsed };
   }
 
-  const mockLesson = MOCK_LESSONS[lessonId] || MOCK_LESSONS['sk_food'];
+  const mockLesson = MOCK_LESSONS[lessonId] || MOCK_LESSONS[numericId.toString()] || MOCK_LESSONS['sk_greetings'] || MOCK_LESSONS['sk_food'];
   return { success: true, lesson: mockLesson };
 }
 
@@ -180,7 +226,8 @@ export async function submitAnswer(
   lessonId: string,
   exerciseId: number,
   userAnswer: unknown,
-  currentHearts: number
+  currentHearts: number,
+  currentExerciseObj?: any
 ): Promise<AnswerResult> {
   const numericId = toNumericLessonId(lessonId);
   const data = await apiFetch<RawAnswerResponse>(`/api/lessons/${numericId}/answer`, {
@@ -193,7 +240,9 @@ export async function submitAnswer(
     if (typeof data.correct_answer === 'string') {
       formattedCorrect = data.correct_answer;
     } else if (Array.isArray(data.correct_answer)) {
-      formattedCorrect = data.correct_answer.map(item => typeof item === 'object' && item !== null ? `${item.left} -> ${item.right}` : String(item)).join(', ');
+      formattedCorrect = data.correct_answer
+        .map(item => (typeof item === 'object' && item !== null ? `${item.left} -> ${item.right}` : String(item)))
+        .join(', ');
     } else {
       formattedCorrect = String(data.correct_answer || '');
     }
@@ -209,29 +258,44 @@ export async function submitAnswer(
   }
 
   // Fallback local mock evaluation engine
-  const lesson = MOCK_LESSONS[lessonId] || MOCK_LESSONS['sk_food'];
-  const exercise = lesson?.exercises.find((ex) => ex.id === exerciseId);
+  const lesson = MOCK_LESSONS[lessonId] || MOCK_LESSONS[numericId.toString()] || MOCK_LESSONS['sk_greetings'] || MOCK_LESSONS['sk_food'];
+  const exercise = currentExerciseObj || lesson?.exercises.find((ex) => ex.id === exerciseId);
 
   let isCorrect = false;
   let correctAnswerStr = '';
 
   if (exercise) {
+    const normalize = (s: string) =>
+      String(s || '')
+        .toLowerCase()
+        .replace(/[!?,.:;\-_"']/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
     if (exercise.type === 'MULTIPLE_CHOICE') {
-      isCorrect = Number(userAnswer) === exercise.correctAnswer;
-      correctAnswerStr = exercise.options[exercise.correctAnswer];
+      const selectedIdx = typeof userAnswer === 'number' ? userAnswer : parseInt(String(userAnswer), 10);
+      const expectedIdx = exercise.correctAnswer;
+      const expectedOption = exercise.options[expectedIdx] || String(expectedIdx);
+
+      if (!isNaN(selectedIdx)) {
+        isCorrect = selectedIdx === expectedIdx;
+      } else {
+        isCorrect = normalize(String(userAnswer)) === normalize(expectedOption);
+      }
+      correctAnswerStr = expectedOption;
     } else if (exercise.type === 'TRANSLATE') {
-      isCorrect = String(userAnswer).trim().toLowerCase() === exercise.correctAnswer.trim().toLowerCase();
+      isCorrect = normalize(String(userAnswer)) === normalize(exercise.correctAnswer);
       correctAnswerStr = exercise.correctAnswer;
     } else if (exercise.type === 'MATCH_PAIRS') {
       isCorrect = Boolean(userAnswer);
       correctAnswerStr = 'All pairs matched!';
     } else if (exercise.type === 'FILL_BLANK') {
-      isCorrect = String(userAnswer).trim().toLowerCase() === exercise.correctAnswer.trim().toLowerCase();
+      isCorrect = normalize(String(userAnswer)) === normalize(exercise.correctAnswer);
       correctAnswerStr = exercise.correctAnswer;
     } else if (exercise.type === 'TYPE_ANSWER') {
-      const formatted = String(userAnswer).trim().toLowerCase();
-      const acceptable = (exercise.acceptableAnswers || [exercise.correctAnswer]).map((a) => a.toLowerCase());
-      isCorrect = acceptable.includes(formatted);
+      const userNorm = normalize(String(userAnswer));
+      const acceptable = (exercise.acceptableAnswers || [exercise.correctAnswer]).map(normalize);
+      isCorrect = acceptable.includes(userNorm);
       correctAnswerStr = exercise.correctAnswer;
     }
   }
@@ -241,7 +305,7 @@ export async function submitAnswer(
   return {
     isCorrect,
     correctAnswer: correctAnswerStr,
-    xpEarned: isCorrect ? 3 : 0,
+    xpEarned: isCorrect ? 1 : 0,
     heartsRemaining: nextHearts,
     isOutOfHearts: nextHearts <= 0,
   };

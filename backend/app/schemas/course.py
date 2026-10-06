@@ -9,6 +9,7 @@ class ExerciseRead(BaseModel):
     type: str  # MULTIPLE_CHOICE, TRANSLATE, MATCH_PAIRS, FILL_BLANK, TYPE_ANSWER
     prompt: str
     content: Any  # JSON content: options, pairs, hint, etc.
+    correct_answer: Any
     explanation: Optional[str] = None
     order: int
 

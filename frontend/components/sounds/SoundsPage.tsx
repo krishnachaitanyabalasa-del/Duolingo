@@ -121,29 +121,29 @@ export const SoundsPage: React.FC = () => {
       {loading && (
         <div className="space-y-8 animate-pulse">
           <div className="flex items-center justify-center gap-4 w-full">
-            <div className="flex-1 h-0.5 bg-[#20323d]" />
-            <div className="h-6 w-24 bg-[#20323d] rounded-lg" />
-            <div className="flex-1 h-0.5 bg-[#20323d]" />
+            <div className="flex-1 h-0.5 bg-gray-200 dark:bg-[#20323d]" />
+            <div className="h-6 w-24 bg-gray-200 dark:bg-[#20323d] rounded-lg" />
+            <div className="flex-1 h-0.5 bg-gray-200 dark:bg-[#20323d]" />
           </div>
-          <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xl mx-auto">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-4 max-w-xl mx-auto">
             {Array.from({ length: 15 }).map((_, idx) => (
               <div
                 key={idx}
-                className="h-[110px] sm:h-[120px] rounded-2xl bg-[#182730] border-2 border-[#20323d]"
+                className="h-[100px] sm:h-[120px] rounded-2xl bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d]"
               />
             ))}
           </div>
 
           <div className="flex items-center justify-center gap-4 w-full pt-4">
-            <div className="flex-1 h-0.5 bg-[#20323d]" />
-            <div className="h-6 w-32 bg-[#20323d] rounded-lg" />
-            <div className="flex-1 h-0.5 bg-[#20323d]" />
+            <div className="flex-1 h-0.5 bg-gray-200 dark:bg-[#20323d]" />
+            <div className="h-6 w-32 bg-gray-200 dark:bg-[#20323d] rounded-lg" />
+            <div className="flex-1 h-0.5 bg-gray-200 dark:bg-[#20323d]" />
           </div>
-          <div className="grid grid-cols-3 gap-3 sm:gap-4 max-w-xl mx-auto">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-4 max-w-xl mx-auto">
             {Array.from({ length: 24 }).map((_, idx) => (
               <div
                 key={idx}
-                className="h-[110px] sm:h-[120px] rounded-2xl bg-[#182730] border-2 border-[#20323d]"
+                className="h-[100px] sm:h-[120px] rounded-2xl bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d]"
               />
             ))}
           </div>
@@ -152,7 +152,7 @@ export const SoundsPage: React.FC = () => {
 
       {/* Error Alert Bar if API fails */}
       {!loading && error && (
-        <div className="p-4 rounded-2xl bg-[#ff4b4b]/10 border-2 border-[#ff4b4b]/40 flex items-center justify-between gap-3 text-xs font-bold text-[#ff4b4b]">
+        <div className="p-4 rounded-2xl bg-red-500/10 border-2 border-red-500/40 flex items-center justify-between gap-3 text-xs font-bold text-red-600 dark:text-[#ff4b4b]">
           <div className="flex items-center gap-2">
             <AlertCircle className="w-5 h-5 shrink-0" />
             <span>Unable to connect to backend API. Showing offline sounds cache.</span>
@@ -172,8 +172,8 @@ export const SoundsPage: React.FC = () => {
         <>
           {vowels.length === 0 && consonants.length === 0 ? (
             <div className="text-center py-16 space-y-4">
-              <Volume2 className="w-12 h-12 text-[#52656d] mx-auto" />
-              <h3 className="text-lg font-black text-white">No sounds available yet.</h3>
+              <Volume2 className="w-12 h-12 text-gray-400 dark:text-[#52656d] mx-auto" />
+              <h3 className="text-lg font-black text-gray-900 dark:text-white">No sounds available yet.</h3>
               <button
                 onClick={fetchSoundsData}
                 className="px-5 py-2.5 rounded-2xl bg-[#1cb0f6] text-white font-black text-xs uppercase"
@@ -185,10 +185,10 @@ export const SoundsPage: React.FC = () => {
             <div className="space-y-6">
               {/* Top Header Banner (Matching User Screenshot) */}
               <div className="text-center py-2 space-y-3">
-                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white tracking-tight">
                   Let&apos;s learn English sounds!
                 </h1>
-                <p className="text-xs sm:text-sm font-bold text-[#8397a1]">
+                <p className="text-xs sm:text-sm font-bold text-gray-500 dark:text-[#8397a1]">
                   Train your ear and learn to pronounce English sounds
                 </p>
 

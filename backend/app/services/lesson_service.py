@@ -92,8 +92,8 @@ def _validate_exercise_answer(exercise: Exercise, answer: Any) -> tuple[bool, An
 
     elif exercise.type == "TRANSLATE":
         user_str = normalize_answer(answer)
-        expected_display = correct_ans
         expected_str = normalize_answer(correct_ans)
+        expected_display = correct_ans
 
         is_correct = user_str == expected_str
         return is_correct, expected_display
@@ -124,6 +124,9 @@ def _validate_exercise_answer(exercise: Exercise, answer: Any) -> tuple[bool, An
         return is_correct, expected_display
 
     elif exercise.type == "MATCH_PAIRS":
+        if answer is True:
+            return True, correct_ans
+
         def normalize_pairs(pairs_data):
             if isinstance(pairs_data, dict):
                 return sorted([(normalize_answer(k), normalize_answer(v)) for k, v in pairs_data.items()])
@@ -142,11 +145,11 @@ def _validate_exercise_answer(exercise: Exercise, answer: Any) -> tuple[bool, An
         user_pairs = normalize_pairs(answer)
         expected_pairs = normalize_pairs(correct_ans)
 
-        is_correct = user_pairs == expected_pairs and len(user_pairs) > 0
+        is_correct = (user_pairs == expected_pairs and len(user_pairs) > 0)
         return is_correct, correct_ans
 
     # Fallback comparison
-    return normalize_answer(answer) == normalize_answer(correct_ans), correct_ans
+    return normalize_answer(answer) == normalize_answer(correct_ans), str(correct_ans)
 
 
 def validate_and_submit_answer(

@@ -22,7 +22,7 @@ export const SoundProgressBar: React.FC<SoundProgressBarProps> = ({
     : 'bg-transparent';
 
   return (
-    <div className={clsx('w-12 sm:w-16 h-1.5 bg-[#20323d] rounded-full overflow-hidden shrink-0', className)}>
+    <div className={clsx('w-10 sm:w-16 h-1.5 bg-gray-200 dark:bg-[#20323d] rounded-full overflow-hidden shrink-0', className)}>
       <div
         className={clsx('h-full rounded-full transition-all duration-500 ease-out', barColor)}
         style={{ width: `${clamped}%` }}

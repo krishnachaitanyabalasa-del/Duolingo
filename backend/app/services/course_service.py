@@ -173,6 +173,7 @@ def get_lesson_detail(db: Session, lesson_id: int, user_id: int) -> LessonDetail
             type=ex.type,
             prompt=ex.prompt,
             content=ex.content,
+            correct_answer=ex.correct_answer,
             explanation=ex.explanation,
             order=ex.order,
         )

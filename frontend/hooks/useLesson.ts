@@ -45,7 +45,8 @@ export function useLesson(lessonId: string, initialHearts = 5) {
       lesson.id.toString(),
       currentExercise.id,
       selectedAnswer,
-      hearts
+      hearts,
+      currentExercise
     );
 
     setAnswerResult(result);

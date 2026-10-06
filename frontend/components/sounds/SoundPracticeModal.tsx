@@ -83,17 +83,17 @@ export const SoundPracticeModal: React.FC<SoundPracticeModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div
         className={clsx(
-          'relative w-full max-w-md bg-[#131f24] border-2 border-[#20323d] rounded-3xl p-6 shadow-2xl space-y-6',
+          'relative w-full max-w-md bg-white dark:bg-[#131f24] border-2 border-gray-200 dark:border-[#20323d] rounded-3xl p-6 shadow-2xl space-y-6',
           'transform transition-all duration-200 scale-100'
         )}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 rounded-xl text-[#52656d] hover:text-white hover:bg-[#182730] transition-colors cursor-pointer"
+          className="absolute top-4 right-4 p-2 rounded-xl text-gray-400 dark:text-[#52656d] hover:text-gray-700 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#182730] transition-colors cursor-pointer"
         >
           <X className="w-6 h-6" />
         </button>
@@ -101,27 +101,27 @@ export const SoundPracticeModal: React.FC<SoundPracticeModalProps> = ({
         {/* Phonetic Header & Pronunciation */}
         <div className="flex flex-col items-center justify-center text-center space-y-3 pt-2">
           {/* Symbol */}
-          <div className="text-5xl font-black text-white tracking-wide">
+          <div className="text-5xl font-black text-gray-900 dark:text-white tracking-wide">
             {sound.symbol}
           </div>
 
           {/* Speaker Button */}
           <button
             onClick={handleSpeak}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#182c34] border-2 border-[#1cb0f6] text-[#1cb0f6] font-black text-sm hover:bg-[#1cb0f6]/10 active:scale-95 transition-all cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-sky-50 dark:bg-[#182c34] border-2 border-[#1cb0f6] text-[#1cb0f6] font-black text-sm hover:bg-[#1cb0f6]/10 active:scale-95 transition-all cursor-pointer"
           >
             <Volume2 className="w-5 h-5" />
             <span>&quot;{sound.example_word}&quot;</span>
           </button>
 
-          <p className="text-xs font-bold text-[#8397a1]">
+          <p className="text-xs font-bold text-gray-500 dark:text-[#8397a1]">
             Listen carefully to the sound in the example word.
           </p>
         </div>
 
         {/* Prompt Question */}
         <div className="text-center">
-          <h3 className="text-base font-extrabold text-white">
+          <h3 className="text-base font-extrabold text-gray-900 dark:text-white">
             What sound does this example use?
           </h3>
         </div>
@@ -130,18 +130,18 @@ export const SoundPracticeModal: React.FC<SoundPracticeModalProps> = ({
         <div className="grid grid-cols-2 gap-3">
           {options.map((opt) => {
             const isSelected = selectedOption === opt;
-            let buttonStyle = 'bg-[#182730] border-[#20323d] text-white hover:border-[#37464f]';
+            let buttonStyle = 'bg-white dark:bg-[#182730] border-gray-200 dark:border-[#20323d] text-gray-900 dark:text-white hover:border-gray-300 dark:hover:border-[#37464f]';
 
             if (hasSubmitted) {
               if (opt === sound.symbol) {
-                buttonStyle = 'bg-[#58cc02]/20 border-[#58cc02] text-[#58cc02] font-black';
+                buttonStyle = 'bg-[#58cc02]/20 border-[#58cc02] text-[#46a302] dark:text-[#58cc02] font-black';
               } else if (isSelected && !isCorrect) {
-                buttonStyle = 'bg-[#ff4b4b]/20 border-[#ff4b4b] text-[#ff4b4b] font-black';
+                buttonStyle = 'bg-[#ff4b4b]/20 border-[#ff4b4b] text-[#ea2b2b] dark:text-[#ff4b4b] font-black';
               } else {
-                buttonStyle = 'bg-[#182730] border-[#20323d] text-[#52656d] opacity-50';
+                buttonStyle = 'bg-gray-100 dark:bg-[#182730] border-gray-200 dark:border-[#20323d] text-gray-400 dark:text-[#52656d] opacity-50';
               }
             } else if (isSelected) {
-              buttonStyle = 'bg-[#182c34] border-[#1cb0f6] text-[#1cb0f6] font-black shadow-[0_0_12px_rgba(28,176,246,0.3)]';
+              buttonStyle = 'bg-sky-50 dark:bg-[#182c34] border-[#1cb0f6] text-[#1cb0f6] font-black shadow-[0_0_12px_rgba(28,176,246,0.3)]';
             }
 
             return (
@@ -170,8 +170,8 @@ export const SoundPracticeModal: React.FC<SoundPracticeModalProps> = ({
               className={clsx(
                 'p-4 rounded-2xl border-2 flex items-center gap-3',
                 isCorrect
-                  ? 'bg-[#58cc02]/10 border-[#58cc02] text-[#58cc02]'
-                  : 'bg-[#ff4b4b]/10 border-[#ff4b4b] text-[#ff4b4b]'
+                  ? 'bg-[#58cc02]/10 border-[#58cc02] text-[#46a302] dark:text-[#58cc02]'
+                  : 'bg-[#ff4b4b]/10 border-[#ff4b4b] text-[#ea2b2b] dark:text-[#ff4b4b]'
               )}
             >
               {isCorrect ? (
@@ -206,7 +206,7 @@ export const SoundPracticeModal: React.FC<SoundPracticeModalProps> = ({
                 'w-full py-3.5 rounded-2xl font-black text-sm uppercase tracking-wider transition-all shadow-[0_4px_0_0_#1899d6] active:translate-y-1 active:shadow-none cursor-pointer',
                 selectedOption && !isSubmitting
                   ? 'bg-[#1cb0f6] text-white hover:bg-[#1bb4ff]'
-                  : 'bg-[#20323d] text-[#52656d] shadow-none cursor-not-allowed'
+                  : 'bg-gray-200 dark:bg-[#20323d] text-gray-400 dark:text-[#52656d] shadow-none cursor-not-allowed'
               )}
             >
               CHECK
@@ -215,13 +215,13 @@ export const SoundPracticeModal: React.FC<SoundPracticeModalProps> = ({
             <div className="flex gap-3">
               <button
                 onClick={handleSpeak}
-                className="flex-1 py-3.5 rounded-2xl border-2 border-[#20323d] bg-[#182730] text-[#1cb0f6] font-black text-xs uppercase tracking-wider hover:bg-[#1a2d37] transition-all cursor-pointer"
+                className="flex-1 py-3.5 rounded-2xl border-2 border-gray-200 dark:border-[#20323d] bg-white dark:bg-[#182730] text-[#1cb0f6] font-black text-xs uppercase tracking-wider hover:bg-gray-50 dark:hover:bg-[#1a2d37] transition-all cursor-pointer"
               >
                 PLAY AGAIN
               </button>
               <button
                 onClick={onClose}
-                className="flex-1 py-3.5 rounded-2xl bg-[#58cc02] text-[#131f24] font-black text-xs uppercase tracking-wider hover:bg-[#61e002] shadow-[0_4px_0_0_#46a302] active:translate-y-1 active:shadow-none transition-all cursor-pointer"
+                className="flex-1 py-3.5 rounded-2xl bg-[#58cc02] text-white dark:text-[#131f24] font-black text-xs uppercase tracking-wider hover:bg-[#61e002] shadow-[0_4px_0_0_#46a302] active:translate-y-1 active:shadow-none transition-all cursor-pointer"
               >
                 I GOT IT
               </button>

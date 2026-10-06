@@ -11,6 +11,8 @@ export interface BaseExercise {
   question: string;
   prompt?: string;
   audioText?: string;
+  correctAnswer?: any;
+  explanation?: string;
 }
 
 export interface MultipleChoiceExercise extends BaseExercise {
