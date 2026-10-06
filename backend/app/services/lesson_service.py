@@ -56,13 +56,7 @@ def start_lesson(db: Session, lesson_id: int, user_id: int) -> LessonStartRespon
     )
 
 
-def _clean_str(val: Any) -> str:
-    """Normalizes string or list of words for flexible answer matching."""
-    if isinstance(val, (list, tuple)):
-        val = " ".join(str(v) for v in val)
-    s = str(val or "").strip().lower()
-    s = s.rstrip(".!?")
-    return " ".join(s.split())
+from app.utils.answer_utils import normalize_answer
 
 
 def _validate_exercise_answer(exercise: Exercise, answer: Any) -> tuple[bool, Any]:
@@ -75,19 +69,18 @@ def _validate_exercise_answer(exercise: Exercise, answer: Any) -> tuple[bool, An
 
     if exercise.type == "MATCH_PAIRS":
         # Handle pair matching answer structures
-        # Standard format: list of dicts [{'left': 'A', 'right': '1'}, ...]
         def normalize_pairs(pairs_data):
             if isinstance(pairs_data, dict):
-                return sorted([(_clean_str(k), _clean_str(v)) for k, v in pairs_data.items()])
+                return sorted([(normalize_answer(k), normalize_answer(v)) for k, v in pairs_data.items()])
             elif isinstance(pairs_data, list):
                 result = []
                 for item in pairs_data:
                     if isinstance(item, dict):
-                        left = _clean_str(item.get("left", ""))
-                        right = _clean_str(item.get("right", ""))
+                        left = normalize_answer(item.get("left", ""))
+                        right = normalize_answer(item.get("right", ""))
                         result.append((left, right))
                     elif isinstance(item, (list, tuple)) and len(item) == 2:
-                        result.append((_clean_str(item[0]), _clean_str(item[1])))
+                        result.append((normalize_answer(item[0]), normalize_answer(item[1])))
                 return sorted(result)
             return []
 
@@ -98,26 +91,22 @@ def _validate_exercise_answer(exercise: Exercise, answer: Any) -> tuple[bool, An
         return is_correct, correct_ans
 
     elif exercise.type in ["MULTIPLE_CHOICE", "TRANSLATE", "FILL_BLANK", "TYPE_ANSWER"]:
-        clean_user_answer = _clean_str(answer)
+        clean_user_answer = normalize_answer(answer)
 
-        # Check if correct_ans is a list of alternative acceptable answers
+        # Check if correct_ans is a list of acceptable answers or word sequence
         if isinstance(correct_ans, list) and len(correct_ans) > 0 and not isinstance(correct_ans[0], dict):
-            # Check if correct_ans is a list of words (single answer) or list of alternative full sentences
-            # If all items are short single words that join to form sentence, treat as 1 answer.
-            # Otherwise check if any alternative matches clean_user_answer.
-            joined_correct = _clean_str(correct_ans)
+            joined_correct = normalize_answer(correct_ans)
             is_correct = clean_user_answer == joined_correct or any(
-                _clean_str(ca) == clean_user_answer for ca in correct_ans
+                normalize_answer(ca) == clean_user_answer for ca in correct_ans
             )
-            display_answer = correct_ans if isinstance(correct_ans, str) else joined_correct
-            return is_correct, display_answer
+            return is_correct, correct_ans
         else:
-            clean_expected = _clean_str(correct_ans)
+            clean_expected = normalize_answer(correct_ans)
             is_correct = clean_user_answer == clean_expected
-            return is_correct, str(correct_ans)
+            return is_correct, correct_ans
 
     # Fallback comparison
-    return _clean_str(answer) == _clean_str(correct_ans), str(correct_ans)
+    return normalize_answer(answer) == normalize_answer(correct_ans), correct_ans
 
 
 def validate_and_submit_answer(
