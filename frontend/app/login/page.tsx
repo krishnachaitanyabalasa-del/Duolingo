@@ -19,7 +19,9 @@ export default function LoginPage() {
       router.replace('/learn');
     } catch (err: any) {
       console.error('Login error:', err);
-      if (err?.code === 'auth/unauthorized-domain' || err?.message?.includes('unauthorized-domain')) {
+      if (err?.code === 'auth/popup-closed-by-user' || err?.code === 'auth/cancelled-popup-request') {
+        setError('Google sign-in popup was closed before completing. Click again to retry, or continue as default learner.');
+      } else if (err?.code === 'auth/unauthorized-domain' || err?.message?.includes('unauthorized-domain')) {
         setError(
           '127.0.0.1 is not added to Authorized Domains in Firebase Console. Add 127.0.0.1 in Firebase Console -> Authentication -> Settings -> Authorized domains, or click "Continue as Default Learner" below.'
         );
