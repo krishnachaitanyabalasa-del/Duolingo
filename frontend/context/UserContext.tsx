@@ -47,28 +47,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    // Check local guest mode flag on mount
-    const hasGuestSession =
-      typeof window !== 'undefined' && localStorage.getItem('duo_guest_mode') === 'true';
-    if (hasGuestSession) {
-      setIsGuest(true);
-    }
-
     // Listen to Firebase authentication state changes
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setFirebaseUser(currentUser);
       if (currentUser) {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('duo_guest_mode');
-        }
         setIsGuest(false);
-      }
-      setAuthLoading(false);
-      if (currentUser || hasGuestSession) {
         await loadData();
       } else {
         setLoading(false);
       }
+      setAuthLoading(false);
     });
 
     // Fallback safety timeout in case Firebase auth check is blocked or delayed
