@@ -2,6 +2,7 @@ from app.models.user import User
 from app.models.course import Course, Unit, Skill, Lesson, Exercise
 from app.models.progress import UserSkillProgress, UserLessonProgress, LessonAttempt
 from app.models.achievement import Achievement, UserAchievement
+from app.models.sound import SoundCategory, Sound, UserSoundProgress
 
 __all__ = [
     "User",
@@ -15,4 +16,7 @@ __all__ = [
     "LessonAttempt",
     "Achievement",
     "UserAchievement",
+    "SoundCategory",
+    "Sound",
+    "UserSoundProgress",
 ]

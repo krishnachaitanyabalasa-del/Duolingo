@@ -14,6 +14,7 @@ from app.routers import (
     lesson_router,
     gamification_router,
     achievement_router,
+    sound_router,
 )
 
 
@@ -77,3 +78,4 @@ app.include_router(progress_router, prefix=api_prefix)
 app.include_router(lesson_router, prefix=api_prefix)
 app.include_router(gamification_router, prefix=api_prefix)
 app.include_router(achievement_router, prefix=api_prefix)
+app.include_router(sound_router, prefix=api_prefix)

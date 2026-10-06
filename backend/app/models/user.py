@@ -24,3 +24,4 @@ class User(Base):
     lesson_progress = relationship("UserLessonProgress", back_populates="user", cascade="all, delete-orphan")
     lesson_attempts = relationship("LessonAttempt", back_populates="user", cascade="all, delete-orphan")
     achievements = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")
+    sound_progress = relationship("UserSoundProgress", back_populates="user", cascade="all, delete-orphan")

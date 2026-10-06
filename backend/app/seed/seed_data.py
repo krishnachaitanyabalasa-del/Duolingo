@@ -5,6 +5,7 @@ from app.models.user import User
 from app.models.course import Course, Unit, Skill, Lesson, Exercise
 from app.models.progress import UserSkillProgress, UserLessonProgress, LessonAttempt
 from app.models.achievement import Achievement, UserAchievement
+from app.models.sound import SoundCategory, Sound, UserSoundProgress
 
 
 def seed_database(db: Session = None):
@@ -15,9 +16,12 @@ def seed_database(db: Session = None):
         close_db = True
 
     try:
-        print("Seeding database with English Foundations course data...")
+        print("Seeding database with English Foundations course data and Pronunciation Sounds...")
 
         # Ensure idempotency by safely removing old seed records in reverse dependency order
+        db.query(UserSoundProgress).delete()
+        db.query(Sound).delete()
+        db.query(SoundCategory).delete()
         db.query(LessonAttempt).delete()
         db.query(UserLessonProgress).delete()
         db.query(UserSkillProgress).delete()
@@ -691,7 +695,70 @@ def seed_database(db: Session = None):
         db.add_all([ua1, ua2, ua3, ua4, ua5])
         db.commit()
 
-        print("Successfully seeded English Foundations course (1 Course, 2 Units, 5 Skills, 10 Lessons, 80 Exercises).")
+        # 6. Seed Pronunciation Sound Categories & Sounds
+        cat_vowels = SoundCategory(id=1, name="Vowels", slug="vowels", display_order=1)
+        cat_consonants = SoundCategory(id=2, name="Consonants", slug="consonants", display_order=2)
+        db.add_all([cat_vowels, cat_consonants])
+        db.commit()
+
+        vowels_data = [
+            ("a", "hot"), ("æ", "cat"), ("ʌ", "but"), ("ɛ", "bed"), ("eɪ", "say"),
+            ("ɝ", "bird"), ("ɪ", "ship"), ("i", "sheep"), ("ə", "about"), ("oʊ", "boat"),
+            ("ʊ", "foot"), ("u", "food"), ("aʊ", "cow"), ("aɪ", "time"), ("ɔɪ", "boy")
+        ]
+
+        consonants_data = [
+            ("b", "book"), ("tʃ", "chair"), ("d", "day"), ("f", "fish"), ("g", "go"),
+            ("h", "home"), ("dʒ", "job"), ("k", "key"), ("l", "lion"), ("m", "moon"),
+            ("n", "nose"), ("ŋ", "sing"), ("p", "pig"), ("r", "red"), ("s", "see"),
+            ("ʒ", "measure"), ("ʃ", "shoe"), ("t", "time"), ("ð", "then"), ("θ", "think"),
+            ("v", "very"), ("w", "water"), ("j", "you"), ("z", "zoo")
+        ]
+
+        vowel_sounds = []
+        for i, (sym, word) in enumerate(vowels_data, start=1):
+            vowel_sounds.append(
+                Sound(
+                    id=i,
+                    category_id=cat_vowels.id,
+                    symbol=sym,
+                    example_word=word,
+                    audio_text=word,
+                    display_order=i,
+                    is_active=True,
+                )
+            )
+
+        consonant_sounds = []
+        for j, (sym, word) in enumerate(consonants_data, start=16):
+            consonant_sounds.append(
+                Sound(
+                    id=j,
+                    category_id=cat_consonants.id,
+                    symbol=sym,
+                    example_word=word,
+                    audio_text=word,
+                    display_order=j,
+                    is_active=True,
+                )
+            )
+
+        db.add_all(vowel_sounds)
+        db.add_all(consonant_sounds)
+        db.commit()
+
+        # Seed initial sound progress for default learner (realistic progress visualization)
+        initial_sound_progress = [
+            UserSoundProgress(user_id=learner.id, sound_id=1, practice_count=1, correct_count=1, incorrect_count=0, progress_percent=20, mastered=False),
+            UserSoundProgress(user_id=learner.id, sound_id=2, practice_count=2, correct_count=2, incorrect_count=0, progress_percent=40, mastered=False),
+            UserSoundProgress(user_id=learner.id, sound_id=3, practice_count=1, correct_count=0, incorrect_count=1, progress_percent=10, mastered=False),
+            UserSoundProgress(user_id=learner.id, sound_id=4, practice_count=2, correct_count=1, incorrect_count=1, progress_percent=30, mastered=False),
+            UserSoundProgress(user_id=learner.id, sound_id=5, practice_count=0, correct_count=0, incorrect_count=0, progress_percent=0, mastered=False),
+        ]
+        db.add_all(initial_sound_progress)
+        db.commit()
+
+        print("Successfully seeded English Foundations course and Pronunciation Sounds (15 Vowels, 24 Consonants).")
 
     finally:
         if close_db:
