@@ -52,16 +52,18 @@ export const TranslateExercise: React.FC<TranslateProps> = ({
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col items-start px-4">
-      <h1 className="text-3xl font-black text-white mb-8 tracking-tight">Translate this sentence</h1>
+      <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-8 tracking-tight">
+        Translate this sentence
+      </h1>
 
       {/* Sentence Prompt Card */}
-      <div className="flex items-center gap-4 mb-8 p-4 bg-[#182730] border-2 border-[#20323d] rounded-2xl w-full">
+      <div className="flex items-center gap-4 mb-8 p-4 bg-gray-50 dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-2xl w-full">
         {exercise.audioText && <SpeakButton text={exercise.audioText} />}
-        <span className="font-extrabold text-xl text-white">{exercise.originalText}</span>
+        <span className="font-extrabold text-xl text-gray-900 dark:text-white">{exercise.originalText}</span>
       </div>
 
       {/* Answer Slots Area */}
-      <div className="w-full min-h-[90px] p-4 bg-[#182730] border-2 border-b-4 border-[#20323d] rounded-2xl mb-8 flex flex-wrap items-center gap-2.5">
+      <div className="w-full min-h-[90px] p-4 bg-gray-50 dark:bg-[#182730] border-2 border-b-4 border-gray-200 dark:border-[#20323d] rounded-2xl mb-8 flex flex-wrap items-center gap-2.5">
         <AnimatePresence>
           {selectedWords.map((word, idx) => (
             <motion.button
@@ -71,14 +73,16 @@ export const TranslateExercise: React.FC<TranslateProps> = ({
               exit={{ scale: 0.8, opacity: 0 }}
               disabled={disabled}
               onClick={() => removeWord(word, idx)}
-              className="px-4 py-2.5 bg-[#20323d] border-2 border-b-4 border-[#1cb0f6] text-[#1cb0f6] font-extrabold text-base rounded-xl cursor-pointer hover:bg-[#283d4a] transition-colors"
+              className="px-4 py-2.5 bg-sky-100 dark:bg-[#20323d] border-2 border-b-4 border-[#1cb0f6] text-[#1cb0f6] font-extrabold text-base rounded-xl cursor-pointer hover:bg-sky-200 dark:hover:bg-[#283d4a] transition-colors"
             >
               {word}
             </motion.button>
           ))}
         </AnimatePresence>
         {selectedWords.length === 0 && (
-          <span className="text-[#52656d] font-bold text-sm">Tap word chips to construct sentence</span>
+          <span className="text-gray-400 dark:text-[#52656d] font-bold text-sm">
+            Tap word chips to construct sentence
+          </span>
         )}
       </div>
 
@@ -89,7 +93,7 @@ export const TranslateExercise: React.FC<TranslateProps> = ({
             key={`${word}-${idx}`}
             disabled={disabled}
             onClick={() => addWord(word, idx)}
-            className="px-4 py-3 bg-[#182730] border-2 border-b-4 border-[#20323d] text-white font-extrabold text-base rounded-xl cursor-pointer hover:bg-[#20323d] active:translate-y-1 transition-all"
+            className="px-4 py-3 bg-white dark:bg-[#182730] border-2 border-b-4 border-gray-200 dark:border-[#20323d] text-gray-800 dark:text-white font-extrabold text-base rounded-xl cursor-pointer hover:bg-gray-100 dark:hover:bg-[#20323d] active:translate-y-1 transition-all shadow-xs"
           >
             {word}
           </button>

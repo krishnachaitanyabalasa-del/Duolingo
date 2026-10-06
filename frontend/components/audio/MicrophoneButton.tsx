@@ -47,7 +47,7 @@ export const MicrophoneButton: React.FC<MicrophoneButtonProps> = ({ onTranscript
           'p-4 rounded-full border-2 border-b-4 transition-all flex items-center justify-center cursor-pointer shadow-lg',
           isListening
             ? 'bg-rose-500 border-rose-600 text-white animate-pulse ring-4 ring-rose-300'
-            : 'bg-[#182730] border-[#20323d] text-[#1cb0f6] hover:bg-[#20323d]'
+            : 'bg-white dark:bg-[#182730] border-gray-200 dark:border-[#20323d] text-[#1cb0f6] hover:bg-sky-50 dark:hover:bg-[#20323d]'
         )}
       >
         {isListening ? (
@@ -58,17 +58,17 @@ export const MicrophoneButton: React.FC<MicrophoneButtonProps> = ({ onTranscript
       </button>
 
       {isListening && (
-        <span className="text-xs font-bold text-rose-400 animate-pulse">Recording... Speak now</span>
+        <span className="text-xs font-bold text-rose-500 dark:text-rose-400 animate-pulse">Recording... Speak now</span>
       )}
 
       {(permissionError || error) && (
-        <span className="text-xs font-bold text-gray-400 text-center max-w-xs">
+        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 text-center max-w-xs">
           {permissionError || error || 'Speech recognition not supported in this browser.'}
         </span>
       )}
 
       {transcript && (
-        <div className="p-3 bg-[#182730] border border-[#20323d] rounded-xl text-sm font-extrabold text-[#1cb0f6] mt-1">
+        <div className="p-3 bg-white dark:bg-[#182730] border border-gray-200 dark:border-[#20323d] rounded-xl text-sm font-extrabold text-[#1cb0f6] mt-1 shadow-xs">
           &quot;{transcript}&quot;
         </div>
       )}

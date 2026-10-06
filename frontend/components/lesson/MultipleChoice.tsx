@@ -37,14 +37,14 @@ export const MultipleChoice: React.FC<MultipleChoiceProps> = ({
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col items-start px-4">
-      {/* Exercise Section Title (Matching Screenshots 1 & 2) */}
-      <h1 className="text-3xl font-black text-white mb-8 tracking-tight">Read and respond</h1>
+      {/* Exercise Section Title */}
+      <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-8 tracking-tight">Read and respond</h1>
 
-      {/* Audio Prompt Card with Dotted Words (Matching Screenshots 1 & 2) */}
+      {/* Audio Prompt Card with Dotted Words */}
       {exercise.audioText && (
-        <div className="flex items-start gap-4 mb-8 p-4 bg-[#182730] border-2 border-[#20323d] rounded-2xl w-full">
+        <div className="flex items-start gap-4 mb-8 p-4 bg-gray-50 dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-2xl w-full">
           <SpeakButton text={exercise.audioText} />
-          <div className="text-lg font-bold text-[#dce6eb] leading-relaxed pt-1 flex flex-wrap gap-1.5">
+          <div className="text-lg font-bold text-gray-800 dark:text-[#dce6eb] leading-relaxed pt-1 flex flex-wrap gap-1.5">
             {words.map((word, i) => (
               <span key={i} className="dotted-word">
                 {word}
@@ -55,11 +55,11 @@ export const MultipleChoice: React.FC<MultipleChoiceProps> = ({
       )}
 
       {/* Question Prompt */}
-      <h2 className="text-lg font-extrabold text-white mb-6">
+      <h2 className="text-lg font-extrabold text-gray-900 dark:text-white mb-6">
         {exercise.question}
       </h2>
 
-      {/* Options Stack (Matching Screenshots 1 & 2) */}
+      {/* Options Stack */}
       <div className="flex flex-col gap-3.5 w-full">
         {exercise.options.map((option, idx) => {
           const isSelected = selectedIndex === idx;
@@ -72,16 +72,16 @@ export const MultipleChoice: React.FC<MultipleChoiceProps> = ({
               className={clsx(
                 'flex items-center gap-6 p-4 sm:p-5 rounded-2xl border-2 border-b-4 font-bold text-base transition-all text-left cursor-pointer',
                 isSelected
-                  ? 'bg-[#183445] border-[#1cb0f6] text-white shadow-md'
-                  : 'bg-[#182730] border-[#20323d] hover:bg-[#20323d] text-[#dce6eb]'
+                  ? 'bg-sky-50 dark:bg-[#183445] border-[#1cb0f6] text-sky-600 dark:text-white shadow-md'
+                  : 'bg-white dark:bg-[#182730] border-gray-200 dark:border-[#20323d] hover:bg-gray-50 dark:hover:bg-[#20323d] text-gray-800 dark:text-[#dce6eb]'
               )}
             >
               <span
                 className={clsx(
                   'w-8 h-8 rounded-xl border-2 flex items-center justify-center text-xs font-black shrink-0',
                   isSelected
-                    ? 'border-[#1cb0f6] text-[#1cb0f6] bg-[#131f24]'
-                    : 'border-[#37464f] text-[#52656d]'
+                    ? 'border-[#1cb0f6] text-[#1cb0f6] bg-white dark:bg-[#131f24]'
+                    : 'border-gray-300 dark:border-[#37464f] text-gray-400 dark:text-[#52656d]'
                 )}
               >
                 {idx + 1}

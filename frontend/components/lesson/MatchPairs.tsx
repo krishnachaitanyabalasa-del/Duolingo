@@ -84,7 +84,7 @@ export const MatchPairs: React.FC<MatchPairsProps> = ({
 
   return (
     <div className="w-full max-w-xl mx-auto flex flex-col items-center">
-      <h2 className="text-2xl font-extrabold text-gray-800 text-center mb-6">
+      <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white text-center mb-6">
         {exercise.question}
       </h2>
 
@@ -104,10 +104,10 @@ export const MatchPairs: React.FC<MatchPairsProps> = ({
                 whileTap={!isMatched ? { scale: 0.97 } : {}}
                 className={clsx(
                   'p-4 rounded-2xl border-2 border-b-4 font-extrabold text-base transition-all text-center cursor-pointer',
-                  isMatched && 'bg-gray-100 border-gray-200 text-gray-400 border-b-2 opacity-50 cursor-not-allowed',
-                  isMismatch && 'bg-rose-100 border-rose-400 text-rose-700 animate-shake',
-                  isSelected && !isMismatch && 'bg-sky-100 border-sky-400 text-sky-700 shadow-md',
-                  !isMatched && !isSelected && !isMismatch && 'bg-white border-gray-200 hover:bg-gray-50 text-gray-700'
+                  isMatched && 'bg-gray-100 dark:bg-[#131f24] border-gray-200 dark:border-[#20323d] text-gray-400 dark:text-gray-600 border-b-2 opacity-50 cursor-not-allowed',
+                  isMismatch && 'bg-rose-100 dark:bg-[#3b1219] border-rose-400 dark:border-[#571922] text-rose-700 dark:text-rose-300 animate-shake',
+                  isSelected && !isMismatch && 'bg-sky-100 dark:bg-[#183445] border-sky-400 dark:border-[#1cb0f6] text-sky-700 dark:text-sky-300 shadow-md',
+                  !isMatched && !isSelected && !isMismatch && 'bg-white dark:bg-[#182730] border-gray-200 dark:border-[#20323d] hover:bg-gray-50 dark:hover:bg-[#20323d] text-gray-800 dark:text-[#dce6eb]'
                 )}
               >
                 {item.text}
@@ -131,10 +131,10 @@ export const MatchPairs: React.FC<MatchPairsProps> = ({
                 whileTap={!isMatched ? { scale: 0.97 } : {}}
                 className={clsx(
                   'p-4 rounded-2xl border-2 border-b-4 font-extrabold text-base transition-all text-center cursor-pointer',
-                  isMatched && 'bg-gray-100 border-gray-200 text-gray-400 border-b-2 opacity-50 cursor-not-allowed',
-                  isMismatch && 'bg-rose-100 border-rose-400 text-rose-700 animate-shake',
-                  isSelected && !isMismatch && 'bg-sky-100 border-sky-400 text-sky-700 shadow-md',
-                  !isMatched && !isSelected && !isMismatch && 'bg-white border-gray-200 hover:bg-gray-50 text-gray-700'
+                  isMatched && 'bg-gray-100 dark:bg-[#131f24] border-gray-200 dark:border-[#20323d] text-gray-400 dark:text-gray-600 border-b-2 opacity-50 cursor-not-allowed',
+                  isMismatch && 'bg-rose-100 dark:bg-[#3b1219] border-rose-400 dark:border-[#571922] text-rose-700 dark:text-rose-300 animate-shake',
+                  isSelected && !isMismatch && 'bg-sky-100 dark:bg-[#183445] border-sky-400 dark:border-[#1cb0f6] text-sky-700 dark:text-sky-300 shadow-md',
+                  !isMatched && !isSelected && !isMismatch && 'bg-white dark:bg-[#182730] border-gray-200 dark:border-[#20323d] hover:bg-gray-50 dark:hover:bg-[#20323d] text-gray-800 dark:text-[#dce6eb]'
                 )}
               >
                 {item.text}

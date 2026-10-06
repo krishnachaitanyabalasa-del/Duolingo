@@ -5,22 +5,26 @@ import { usePathname } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { RightPanel } from './RightPanel';
 import { MobileNav } from './MobileNav';
-import { UserProvider, useUserContext } from '@/context/UserContext';
+import { useUserContext } from '@/context/UserContext';
 import { OutOfHearts } from '../lesson/OutOfHearts';
 
-const AppLayoutInner: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AppLayoutClient: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const pathname = usePathname();
   const isLessonRoute = pathname?.startsWith('/lesson/');
   const { user, refillHearts } = useUserContext();
   const [showRefillModal, setShowRefillModal] = useState(false);
 
   if (isLessonRoute) {
-    return <main className="w-full min-h-screen bg-[#131f24]">{children}</main>;
+    return (
+      <main className="w-full min-h-screen bg-white dark:bg-[#131f24] text-gray-800 dark:text-[#f7f9fa] transition-colors duration-150">
+        {children}
+      </main>
+    );
   }
 
   return (
-    <div className="flex min-h-screen bg-[#131f24]">
-      {/* Sidebar for Desktop (Matching Screenshot 3 Left Side) */}
+    <div className="flex min-h-screen bg-white dark:bg-[#131f24] text-gray-800 dark:text-[#f7f9fa] transition-colors duration-150">
+      {/* Sidebar for Desktop */}
       <Sidebar />
 
       {/* Center Main Content Area */}
@@ -29,7 +33,7 @@ const AppLayoutInner: React.FC<{ children: React.ReactNode }> = ({ children }) =
         <MobileNav />
       </div>
 
-      {/* Right Information Panel for Desktop (Matching Screenshot 3 Right Side) */}
+      {/* Right Information Panel for Desktop */}
       <RightPanel user={user} />
 
       {/* Hearts Refill Modal */}
@@ -42,13 +46,5 @@ const AppLayoutInner: React.FC<{ children: React.ReactNode }> = ({ children }) =
         />
       )}
     </div>
-  );
-};
-
-export const AppLayoutClient: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return (
-    <UserProvider>
-      <AppLayoutInner>{children}</AppLayoutInner>
-    </UserProvider>
   );
 };

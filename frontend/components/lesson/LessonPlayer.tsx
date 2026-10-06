@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useLesson } from '@/hooks/useLesson';
-import { useUserContext } from '@/context/UserContext';
 import { LessonHeader } from './LessonHeader';
 import { ExerciseRenderer } from './ExerciseRenderer';
 import { AnswerFeedback } from './AnswerFeedback';
@@ -15,7 +14,6 @@ interface LessonPlayerProps {
 }
 
 export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lessonId }) => {
-  const { addXp, deductHeart, refillHearts } = useUserContext();
   const {
     lesson,
     loading,
@@ -35,39 +33,11 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lessonId }) => {
     refillHeartsInLesson,
   } = useLesson(lessonId);
 
-  // Sync answer results with global context
-  useEffect(() => {
-    if (answerResult) {
-      if (answerResult.isCorrect) {
-        addXp(answerResult.xpEarned || 1);
-      } else {
-        deductHeart();
-      }
-    }
-  }, [answerResult]);
-
-  // Global Keyboard Enter Listener for CHECK / CONTINUE
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Enter') {
-        if (!isSubmitted && selectedAnswer !== null && selectedAnswer !== '') {
-          e.preventDefault();
-          handleCheckAnswer();
-        } else if (isSubmitted) {
-          e.preventDefault();
-          handleNextExercise();
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSubmitted, selectedAnswer, handleCheckAnswer, handleNextExercise]);
-
   if (loading) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center gap-4 bg-[#131f24]">
-        <Loader2 className="w-12 h-12 text-[#58cc02] animate-spin" />
-        <p className="font-extrabold text-[#93a7b1]">Loading lesson...</p>
+      <div className="h-screen w-full flex flex-col items-center justify-center gap-4 bg-white dark:bg-[#131f24] text-gray-500 dark:text-gray-400 transition-colors duration-150">
+        <Loader2 className="w-12 h-12 text-green-500 animate-spin" />
+        <p className="font-extrabold text-gray-500 dark:text-gray-400">Loading lesson...</p>
       </div>
     );
   }
@@ -78,14 +48,14 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lessonId }) => {
 
   if (!lesson || !currentExercise) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center gap-4 bg-[#131f24]">
-        <p className="font-extrabold text-[#93a7b1]">Lesson not found.</p>
+      <div className="h-screen w-full flex flex-col items-center justify-center gap-4 bg-white dark:bg-[#131f24] text-gray-500 dark:text-gray-400 transition-colors duration-150">
+        <p className="font-extrabold text-gray-500 dark:text-gray-400">Lesson not found.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#131f24] flex flex-col justify-between pb-32">
+    <div className="min-h-screen bg-white dark:bg-[#131f24] text-gray-800 dark:text-[#f7f9fa] flex flex-col justify-between pb-32 transition-colors duration-150">
       {/* Top Header */}
       <LessonHeader
         current={currentIndex + 1}
@@ -105,12 +75,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lessonId }) => {
 
       {/* Out of Hearts Dialog */}
       {isOutOfHearts && (
-        <OutOfHearts
-          onRefill={() => {
-            refillHearts();
-            refillHeartsInLesson();
-          }}
-        />
+        <OutOfHearts onRefill={refillHeartsInLesson} />
       )}
 
       {/* Answer Feedback Bottom Bar */}
@@ -120,7 +85,6 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lessonId }) => {
         result={answerResult}
         onCheck={handleCheckAnswer}
         onContinue={handleNextExercise}
-        onSkip={handleNextExercise}
       />
     </div>
   );

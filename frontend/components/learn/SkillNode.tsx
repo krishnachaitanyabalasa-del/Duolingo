@@ -37,7 +37,7 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ skill, onClick }) => {
       className="relative flex flex-col items-center my-5 group"
       style={{ transform: `translateX(${skill.positionOffset}px)` }}
     >
-      {/* Animated Character Mascot riding on active node */}
+      {/* Animated Mascot riding on active node */}
       {isCurrent && (
         <div className="absolute -top-12 z-20 flex flex-col items-center animate-bob">
           <div className="w-12 h-12 bg-amber-400 rounded-full border-2 border-amber-600 flex items-center justify-center text-xl shadow-lg">
@@ -57,11 +57,11 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ skill, onClick }) => {
             isCurrent && 'bg-[#ff9600] border-[#e07300] text-white ring-4 ring-[#ff9600]/40 animate-pulse',
             isCompleted && 'bg-[#ff9600] border-[#e07300] text-white',
             skill.status === 'AVAILABLE' && 'bg-[#ff9600] border-[#e07300] text-white',
-            isLocked && 'bg-[#182730] border-[#20323d] text-[#52656d] cursor-not-allowed'
+            isLocked && 'bg-[#e5e5e5] dark:bg-[#182730] border-[#d0d0d0] dark:border-[#20323d] text-[#afafaf] dark:text-[#52656d] cursor-not-allowed'
           )}
         >
           {isLocked ? (
-            <Lock className="w-8 h-8 text-[#52656d]" />
+            <Lock className="w-8 h-8 text-[#afafaf] dark:text-[#52656d]" />
           ) : isCompleted ? (
             <Check className="w-9 h-9 stroke-[3.5]" />
           ) : isEmoji ? (
@@ -74,7 +74,7 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ skill, onClick }) => {
         </motion.button>
       </div>
 
-      <span className="mt-2 text-xs font-black text-[#93a7b1] text-center tracking-wide max-w-[120px]">
+      <span className="mt-2 text-xs font-black text-gray-700 dark:text-[#93a7b1] text-center tracking-wide max-w-[120px]">
         {skill.title}
       </span>
     </div>

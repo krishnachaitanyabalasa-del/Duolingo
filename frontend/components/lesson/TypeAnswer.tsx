@@ -39,13 +39,13 @@ export const TypeAnswer: React.FC<TypeAnswerProps> = ({
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col items-start px-4">
-      <h1 className="text-3xl font-black text-white mb-8 tracking-tight">Type in Spanish</h1>
+      <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-8 tracking-tight">Type in Spanish</h1>
 
       {/* Audio Text Prompt */}
       {exercise.audioText && (
-        <div className="flex items-center gap-4 mb-6 p-4 bg-[#182730] border-2 border-[#20323d] rounded-2xl w-full">
+        <div className="flex items-center gap-4 mb-6 p-4 bg-gray-50 dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-2xl w-full">
           <SpeakButton text={exercise.audioText} />
-          <span className="font-extrabold text-xl text-white">{exercise.prompt || exercise.audioText}</span>
+          <span className="font-extrabold text-xl text-gray-900 dark:text-white">{exercise.prompt || exercise.audioText}</span>
         </div>
       )}
 
@@ -57,7 +57,7 @@ export const TypeAnswer: React.FC<TypeAnswerProps> = ({
           onChange={(e) => handleChange(e.target.value)}
           placeholder="Type or speak your response..."
           rows={3}
-          className="w-full p-4 rounded-2xl bg-[#182730] border-2 border-b-4 border-[#20323d] focus:border-[#1cb0f6] focus:outline-none font-extrabold text-lg text-white resize-none"
+          className="w-full p-4 rounded-2xl bg-white dark:bg-[#182730] border-2 border-b-4 border-gray-200 dark:border-[#20323d] focus:border-[#1cb0f6] focus:outline-none font-extrabold text-lg text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#52656d] resize-none transition-colors"
         />
 
         <div className="flex justify-center">
@@ -74,7 +74,7 @@ export const TypeAnswer: React.FC<TypeAnswerProps> = ({
             key={char}
             disabled={disabled}
             onClick={() => insertChar(char)}
-            className="px-3.5 py-2 bg-[#182730] border-2 border-b-4 border-[#20323d] rounded-xl font-extrabold text-base hover:bg-[#20323d] text-white cursor-pointer"
+            className="px-3.5 py-2 bg-white dark:bg-[#182730] border-2 border-b-4 border-gray-200 dark:border-[#20323d] rounded-xl font-extrabold text-base hover:bg-gray-100 dark:hover:bg-[#20323d] text-gray-800 dark:text-white cursor-pointer transition-all active:translate-y-0.5 shadow-xs"
           >
             {char}
           </button>

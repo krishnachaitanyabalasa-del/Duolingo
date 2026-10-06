@@ -15,14 +15,14 @@ export const OutOfHearts: React.FC<OutOfHeartsProps> = ({ onRefill }) => {
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl text-center border-2 border-gray-200"
+        className="w-full max-w-sm bg-white dark:bg-[#182730] rounded-3xl p-6 shadow-2xl text-center border-2 border-gray-200 dark:border-[#20323d]"
       >
-        <div className="w-20 h-20 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-rose-200">
+        <div className="w-20 h-20 bg-rose-100 dark:bg-rose-950/40 rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-rose-200 dark:border-rose-700/60">
           <Heart className="w-10 h-10 text-rose-500 fill-rose-500 animate-bounce" />
         </div>
 
-        <h3 className="text-2xl font-black text-gray-800 mb-2">You ran out of hearts!</h3>
-        <p className="text-sm font-medium text-gray-500 mb-6">
+        <h3 className="text-2xl font-black text-gray-900 dark:text-white mb-2">You ran out of hearts!</h3>
+        <p className="text-sm font-medium text-gray-500 dark:text-[#93a7b1] mb-6">
           Review previous lessons to earn hearts back, or refill now to keep practicing!
         </p>
 
@@ -37,7 +37,7 @@ export const OutOfHearts: React.FC<OutOfHeartsProps> = ({ onRefill }) => {
 
           <Link
             href="/learn"
-            className="w-full duo-button duo-button-outline text-sm py-3 flex items-center justify-center gap-2"
+            className="w-full duo-button duo-button-neutral text-sm py-3 flex items-center justify-center gap-2 border-gray-200 dark:border-[#20323d] text-gray-700 dark:text-gray-200 block"
           >
             <RefreshCw className="w-4 h-4" />
             PRACTICE TO EARN HEARTS

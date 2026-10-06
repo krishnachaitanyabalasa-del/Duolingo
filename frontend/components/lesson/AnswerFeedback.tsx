@@ -27,18 +27,18 @@ export const AnswerFeedback: React.FC<AnswerFeedbackProps> = ({
     <div
       className={clsx(
         'fixed bottom-0 left-0 right-0 z-40 border-t-2 py-5 px-6 transition-colors duration-300',
-        !isSubmitted && 'bg-[#131f24] border-[#20323d]',
-        isSubmitted && result?.isCorrect && 'bg-[#052b14] border-[#0c401f] text-green-300',
-        isSubmitted && !result?.isCorrect && 'bg-[#3b1219] border-[#571922] text-rose-300'
+        !isSubmitted && 'bg-white dark:bg-[#131f24] border-gray-200 dark:border-[#20323d]',
+        isSubmitted && result?.isCorrect && 'bg-[#d7ffb8] dark:bg-[#052b14] border-[#b8f28b] dark:border-[#0c401f] text-[#2c7a00] dark:text-green-300',
+        isSubmitted && !result?.isCorrect && 'bg-[#ffdfe0] dark:bg-[#3b1219] border-[#ffb8b8] dark:border-[#571922] text-[#ea2b2b] dark:text-rose-300'
       )}
     >
       <div className="max-w-4xl mx-auto flex items-center justify-between min-h-[64px]">
-        {/* Left Side Feedback Message or SKIP Button (Matching Screenshots 1 & 2) */}
+        {/* Left Side Feedback Message or SKIP Button */}
         <AnimatePresence mode="wait">
           {!isSubmitted ? (
             <button
               onClick={onSkip}
-              className="duo-button duo-button-dark px-8 py-3.5 text-xs font-black text-[#52656d]"
+              className="duo-button duo-button-neutral px-8 py-3.5 text-xs font-black text-gray-500 dark:text-[#52656d]"
             >
               SKIP
             </button>
@@ -52,7 +52,7 @@ export const AnswerFeedback: React.FC<AnswerFeedbackProps> = ({
               <CheckCircle2 className="w-10 h-10 text-[#58cc02] fill-[#58cc02]/20 shrink-0" />
               <div>
                 <h4 className="text-xl font-black text-[#58cc02]">Great job!</h4>
-                <p className="text-xs font-bold text-green-300">+10 XP</p>
+                <p className="text-xs font-bold text-[#2c7a00] dark:text-green-300">+10 XP</p>
               </div>
             </motion.div>
           ) : (
@@ -65,13 +65,13 @@ export const AnswerFeedback: React.FC<AnswerFeedbackProps> = ({
               <XCircle className="w-10 h-10 text-[#ff4b4b] fill-[#ff4b4b]/20 shrink-0" />
               <div>
                 <h4 className="text-lg font-black text-[#ff4b4b]">Correct solution:</h4>
-                <p className="text-sm font-bold text-white">{result?.correctAnswer}</p>
+                <p className="text-sm font-bold text-gray-800 dark:text-white">{result?.correctAnswer}</p>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* Right Side Action Button (Matching Screenshots 1 & 2) */}
+        {/* Right Side Action Button */}
         <div>
           {!isSubmitted ? (
             <button

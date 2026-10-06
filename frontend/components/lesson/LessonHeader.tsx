@@ -16,7 +16,7 @@ export const LessonHeader: React.FC<LessonHeaderProps> = ({ current, total, hear
     <header className="w-full max-w-4xl mx-auto px-4 py-4 flex items-center gap-4 sm:gap-6">
       <Link
         href="/learn"
-        className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors"
+        className="p-2 text-gray-400 dark:text-[#52656d] hover:text-gray-700 dark:hover:text-white rounded-full hover:bg-gray-100 dark:hover:bg-[#20323d] transition-colors"
       >
         <X className="w-6 h-6 stroke-[2.5]" />
       </Link>

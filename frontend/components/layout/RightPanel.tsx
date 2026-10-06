@@ -6,7 +6,7 @@ import { StreakDisplay } from '../gamification/StreakDisplay';
 import { HeartsDisplay } from '../gamification/HeartsDisplay';
 import { GemsDisplay } from '../gamification/GemsDisplay';
 import { UserProfile } from '@/types/user';
-import { Sparkles, ChevronRight, Zap } from 'lucide-react';
+import { Sparkles, ChevronRight, Zap, Shield } from 'lucide-react';
 
 interface RightPanelProps {
   user: UserProfile;
@@ -14,7 +14,7 @@ interface RightPanelProps {
 
 export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
   return (
-    <aside className="hidden lg:flex flex-col w-[380px] h-screen sticky top-0 p-5 bg-[#131f24] border-l-2 border-[#20323d] space-y-5 overflow-y-auto shrink-0 select-none">
+    <aside className="hidden lg:flex flex-col w-[360px] h-screen sticky top-0 p-5 bg-[#131f24] border-l-2 border-[#20323d] space-y-5 overflow-y-auto shrink-0 select-none">
       {/* Top Stats Bar Row */}
       <div className="flex items-center justify-between gap-2 bg-[#131f24] p-1 rounded-2xl">
         <div className="flex items-center gap-1.5 px-2 py-1 rounded-xl hover:bg-[#182730] transition-colors cursor-pointer">
@@ -60,8 +60,8 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
         </div>
 
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-[#9346f8]/20 border-2 border-[#9346f8] flex items-center justify-center shrink-0">
-            <span className="text-2xl select-none">😴</span>
+          <div className="w-12 h-12 rounded-2xl bg-[#ce82ff]/20 border-2 border-[#ce82ff] flex items-center justify-center shrink-0">
+            <Shield className="w-6 h-6 text-[#ce82ff] fill-[#ce82ff]" />
           </div>
           <p className="text-xs font-bold text-[#93a7b1] leading-relaxed">
             Complete a lesson to join this week&apos;s leaderboard and compete against other learners
@@ -92,7 +92,6 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
             <span className="font-black text-xs text-[#52656d]">0 / 10</span>
           </div>
 
-          {/* Progress Bar with Chest */}
           <div className="flex items-center gap-2">
             <div className="flex-1 h-3.5 bg-[#20323d] rounded-full overflow-hidden p-0.5">
               <div className="h-full bg-[#ffc800] rounded-full w-0 transition-all duration-300" />
@@ -102,39 +101,12 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
         </div>
       </div>
 
-      {/* 4. Advertisement Placeholder Card (Gemini Plan as shown in screenshot) */}
-      <div className="bg-[#182730] p-5 rounded-3xl border-2 border-[#20323d] space-y-4">
-        <div className="bg-[#20323d]/60 p-4 rounded-2xl border border-[#20323d] relative space-y-3">
-          <h5 className="font-extrabold text-base text-white leading-snug">
-            Claim your Gemini student plan
-          </h5>
-          <p className="text-xs font-bold text-[#8397a1] leading-relaxed pr-8">
-            Google Gemini: Claim your student plan for 1 year at no cost.
-          </p>
-
-          <button className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-white text-[#131f24] flex items-center justify-center hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-md">
-            <ChevronRight className="w-5 h-5 stroke-[3]" />
-          </button>
-
-          <div className="flex items-center justify-between text-[10px] text-[#52656d] font-bold pt-1">
-            <span>ⓘ ℹ</span>
-            <span>Google Gemini</span>
-          </div>
-        </div>
-
-        <button className="w-full text-center text-xs font-black text-[#1cb0f6] hover:text-[#1899d6] uppercase tracking-wider transition-colors cursor-pointer">
-          REMOVE ADS
-        </button>
-      </div>
-
       {/* Footer Navigation Links */}
       <div className="pt-2 px-1 flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] font-extrabold text-[#52656d] uppercase tracking-wider">
         <Link href="#" className="hover:text-[#93a7b1]">ABOUT</Link>
         <Link href="#" className="hover:text-[#93a7b1]">BLOG</Link>
         <Link href="#" className="hover:text-[#93a7b1]">STORE</Link>
-        <Link href="#" className="hover:text-[#93a7b1]">EFFICACY</Link>
         <Link href="#" className="hover:text-[#93a7b1]">CAREERS</Link>
-        <Link href="#" className="hover:text-[#93a7b1]">INVESTORS</Link>
         <Link href="#" className="hover:text-[#93a7b1]">TERMS</Link>
         <Link href="#" className="hover:text-[#93a7b1]">PRIVACY</Link>
       </div>
