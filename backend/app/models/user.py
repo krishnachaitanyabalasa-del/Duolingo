@@ -8,6 +8,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, index=True)
+    firebase_uid = Column(String, unique=True, index=True, nullable=True)
     username = Column(String, unique=True, index=True, nullable=False)
     display_name = Column(String, nullable=True)
     avatar_id = Column(String, default="avatar_01", nullable=True)
@@ -28,8 +29,10 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
+    unit_progress = relationship("UserUnitProgress", back_populates="user", cascade="all, delete-orphan")
     skill_progress = relationship("UserSkillProgress", back_populates="user", cascade="all, delete-orphan")
     lesson_progress = relationship("UserLessonProgress", back_populates="user", cascade="all, delete-orphan")
     lesson_attempts = relationship("LessonAttempt", back_populates="user", cascade="all, delete-orphan")
+    test_attempts = relationship("UserTestAttempt", back_populates="user", cascade="all, delete-orphan")
     achievements = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")
     sound_progress = relationship("UserSoundProgress", back_populates="user", cascade="all, delete-orphan")

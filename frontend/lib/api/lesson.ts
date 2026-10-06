@@ -125,13 +125,22 @@ export async function getLesson(lessonId: string): Promise<Lesson | null> {
           } else {
             correctStr = String(rawCorrect || '');
           }
+
+          let rawBank: string[] = content.word_bank || ex.word_bank || [];
+          if (!rawBank || rawBank.length === 0) {
+            const correctWords = correctStr.split(/\s+/).filter(Boolean);
+            const distractors = ['Hello', 'Goodbye', 'Please', 'Thanks', 'Yes', 'No', 'Good', 'Morning', 'Night', 'See', 'you'];
+            const combined = Array.from(new Set([...correctWords, ...distractors]));
+            rawBank = combined.slice(0, Math.max(6, correctWords.length + 3));
+          }
+
           return {
             id: ex.id,
             type: 'TRANSLATE',
             question: questionText,
-            originalText: content.text || ex.original_text || ex.prompt || '',
+            originalText: content.text || ex.original_text || ex.prompt || ex.question || 'Goodbye',
             audioText: audioText,
-            wordBank: content.word_bank || ex.word_bank || [],
+            wordBank: rawBank,
             correctAnswer: correctStr,
             explanation,
           };
@@ -191,7 +200,7 @@ export async function getLesson(lessonId: string): Promise<Lesson | null> {
             id: ex.id,
             type: 'TYPE_ANSWER',
             question: questionText,
-            prompt: content.text || ex.prompt,
+            prompt: content.text || ex.prompt || ex.question || 'Type your response',
             audioText: audioText,
             correctAnswer: correctStr,
             acceptableAnswers: acceptable,
@@ -274,16 +283,38 @@ export async function submitAnswer(
         .trim();
 
     if (exercise.type === 'MULTIPLE_CHOICE') {
-      const selectedIdx = typeof userAnswer === 'number' ? userAnswer : parseInt(String(userAnswer), 10);
-      const expectedIdx = exercise.correctAnswer;
-      const expectedOption = exercise.options[expectedIdx] || String(expectedIdx);
+      const options: string[] = exercise.options || [];
 
-      if (!isNaN(selectedIdx)) {
-        isCorrect = selectedIdx === expectedIdx;
+      let userOptionText = String(userAnswer ?? '');
+      let userIdx = -1;
+      if (typeof userAnswer === 'number') {
+        userIdx = userAnswer;
+        userOptionText = options[userIdx] ?? userOptionText;
+      } else if (typeof userAnswer === 'string' && /^\d+$/.test(userAnswer.trim())) {
+        userIdx = parseInt(userAnswer.trim(), 10);
+        userOptionText = options[userIdx] ?? userOptionText;
       } else {
-        isCorrect = normalize(String(userAnswer)) === normalize(expectedOption);
+        userIdx = options.findIndex((opt) => normalize(opt) === normalize(userOptionText));
       }
-      correctAnswerStr = expectedOption;
+
+      const rawExpected = exercise.correctAnswer;
+      let expectedOptionText = String(rawExpected ?? '');
+      let expectedIdx = -1;
+      if (typeof rawExpected === 'number') {
+        expectedIdx = rawExpected;
+        expectedOptionText = options[expectedIdx] ?? expectedOptionText;
+      } else if (typeof rawExpected === 'string' && /^\d+$/.test(rawExpected.trim())) {
+        expectedIdx = parseInt(rawExpected.trim(), 10);
+        expectedOptionText = options[expectedIdx] ?? expectedOptionText;
+      } else {
+        expectedIdx = options.findIndex((opt) => normalize(opt) === normalize(expectedOptionText));
+      }
+
+      isCorrect =
+        (userIdx !== -1 && expectedIdx !== -1 && userIdx === expectedIdx) ||
+        (normalize(userOptionText) === normalize(expectedOptionText));
+
+      correctAnswerStr = expectedOptionText;
     } else if (exercise.type === 'TRANSLATE') {
       isCorrect = normalize(String(userAnswer)) === normalize(exercise.correctAnswer);
       correctAnswerStr = exercise.correctAnswer;
@@ -291,7 +322,14 @@ export async function submitAnswer(
       isCorrect = Boolean(userAnswer);
       correctAnswerStr = 'All pairs matched!';
     } else if (exercise.type === 'FILL_BLANK') {
-      isCorrect = normalize(String(userAnswer)) === normalize(exercise.correctAnswer);
+      const options: string[] = exercise.options || [];
+      let userOptionText = String(userAnswer ?? '');
+      if (typeof userAnswer === 'number' && options[userAnswer]) {
+        userOptionText = options[userAnswer];
+      } else if (typeof userAnswer === 'string' && /^\d+$/.test(userAnswer.trim()) && options[parseInt(userAnswer.trim(), 10)]) {
+        userOptionText = options[parseInt(userAnswer.trim(), 10)];
+      }
+      isCorrect = normalize(userOptionText) === normalize(exercise.correctAnswer);
       correctAnswerStr = exercise.correctAnswer;
     } else if (exercise.type === 'TYPE_ANSWER') {
       const userNorm = normalize(String(userAnswer));
