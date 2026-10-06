@@ -2,31 +2,50 @@ import { apiFetch } from './client';
 import { Lesson, AnswerResult } from '@/types/lesson';
 import { MOCK_LESSONS } from '../mockData';
 
-interface RawBackendLesson {
+interface RawBackendExerciseContent {
+  question?: string;
+  text?: string;
+  speak_text?: string;
+  options?: string[];
+  word_bank?: string[];
+  pairs?: { left: string; right: string; id?: string }[];
+  sentence?: string;
+  sentence_prefix?: string;
+  sentence_suffix?: string;
+}
+
+interface RawBackendExercise {
   id: number;
+  type: string;
+  prompt: string;
+  content?: RawBackendExerciseContent;
+  explanation?: string;
+  order: number;
+
+  // Root properties fallback
+  question?: string;
+  audio_text?: string;
+  options?: string[];
+  correct_answer?: string | number | unknown;
+  original_text?: string;
+  word_bank?: string[];
+  pairs?: { id: string; left: string; right: string }[];
+  sentence_prefix?: string;
+  sentence_suffix?: string;
+}
+
+interface RawBackendLessonDetail {
+  id: number;
+  skill_id: number;
   title: string;
-  skill_id?: number | string;
-  skill_title?: string;
-  exercises: {
-    id: number;
-    type: string;
-    question: string;
-    prompt?: string;
-    audio_text?: string;
-    options?: string[];
-    correct_answer?: string | number;
-    original_text?: string;
-    word_bank?: string[];
-    pairs?: { id: string; left: string; right: string }[];
-    sentence_prefix?: string;
-    sentence_suffix?: string;
-    acceptable_answers?: string[];
-  }[];
+  order: number;
+  xp_reward: number;
+  exercises: RawBackendExercise[];
 }
 
 interface RawAnswerResponse {
   correct: boolean;
-  correct_answer: string;
+  correct_answer: unknown;
   explanation?: string;
   hearts: number;
   xp_earned: number;
@@ -45,15 +64,15 @@ function toNumericLessonId(lessonId: string): number {
   if (!isNaN(parsed)) return parsed;
   if (lessonId === 'sk_greetings') return 1;
   if (lessonId === 'sk_introductions') return 3;
-  if (lessonId === 'sk_food') return 5;
+  if (lessonId === 'sk_food') return 7;
   return 1;
 }
 
 export async function getLesson(lessonId: string): Promise<Lesson | null> {
   const numericId = toNumericLessonId(lessonId);
-  const data = await apiFetch<RawBackendLesson>(`/api/lessons/${numericId}`);
-  
-  if (!data) {
+  const data = await apiFetch<RawBackendLessonDetail>(`/api/lessons/${numericId}`);
+
+  if (!data || !data.exercises) {
     return MOCK_LESSONS[lessonId] || MOCK_LESSONS['sk_food'] || null;
   }
 
@@ -61,57 +80,76 @@ export async function getLesson(lessonId: string): Promise<Lesson | null> {
     return {
       id: data.id,
       skillId: data.skill_id?.toString() || lessonId,
-      skillTitle: data.skill_title || 'Lesson Session',
+      skillTitle: data.title || 'Lesson Session',
       totalExercises: data.exercises.length,
-      xpReward: 15,
+      xpReward: data.xp_reward || 10,
       exercises: data.exercises.map((ex) => {
-        const typeStr = ex.type.toUpperCase();
+        const typeStr = (ex.type || '').toUpperCase();
+        const content = ex.content || {};
+
+        const questionText = content.question || ex.prompt || ex.question || 'Answer the question';
+        const audioText = content.speak_text || content.text || ex.audio_text || '';
+
         if (typeStr === 'MULTIPLE_CHOICE') {
           return {
             id: ex.id,
             type: 'MULTIPLE_CHOICE',
-            question: ex.question,
-            prompt: ex.prompt,
-            audioText: ex.audio_text,
-            options: ex.options || [],
-            correctAnswer: Number(ex.correct_answer || 0),
+            question: questionText,
+            prompt: content.text || ex.prompt,
+            audioText: audioText,
+            options: content.options || ex.options || [],
+            correctAnswer: 0, // Server hides correct answer for security until submission
           };
         } else if (typeStr === 'TRANSLATE') {
           return {
             id: ex.id,
             type: 'TRANSLATE',
-            question: ex.question,
-            originalText: ex.original_text || ex.prompt || '',
-            audioText: ex.audio_text,
-            wordBank: ex.word_bank || [],
-            correctAnswer: String(ex.correct_answer || ''),
+            question: questionText,
+            originalText: content.text || ex.original_text || ex.prompt || '',
+            audioText: audioText,
+            wordBank: content.word_bank || ex.word_bank || [],
+            correctAnswer: '',
           };
         } else if (typeStr === 'MATCH_PAIRS') {
+          const rawPairs = content.pairs || ex.pairs || [];
+          const normalizedPairs = rawPairs.map((p, idx) => ({
+            id: p.id || `p_${idx}`,
+            left: p.left,
+            right: p.right,
+          }));
           return {
             id: ex.id,
             type: 'MATCH_PAIRS',
-            question: ex.question,
-            pairs: ex.pairs || [],
+            question: questionText,
+            pairs: normalizedPairs,
           };
         } else if (typeStr === 'FILL_BLANK') {
+          let prefix = content.sentence_prefix || ex.sentence_prefix || '';
+          let suffix = content.sentence_suffix || ex.sentence_suffix || '';
+
+          if (!prefix && content.sentence) {
+            const parts = content.sentence.split('_____');
+            prefix = parts[0] || '';
+            suffix = parts[1] || '';
+          }
+
           return {
             id: ex.id,
             type: 'FILL_BLANK',
-            question: ex.question,
-            sentencePrefix: ex.sentence_prefix || '',
-            sentenceSuffix: ex.sentence_suffix || '',
-            options: ex.options || [],
-            correctAnswer: String(ex.correct_answer || ''),
+            question: questionText,
+            sentencePrefix: prefix,
+            sentenceSuffix: suffix,
+            options: content.options || ex.options || [],
+            correctAnswer: '',
           };
         } else {
           return {
             id: ex.id,
             type: 'TYPE_ANSWER',
-            question: ex.question,
-            prompt: ex.prompt,
-            audioText: ex.audio_text,
-            correctAnswer: String(ex.correct_answer || ''),
-            acceptableAnswers: ex.acceptable_answers || [],
+            question: questionText,
+            prompt: content.text || ex.prompt,
+            audioText: audioText,
+            correctAnswer: '',
           };
         }
       }),
@@ -124,9 +162,10 @@ export async function getLesson(lessonId: string): Promise<Lesson | null> {
 
 export async function startLesson(lessonId: string): Promise<{ success: boolean; lesson: Lesson | null }> {
   const numericId = toNumericLessonId(lessonId);
-  const data = await apiFetch<{ success: boolean; lesson: RawBackendLesson }>(`/api/lessons/${numericId}/start`, {
-    method: 'POST',
-  });
+  const data = await apiFetch<{ attempt_id: number; lesson: RawBackendLessonDetail; user_hearts: number }>(
+    `/api/lessons/${numericId}/start`,
+    { method: 'POST' }
+  );
 
   if (data) {
     const parsed = await getLesson(lessonId);
@@ -150,9 +189,18 @@ export async function submitAnswer(
   });
 
   if (data) {
+    let formattedCorrect = '';
+    if (typeof data.correct_answer === 'string') {
+      formattedCorrect = data.correct_answer;
+    } else if (Array.isArray(data.correct_answer)) {
+      formattedCorrect = data.correct_answer.map(item => typeof item === 'object' && item !== null ? `${item.left} -> ${item.right}` : String(item)).join(', ');
+    } else {
+      formattedCorrect = String(data.correct_answer || '');
+    }
+
     return {
       isCorrect: data.correct,
-      correctAnswer: data.correct_answer,
+      correctAnswer: formattedCorrect,
       explanation: data.explanation,
       xpEarned: data.xp_earned || (data.correct ? 1 : 0),
       heartsRemaining: data.hearts,
@@ -182,7 +230,7 @@ export async function submitAnswer(
       correctAnswerStr = exercise.correctAnswer;
     } else if (exercise.type === 'TYPE_ANSWER') {
       const formatted = String(userAnswer).trim().toLowerCase();
-      const acceptable = (exercise.acceptableAnswers || [exercise.correctAnswer]).map(a => a.toLowerCase());
+      const acceptable = (exercise.acceptableAnswers || [exercise.correctAnswer]).map((a) => a.toLowerCase());
       isCorrect = acceptable.includes(formatted);
       correctAnswerStr = exercise.correctAnswer;
     }
@@ -199,7 +247,9 @@ export async function submitAnswer(
   };
 }
 
-export async function completeLesson(lessonId: string): Promise<{ xpEarned: number; newTotalXp: number; streak: number }> {
+export async function completeLesson(
+  lessonId: string
+): Promise<{ xpEarned: number; newTotalXp: number; streak: number }> {
   const numericId = toNumericLessonId(lessonId);
   const data = await apiFetch<RawCompleteResponse>(`/api/lessons/${numericId}/complete`, {
     method: 'POST',

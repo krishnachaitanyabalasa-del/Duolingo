@@ -25,7 +25,9 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 export const SkillNode: React.FC<SkillNodeProps> = ({ skill, onClick }) => {
-  const IconComponent = ICON_MAP[skill.icon] || Star;
+  const isEmoji = skill.icon && /\p{Extended_Pictographic}/u.test(skill.icon);
+  const IconComponent = !isEmoji ? (ICON_MAP[skill.icon] || Star) : null;
+
   const isLocked = skill.status === 'LOCKED';
   const isCompleted = skill.status === 'COMPLETED';
   const isCurrent = skill.status === 'CURRENT';
@@ -35,7 +37,7 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ skill, onClick }) => {
       className="relative flex flex-col items-center my-5 group"
       style={{ transform: `translateX(${skill.positionOffset}px)` }}
     >
-      {/* Animated Character Mascot riding on active node (Matching Screenshot 3!) */}
+      {/* Animated Character Mascot riding on active node */}
       {isCurrent && (
         <div className="absolute -top-12 z-20 flex flex-col items-center animate-bob">
           <div className="w-12 h-12 bg-amber-400 rounded-full border-2 border-amber-600 flex items-center justify-center text-xl shadow-lg">
@@ -62,8 +64,12 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ skill, onClick }) => {
             <Lock className="w-8 h-8 text-[#52656d]" />
           ) : isCompleted ? (
             <Check className="w-9 h-9 stroke-[3.5]" />
-          ) : (
+          ) : isEmoji ? (
+            <span className="text-3xl">{skill.icon}</span>
+          ) : IconComponent ? (
             <IconComponent className="w-8 h-8" />
+          ) : (
+            <Star className="w-8 h-8" />
           )}
         </motion.button>
       </div>
