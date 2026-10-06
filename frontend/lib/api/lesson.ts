@@ -40,8 +40,19 @@ interface RawCompleteResponse {
   current_streak: number;
 }
 
+function toNumericLessonId(lessonId: string): number {
+  const parsed = parseInt(lessonId, 10);
+  if (!isNaN(parsed)) return parsed;
+  if (lessonId === 'sk_greetings') return 1;
+  if (lessonId === 'sk_introductions') return 3;
+  if (lessonId === 'sk_food') return 5;
+  return 1;
+}
+
 export async function getLesson(lessonId: string): Promise<Lesson | null> {
-  const data = await apiFetch<RawBackendLesson>(`/api/lessons/${lessonId}`);
+  const numericId = toNumericLessonId(lessonId);
+  const data = await apiFetch<RawBackendLesson>(`/api/lessons/${numericId}`);
+  
   if (!data) {
     return MOCK_LESSONS[lessonId] || MOCK_LESSONS['sk_food'] || null;
   }
@@ -112,7 +123,8 @@ export async function getLesson(lessonId: string): Promise<Lesson | null> {
 }
 
 export async function startLesson(lessonId: string): Promise<{ success: boolean; lesson: Lesson | null }> {
-  const data = await apiFetch<{ success: boolean; lesson: RawBackendLesson }>(`/api/lessons/${lessonId}/start`, {
+  const numericId = toNumericLessonId(lessonId);
+  const data = await apiFetch<{ success: boolean; lesson: RawBackendLesson }>(`/api/lessons/${numericId}/start`, {
     method: 'POST',
   });
 
@@ -131,7 +143,8 @@ export async function submitAnswer(
   userAnswer: unknown,
   currentHearts: number
 ): Promise<AnswerResult> {
-  const data = await apiFetch<RawAnswerResponse>(`/api/lessons/${lessonId}/answer`, {
+  const numericId = toNumericLessonId(lessonId);
+  const data = await apiFetch<RawAnswerResponse>(`/api/lessons/${numericId}/answer`, {
     method: 'POST',
     body: JSON.stringify({ exercise_id: exerciseId, answer: userAnswer }),
   });
@@ -187,7 +200,8 @@ export async function submitAnswer(
 }
 
 export async function completeLesson(lessonId: string): Promise<{ xpEarned: number; newTotalXp: number; streak: number }> {
-  const data = await apiFetch<RawCompleteResponse>(`/api/lessons/${lessonId}/complete`, {
+  const numericId = toNumericLessonId(lessonId);
+  const data = await apiFetch<RawCompleteResponse>(`/api/lessons/${numericId}/complete`, {
     method: 'POST',
   });
 
