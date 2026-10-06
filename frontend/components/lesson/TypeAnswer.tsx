@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { TypeAnswerExercise } from '@/types/lesson';
 import { SpeakButton } from '../audio/SpeakButton';
 import { MicrophoneButton } from '../audio/MicrophoneButton';
@@ -24,28 +24,42 @@ export const TypeAnswer: React.FC<TypeAnswerProps> = ({
     setText('');
   }, [exercise.id]);
 
-  const handleChange = (val: string) => {
-    if (disabled) return;
-    setText(val);
-    onSelect(val);
-  };
+  const handleChange = useCallback(
+    (val: string) => {
+      if (disabled) return;
+      setText(val);
+      onSelect(val);
+    },
+    [disabled, onSelect]
+  );
+
+  const handleSpeechTranscript = useCallback(
+    (spoken: string) => {
+      if (disabled || !spoken) return;
+      handleChange(spoken);
+    },
+    [disabled, handleChange]
+  );
 
   const insertChar = (char: string) => {
     if (disabled) return;
     const newText = text + char;
-    setText(newText);
-    onSelect(newText);
+    handleChange(newText);
   };
 
   return (
     <div className="w-full max-w-2xl mx-auto flex flex-col items-start px-4">
-      <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-8 tracking-tight">Type in Spanish</h1>
+      <h1 className="text-3xl font-black text-gray-900 dark:text-white mb-8 tracking-tight">
+        Type in Spanish
+      </h1>
 
       {/* Audio Text Prompt */}
       {exercise.audioText && (
         <div className="flex items-center gap-4 mb-6 p-4 bg-gray-50 dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-2xl w-full">
           <SpeakButton text={exercise.audioText} />
-          <span className="font-extrabold text-xl text-gray-900 dark:text-white">{exercise.prompt || exercise.audioText}</span>
+          <span className="font-extrabold text-xl text-gray-900 dark:text-white">
+            {exercise.prompt || exercise.audioText}
+          </span>
         </div>
       )}
 
@@ -61,9 +75,7 @@ export const TypeAnswer: React.FC<TypeAnswerProps> = ({
         />
 
         <div className="flex justify-center">
-          <MicrophoneButton
-            onTranscriptChange={(spoken) => handleChange(text ? `${text} ${spoken}` : spoken)}
-          />
+          <MicrophoneButton lang="es-ES" onTranscriptChange={handleSpeechTranscript} />
         </div>
       </div>
 
@@ -72,6 +84,7 @@ export const TypeAnswer: React.FC<TypeAnswerProps> = ({
         {SPECIAL_CHARS.map((char) => (
           <button
             key={char}
+            type="button"
             disabled={disabled}
             onClick={() => insertChar(char)}
             className="px-3.5 py-2 bg-white dark:bg-[#182730] border-2 border-b-4 border-gray-200 dark:border-[#20323d] rounded-xl font-extrabold text-base hover:bg-gray-100 dark:hover:bg-[#20323d] text-gray-800 dark:text-white cursor-pointer transition-all active:translate-y-0.5 shadow-xs"
