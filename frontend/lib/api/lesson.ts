@@ -240,9 +240,10 @@ export async function submitAnswer(
     if (typeof data.correct_answer === 'string') {
       formattedCorrect = data.correct_answer;
     } else if (Array.isArray(data.correct_answer)) {
-      formattedCorrect = data.correct_answer
-        .map(item => (typeof item === 'object' && item !== null ? `${item.left} -> ${item.right}` : String(item)))
-        .join(', ');
+      const isPairArray = data.correct_answer.length > 0 && typeof data.correct_answer[0] === 'object' && data.correct_answer[0] !== null;
+      formattedCorrect = isPairArray
+        ? data.correct_answer.map((item: any) => `${item.left} -> ${item.right}`).join(', ')
+        : data.correct_answer.map(String).join(' ');
     } else {
       formattedCorrect = String(data.correct_answer || '');
     }

@@ -124,7 +124,7 @@ def _validate_exercise_answer(exercise: Exercise, answer: Any) -> tuple[bool, An
         return is_correct, expected_display
 
     elif exercise.type == "MATCH_PAIRS":
-        if answer is True:
+        if answer is True or str(answer).lower() == 'true':
             return True, correct_ans
 
         def normalize_pairs(pairs_data):

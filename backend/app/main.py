@@ -5,11 +5,12 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.config import settings
-from app.database import engine, Base, SessionLocal
+from app.database import engine, Base, SessionLocal, init_and_migrate_db
 from app.seed.seed_data import seed_database
 from app.routers import (
     course_router,
     user_router,
+    profile_router,
     progress_router,
     lesson_router,
     gamification_router,
@@ -21,7 +22,7 @@ from app.routers import (
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan context manager to handle DB initialization and auto-seeding on startup."""
-    Base.metadata.create_all(bind=engine)
+    init_and_migrate_db()
     db = SessionLocal()
     try:
         seed_database(db)
@@ -74,6 +75,7 @@ api_prefix = settings.API_V1_STR
 
 app.include_router(course_router, prefix=api_prefix)
 app.include_router(user_router, prefix=api_prefix)
+app.include_router(profile_router, prefix=api_prefix)
 app.include_router(progress_router, prefix=api_prefix)
 app.include_router(lesson_router, prefix=api_prefix)
 app.include_router(gamification_router, prefix=api_prefix)

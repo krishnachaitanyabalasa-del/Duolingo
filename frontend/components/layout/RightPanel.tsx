@@ -5,7 +5,10 @@ import Link from 'next/link';
 import { StreakDisplay } from '../gamification/StreakDisplay';
 import { HeartsDisplay } from '../gamification/HeartsDisplay';
 import { GemsDisplay } from '../gamification/GemsDisplay';
-import { UserProfile } from '@/types/user';
+import { usePathname } from 'next/navigation';
+import { ProfileRightPanel } from '../profile/ProfileRightPanel';
+import { getFullProfile, getFollowers, getFollowing, toggleFollow } from '@/lib/api/user';
+import type { FullProfile, FollowerUser, UserProfile } from '@/types/user';
 import { Zap, Shield, Sparkles } from 'lucide-react';
 
 interface RightPanelProps {
@@ -13,6 +16,51 @@ interface RightPanelProps {
 }
 
 export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
+  const pathname = usePathname();
+  const isProfile = pathname === '/profile';
+
+  const [profile, setProfile] = React.useState<FullProfile | null>(null);
+  const [followers, setFollowers] = React.useState<FollowerUser[]>([]);
+  const [following, setFollowing] = React.useState<FollowerUser[]>([]);
+
+  React.useEffect(() => {
+    if (isProfile) {
+      Promise.all([getFullProfile(), getFollowers(), getFollowing()]).then(
+        ([p, flw, flg]) => {
+          setProfile(p);
+          setFollowers(flw);
+          setFollowing(flg);
+        }
+      );
+    }
+  }, [isProfile]);
+
+  const handleToggleFollow = async (userId: number | string) => {
+    await toggleFollow(userId);
+    const [flw, flg, p] = await Promise.all([getFollowers(), getFollowing(), getFullProfile()]);
+    setFollowers(flw);
+    setFollowing(flg);
+    setProfile(p);
+  };
+
+  if (isProfile && profile) {
+    return (
+      <ProfileRightPanel
+        profile={profile}
+        followers={followers}
+        following={following}
+        onFindFriendsClick={() => {
+          // Triggers modal via custom event or profile state
+          window.dispatchEvent(new CustomEvent('open-find-friends'));
+        }}
+        onInviteFriendsClick={() => {
+          window.dispatchEvent(new CustomEvent('open-invite-friends'));
+        }}
+        onToggleFollow={handleToggleFollow}
+      />
+    );
+  }
+
   return (
     <aside className="hidden lg:flex flex-col w-[360px] h-screen sticky top-0 p-5 bg-white dark:bg-[#131f24] border-l-2 border-gray-200 dark:border-[#20323d] space-y-5 overflow-y-auto shrink-0 select-none transition-colors duration-150">
       {/* Top Stats Bar Row */}

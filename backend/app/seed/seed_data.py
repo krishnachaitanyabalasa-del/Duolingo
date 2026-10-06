@@ -26,24 +26,40 @@ def seed_database(db: Session = None):
             learner = User(
                 id=1,
                 username="learner",
+                display_name="krishnachaitanyabalasa",
+                avatar_id="avatar_01",
+                bio="Learning languages every day on Duolingo!",
+                joined_date="Joined April 2025",
                 email="learner@duolingo.clone",
                 xp=120,
                 streak=5,
                 longest_streak=5,
                 hearts=5,
-                gems=100,
+                gems=6450,
+                league="Amethyst",
+                top_three_finishes=7,
+                following_count=0,
+                followers_count=1,
                 last_activity_date=yesterday,
             )
 
             leaderboard_users = [
                 learner,
-                User(id=2, username="Orion", email="orion@example.com", xp=1250, streak=14, longest_streak=14, hearts=5, gems=350, last_activity_date=date.today()),
-                User(id=3, username="Sarah", email="sarah@example.com", xp=980, streak=9, longest_streak=12, hearts=4, gems=200, last_activity_date=date.today()),
-                User(id=4, username="Rahul", email="rahul@example.com", xp=750, streak=7, longest_streak=7, hearts=5, gems=150, last_activity_date=yesterday),
-                User(id=5, username="Elena", email="elena@example.com", xp=90, streak=2, longest_streak=3, hearts=3, gems=80, last_activity_date=yesterday),
-                User(id=6, username="David", email="david@example.com", xp=45, streak=1, longest_streak=1, hearts=5, gems=50, last_activity_date=date.today()),
+                User(id=2, username="Orion", display_name="Orion Star", avatar_id="avatar_03", email="orion@example.com", xp=1250, streak=14, longest_streak=14, hearts=5, gems=350, last_activity_date=date.today()),
+                User(id=3, username="Sarah", display_name="Sarah Miller", avatar_id="avatar_02", email="sarah@example.com", xp=980, streak=9, longest_streak=12, hearts=4, gems=200, last_activity_date=date.today()),
+                User(id=4, username="Rahul", display_name="Rahul Sharma", avatar_id="avatar_04", email="rahul@example.com", xp=750, streak=7, longest_streak=7, hearts=5, gems=150, last_activity_date=yesterday),
+                User(id=5, username="Elena", display_name="Elena Rostova", avatar_id="avatar_05", email="elena@example.com", xp=90, streak=2, longest_streak=3, hearts=3, gems=80, last_activity_date=yesterday),
+                User(id=6, username="David", display_name="David Chen", avatar_id="avatar_06", email="david@example.com", xp=45, streak=1, longest_streak=1, hearts=5, gems=50, last_activity_date=date.today()),
             ]
             db.add_all(leaderboard_users)
+            db.commit()
+        else:
+            learner.xp = 120
+            learner.streak = 5
+            learner.longest_streak = 5
+            learner.hearts = 5
+            learner.gems = 100
+            learner.last_activity_date = yesterday
             db.commit()
 
         # 2. Seed Course, Units, Skills, Lessons
@@ -138,15 +154,15 @@ def seed_database(db: Session = None):
                 ),
                 Exercise(
                     id=6, lesson_id=1, type="MULTIPLE_CHOICE",
-                    prompt="How do you say 'Buenas noches' in the evening?",
-                    content={"question": "How do you say 'Buenas noches' in the evening?", "text": "Buenas noches", "options": ["Good morning", "Goodbye", "Good evening", "Good night"], "speak_text": "Good evening"},
-                    correct_answer="Good evening", explanation="'Good evening' is used when greeting someone in the evening.", order=6
+                    prompt="How do you say 'Buenas noches' at night?",
+                    content={"question": "How do you say 'Buenas noches' at night?", "text": "Buenas noches", "options": ["Good morning", "Goodbye", "Good evening", "Good night"], "speak_text": "Good night"},
+                    correct_answer="Good night", explanation="'Buenas noches' translates to 'Good night'.", order=6
                 ),
                 Exercise(
                     id=7, lesson_id=1, type="TRANSLATE",
                     prompt="Translate to English: Gracias",
                     content={"question": "Translate to English: Gracias", "text": "Gracias", "word_bank": ["Thank", "you", "Hello", "Bye"], "speak_text": "Thank you"},
-                    correct_answer=["Thank", "you"], explanation="'Gracias' translates to 'Thank you'.", order=7
+                    correct_answer="Thank you", explanation="'Gracias' translates to 'Thank you'.", order=7
                 ),
                 Exercise(
                     id=8, lesson_id=1, type="FILL_BLANK",
