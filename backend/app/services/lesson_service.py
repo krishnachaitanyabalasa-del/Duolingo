@@ -24,9 +24,156 @@ from app.services.quest_service import sync_quest_progress
 from app.utils.date_utils import update_user_streak
 
 
+def find_next_lesson(db: Session, current_lesson: Lesson) -> Lesson | None:
+    """
+    Finds the sequentially next lesson in the course path:
+    1. Next lesson in same skill (order > current.order)
+    2. First lesson in next skill of same unit
+    3. First lesson in next unit
+    4. Fallback: lesson with id > current.id
+    """
+    # 1. Same skill
+    next_in_skill = (
+        db.query(Lesson)
+        .filter(Lesson.skill_id == current_lesson.skill_id, Lesson.order > current_lesson.order)
+        .order_by(Lesson.order.asc())
+        .first()
+    )
+    if next_in_skill:
+        return next_in_skill
+
+    # 2. Next skill in same unit
+    current_skill = current_lesson.skill
+    if current_skill:
+        next_skill = (
+            db.query(Skill)
+            .filter(Skill.unit_id == current_skill.unit_id, Skill.order > current_skill.order)
+            .order_by(Skill.order.asc())
+            .first()
+        )
+        if next_skill:
+            first_lesson = (
+                db.query(Lesson)
+                .filter(Lesson.skill_id == next_skill.id)
+                .order_by(Lesson.order.asc())
+                .first()
+            )
+            if first_lesson:
+                return first_lesson
+
+        # 3. Next unit's first skill's first lesson
+        current_unit = current_skill.unit
+        if current_unit:
+            next_unit = (
+                db.query(current_unit.__class__)
+                .filter(current_unit.__class__.course_id == current_unit.course_id, current_unit.__class__.order > current_unit.order)
+                .order_by(current_unit.__class__.order.asc())
+                .first()
+            )
+            if next_unit:
+                first_skill = (
+                    db.query(Skill)
+                    .filter(Skill.unit_id == next_unit.id)
+                    .order_by(Skill.order.asc())
+                    .first()
+                )
+                if first_skill:
+                    first_lesson = (
+                        db.query(Lesson)
+                        .filter(Lesson.skill_id == first_skill.id)
+                        .order_by(Lesson.order.asc())
+                        .first()
+                    )
+                    if first_lesson:
+                        return first_lesson
+
+    # 4. Fallback to ID-based ordering
+    return (
+        db.query(Lesson)
+        .filter(Lesson.id > current_lesson.id)
+        .order_by(Lesson.id.asc())
+        .first()
+    )
+
+
+def unlock_next_lesson(db: Session, user_id: int, current_lesson: Lesson) -> Lesson | None:
+    """Unlocks the next sequential lesson for the user, updating skills/units as needed."""
+    from app.models.progress import UserUnitProgress
+
+    next_lesson = find_next_lesson(db, current_lesson)
+    if not next_lesson:
+        return None
+
+    next_lp = (
+        db.query(UserLessonProgress)
+        .filter(UserLessonProgress.user_id == user_id, UserLessonProgress.lesson_id == next_lesson.id)
+        .first()
+    )
+    if not next_lp:
+        next_lp = UserLessonProgress(
+            user_id=user_id,
+            lesson_id=next_lesson.id,
+            status="AVAILABLE",
+            is_completed=False,
+        )
+        db.add(next_lp)
+        db.flush()
+    elif next_lp.status == "LOCKED":
+        next_lp.status = "AVAILABLE"
+        db.flush()
+
+    # Also unlock next skill only if it is a new/different skill
+    next_skill = next_lesson.skill
+    if next_skill and next_skill.id != current_lesson.skill_id:
+        sp = (
+            db.query(UserSkillProgress)
+            .filter(UserSkillProgress.user_id == user_id, UserSkillProgress.skill_id == next_skill.id)
+            .first()
+        )
+        if not sp:
+            sp = UserSkillProgress(
+                user_id=user_id,
+                skill_id=next_skill.id,
+                status="AVAILABLE",
+                unlocked_at=datetime.utcnow(),
+            )
+            db.add(sp)
+            db.flush()
+        elif sp.status == "LOCKED":
+            sp.status = "AVAILABLE"
+            sp.unlocked_at = datetime.utcnow()
+            db.flush()
+
+        # Also unlock unit if next lesson belongs to a different unit
+        next_unit = next_skill.unit
+        current_unit_id = current_lesson.skill.unit_id if current_lesson.skill else None
+        if next_unit and next_unit.id != current_unit_id:
+            up = (
+                db.query(UserUnitProgress)
+                .filter(UserUnitProgress.user_id == user_id, UserUnitProgress.unit_id == next_unit.id)
+                .first()
+            )
+            if not up:
+                up = UserUnitProgress(
+                    user_id=user_id,
+                    unit_id=next_unit.id,
+                    status="AVAILABLE",
+                    unlocked_at=datetime.utcnow(),
+                )
+                db.add(up)
+                db.flush()
+            elif up.status == "LOCKED":
+                up.status = "AVAILABLE"
+                up.unlocked_at = datetime.utcnow()
+                db.flush()
+
+    return next_lesson
+
+
 def start_lesson(db: Session, lesson_id: int, user_id: int) -> LessonStartResponse:
     """
     Starts a lesson for the user. Validates user has > 0 hearts.
+    Validates lesson is unlocked (AVAILABLE, IN_PROGRESS, or COMPLETED for practice).
     Creates an active LessonAttempt record.
     """
     user = db.query(User).filter(User.id == user_id).first()
@@ -39,7 +186,54 @@ def start_lesson(db: Session, lesson_id: int, user_id: int) -> LessonStartRespon
             detail="No hearts remaining. Refill your hearts to continue learning."
         )
 
-    lesson_detail = get_lesson_detail(db, lesson_id, user_id)
+    lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
+    if not lesson:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Lesson with id {lesson_id} not found."
+        )
+
+    # Check lesson progression status
+    lp = (
+        db.query(UserLessonProgress)
+        .filter(UserLessonProgress.user_id == user.id, UserLessonProgress.lesson_id == lesson_id)
+        .first()
+    )
+
+    # If first lesson in course and no record exists, initialize it as AVAILABLE
+    if not lp:
+        first_lesson = db.query(Lesson).order_by(Lesson.id.asc()).first()
+        is_first = (first_lesson and first_lesson.id == lesson_id)
+        lp = UserLessonProgress(
+            user_id=user.id,
+            lesson_id=lesson_id,
+            status="AVAILABLE" if is_first else "LOCKED",
+            is_completed=False,
+        )
+        db.add(lp)
+        db.flush()
+
+    if lp.status == "LOCKED":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Lesson is locked. Complete previous lessons to unlock."
+        )
+
+    # Only set IN_PROGRESS if lesson is not already COMPLETED (PRACTICE MODE maintains COMPLETED)
+    if lp.status == "AVAILABLE":
+        lp.status = "IN_PROGRESS"
+
+    # Also update skill progress status to IN_PROGRESS if AVAILABLE
+    if lesson.skill:
+        sp = (
+            db.query(UserSkillProgress)
+            .filter(UserSkillProgress.user_id == user.id, UserSkillProgress.skill_id == lesson.skill.id)
+            .first()
+        )
+        if sp and sp.status == "AVAILABLE":
+            sp.status = "IN_PROGRESS"
+
+    lesson_detail = get_lesson_detail(db, lesson_id, user.id)
 
     # Create new attempt session
     attempt = LessonAttempt(
@@ -255,18 +449,23 @@ def complete_lesson(db: Session, lesson_id: int, user_id: int) -> LessonComplete
         lesson_prog = UserLessonProgress(
             user_id=user.id,
             lesson_id=lesson_id,
-            is_completed=False,
+            status="COMPLETED",
+            is_completed=True,
+            completed_at=datetime.utcnow(),
             attempts_count=1,
         )
         db.add(lesson_prog)
+        already_completed = False
     else:
         lesson_prog.attempts_count += 1
+        already_completed = lesson_prog.is_completed
 
-    already_completed = lesson_prog.is_completed
     xp_awarded = 0
+    next_lesson = None
 
     if not already_completed:
         lesson_prog.is_completed = True
+        lesson_prog.status = "COMPLETED"
         lesson_prog.completed_at = datetime.utcnow()
 
         # Award lesson completion XP bonus (+10 XP) exactly once
@@ -274,6 +473,11 @@ def complete_lesson(db: Session, lesson_id: int, user_id: int) -> LessonComplete
         record_xp(db, user, xp_awarded)
         record_lesson_completed(db, user)
         sync_quest_progress(db, user)
+        db.flush()
+    else:
+        # Idempotent re-completion or practice: preserve COMPLETED status, no new XP
+        lesson_prog.is_completed = True
+        lesson_prog.status = "COMPLETED"
         db.flush()
 
     # Update active attempt session if exists
@@ -300,7 +504,7 @@ def complete_lesson(db: Session, lesson_id: int, user_id: int) -> LessonComplete
 
     # Update Skill Progress
     skill = lesson.skill
-    all_lessons_in_skill = db.query(Lesson).filter(Lesson.skill_id == skill.id).all()
+    all_lessons_in_skill = db.query(Lesson).filter(Lesson.skill_id == skill.id).all() if skill else []
     completed_lessons_count = (
         db.query(UserLessonProgress)
         .filter(
@@ -326,76 +530,85 @@ def complete_lesson(db: Session, lesson_id: int, user_id: int) -> LessonComplete
     else:
         crown_level = 0
 
-    skill_prog = (
-        db.query(UserSkillProgress)
-        .filter(UserSkillProgress.user_id == user.id, UserSkillProgress.skill_id == skill.id)
-        .first()
-    )
-
-    if not skill_prog:
-        skill_prog = UserSkillProgress(
-            user_id=user.id,
-            skill_id=skill.id,
-            status="IN_PROGRESS",
-            crown_level=crown_level,
-            progress_percentage=progress_percentage,
-        )
-        db.add(skill_prog)
-    else:
-        skill_prog.progress_percentage = progress_percentage
-        skill_prog.crown_level = crown_level
-        if skill_prog.status == "AVAILABLE" or skill_prog.status == "LOCKED":
-            skill_prog.status = "IN_PROGRESS"
-
     skill_just_completed = False
     next_skill_unlocked_info = None
 
-    if progress_percentage >= 100.0 and skill_prog.status != "COMPLETED":
-        skill_prog.status = "COMPLETED"
-        skill_prog.completed_at = datetime.utcnow()
-        skill_just_completed = True
-
-        # Automatically unlock next skill in sequence
-        next_skill = (
-            db.query(Skill)
-            .filter(Skill.unit_id == skill.unit_id, Skill.order > skill.order)
-            .order_by(Skill.order.asc())
+    if skill:
+        skill_prog = (
+            db.query(UserSkillProgress)
+            .filter(UserSkillProgress.user_id == user.id, UserSkillProgress.skill_id == skill.id)
             .first()
         )
-        if not next_skill:
-            # Check next unit's first skill
-            next_unit_skills = (
+
+        if not skill_prog:
+            skill_prog = UserSkillProgress(
+                user_id=user.id,
+                skill_id=skill.id,
+                status="IN_PROGRESS" if progress_percentage < 100.0 else "COMPLETED",
+                crown_level=crown_level,
+                progress_percentage=progress_percentage,
+            )
+            db.add(skill_prog)
+        else:
+            skill_prog.progress_percentage = progress_percentage
+            skill_prog.crown_level = crown_level
+            if skill_prog.status == "AVAILABLE" or skill_prog.status == "LOCKED":
+                skill_prog.status = "IN_PROGRESS"
+
+        if progress_percentage >= 100.0 and skill_prog.status != "COMPLETED":
+            skill_prog.status = "COMPLETED"
+            skill_prog.completed_at = datetime.utcnow()
+            skill_just_completed = True
+
+            # Automatically unlock next skill in sequence
+            next_skill = (
                 db.query(Skill)
-                .join(Skill.unit)
-                .filter(Skill.unit_id > skill.unit_id)
-                .order_by(Skill.unit_id.asc(), Skill.order.asc())
+                .filter(Skill.unit_id == skill.unit_id, Skill.order > skill.order)
+                .order_by(Skill.order.asc())
                 .first()
             )
-            next_skill = next_unit_skills
-
-        if next_skill:
-            next_sp = (
-                db.query(UserSkillProgress)
-                .filter(UserSkillProgress.user_id == user.id, UserSkillProgress.skill_id == next_skill.id)
-                .first()
-            )
-            if not next_sp:
-                next_sp = UserSkillProgress(
-                    user_id=user.id,
-                    skill_id=next_skill.id,
-                    status="AVAILABLE",
-                    unlocked_at=datetime.utcnow(),
+            if not next_skill and skill.unit:
+                # Check next unit's first skill
+                next_skill = (
+                    db.query(Skill)
+                    .join(Skill.unit)
+                    .filter(Skill.unit_id > skill.unit_id)
+                    .order_by(Skill.unit_id.asc(), Skill.order.asc())
+                    .first()
                 )
-                db.add(next_sp)
-            elif next_sp.status == "LOCKED":
-                next_sp.status = "AVAILABLE"
-                next_sp.unlocked_at = datetime.utcnow()
 
-            next_skill_unlocked_info = {
-                "id": next_skill.id,
-                "title": next_skill.title,
-                "status": "AVAILABLE"
-            }
+            if next_skill:
+                next_sp = (
+                    db.query(UserSkillProgress)
+                    .filter(UserSkillProgress.user_id == user.id, UserSkillProgress.skill_id == next_skill.id)
+                    .first()
+                )
+                if not next_sp:
+                    next_sp = UserSkillProgress(
+                        user_id=user.id,
+                        skill_id=next_skill.id,
+                        status="AVAILABLE",
+                        unlocked_at=datetime.utcnow(),
+                    )
+                    db.add(next_sp)
+                elif next_sp.status == "LOCKED":
+                    next_sp.status = "AVAILABLE"
+                    next_sp.unlocked_at = datetime.utcnow()
+
+                next_skill_unlocked_info = {
+                    "id": next_skill.id,
+                    "title": next_skill.title,
+                    "status": "AVAILABLE"
+                }
+
+        db.flush()
+
+    # Unlock next lesson in sequence
+    if not already_completed:
+        next_lesson = unlock_next_lesson(db, user.id, lesson)
+    else:
+        next_lesson = find_next_lesson(db, lesson)
+    db.flush()
 
     # Update Streak
     update_user_streak(user)
@@ -407,9 +620,14 @@ def complete_lesson(db: Session, lesson_id: int, user_id: int) -> LessonComplete
     db.refresh(user)
 
     return LessonCompleteResponse(
+        lesson_id=lesson.id,
+        status="COMPLETED",
         completed=True,
+        xp_earned=xp_awarded,
         xp_awarded=xp_awarded,
         total_xp=user.xp,
+        next_lesson_id=next_lesson.id if next_lesson else None,
+        next_lesson_unlocked=bool(next_lesson),
         skill_completed=skill_just_completed,
         next_skill_unlocked=next_skill_unlocked_info,
         current_streak=user.streak,

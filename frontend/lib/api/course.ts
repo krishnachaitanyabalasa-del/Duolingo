@@ -9,6 +9,8 @@ export interface LessonSummary {
   order: number;
   xp_reward: number;
   is_completed: boolean;
+  completed?: boolean;
+  status?: 'LOCKED' | 'AVAILABLE' | 'IN_PROGRESS' | 'COMPLETED';
 }
 
 export interface CoursePathSkill {
@@ -33,6 +35,7 @@ export interface CoursePathUnit {
   status: 'LOCKED' | 'AVAILABLE' | 'IN_PROGRESS' | 'COMPLETED';
   progress_percent: number;
   skills: CoursePathSkill[];
+  lessons?: LessonSummary[];
   test?: UnitTestInfo;
 }
 

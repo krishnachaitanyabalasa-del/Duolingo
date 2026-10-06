@@ -23,6 +23,8 @@ class LessonSummary(BaseModel):
     order: int
     xp_reward: int
     is_completed: bool = False
+    completed: bool = False
+    status: str = "LOCKED"  # LOCKED, AVAILABLE, IN_PROGRESS, COMPLETED
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -137,6 +139,7 @@ class CoursePathUnit(BaseModel):
     status: str = "LOCKED"  # LOCKED, AVAILABLE, IN_PROGRESS, COMPLETED
     progress_percent: float = 0.0
     skills: list[CoursePathSkill] = []
+    lessons: list[LessonSummary] = []
     test: Optional[UnitTestInfo] = None
 
 

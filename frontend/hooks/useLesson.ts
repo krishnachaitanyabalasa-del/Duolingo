@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Lesson, AnswerResult } from '@/types/lesson';
-import { getLesson, submitAnswer as apiSubmitAnswer, completeLesson as apiCompleteLesson } from '@/lib/api/lesson';
+import { getLesson, startLesson, submitAnswer as apiSubmitAnswer, completeLesson as apiCompleteLesson } from '@/lib/api/lesson';
 import { sounds } from '@/lib/sound';
 import { useUserContext } from '@/context/UserContext';
 
@@ -34,6 +34,13 @@ export function useLesson(lessonId: string, initialHearts = 5) {
     setXpEarnedTotal(0);
     setAccuracyEarned(100);
     setStreakEarned(user?.streak || 1);
+
+    // Register lesson start on backend (marks status IN_PROGRESS)
+    try {
+      await startLesson(lessonId);
+    } catch (err) {
+      console.warn('startLesson failed:', err);
+    }
 
     const data = await getLesson(lessonId);
     setLesson(data);

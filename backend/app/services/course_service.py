@@ -80,6 +80,7 @@ def get_active_course(db: Session, user_id: int) -> CourseRead:
             for lesson in skill.lessons:
                 lp = lesson_progress_map.get(lesson.id)
                 is_completed = lp.is_completed if lp else False
+                lesson_status = lp.status if (lp and lp.status) else ("COMPLETED" if is_completed else "LOCKED")
                 lesson_summaries.append(
                     LessonSummary(
                         id=lesson.id,
@@ -88,6 +89,8 @@ def get_active_course(db: Session, user_id: int) -> CourseRead:
                         order=lesson.order,
                         xp_reward=lesson.xp_reward,
                         is_completed=is_completed,
+                        completed=is_completed,
+                        status=lesson_status,
                     )
                 )
 
@@ -197,7 +200,10 @@ def get_course_path(db: Session, user: User) -> CoursePathResponse:
             )
 
         skill_path_list = []
+        unit_lesson_summaries = []
         prev_skill_completed = (unit_status != "LOCKED")
+        prev_lesson_completed = (u_idx == 0 or prev_unit_completed)
+
         for s_idx, skill in enumerate(unit.skills):
             sp = user_skills.get(skill.id)
             all_s_lessons = skill.lessons
@@ -215,15 +221,36 @@ def get_course_path(db: Session, user: User) -> CoursePathResponse:
 
             lesson_summaries = []
             for lesson in all_s_lessons:
-                is_comp = user_lessons.get(lesson.id).is_completed if user_lessons.get(lesson.id) else False
-                lesson_summaries.append(LessonSummary(
+                lp = user_lessons.get(lesson.id)
+                is_comp = bool(lp and lp.is_completed)
+
+                if unit_status == "LOCKED":
+                    l_status = "LOCKED"
+                elif is_comp:
+                    l_status = "COMPLETED"
+                elif lp and lp.status in ("AVAILABLE", "IN_PROGRESS"):
+                    l_status = lp.status
+                elif prev_lesson_completed:
+                    l_status = "AVAILABLE"
+                    if lp and lp.status != "AVAILABLE":
+                        lp.status = "AVAILABLE"
+                else:
+                    l_status = "LOCKED"
+
+                prev_lesson_completed = is_comp
+
+                summary = LessonSummary(
                     id=lesson.id,
                     skill_id=lesson.skill_id,
                     title=lesson.title,
                     order=lesson.order,
                     xp_reward=lesson.xp_reward,
-                    is_completed=is_comp
-                ))
+                    is_completed=is_comp,
+                    completed=is_comp,
+                    status=l_status,
+                )
+                lesson_summaries.append(summary)
+                unit_lesson_summaries.append(summary)
 
             skill_path_list.append(CoursePathSkill(
                 id=skill.id,
@@ -241,6 +268,7 @@ def get_course_path(db: Session, user: User) -> CoursePathResponse:
             status=unit_status,
             progress_percent=unit_progress_pct,
             skills=skill_path_list,
+            lessons=unit_lesson_summaries,
             test=test_info
         ))
 
@@ -465,19 +493,25 @@ def get_skill_detail(db: Session, skill_id: int, user_id: int) -> SkillRead:
         .filter(UserLessonProgress.user_id == user_id)
         .all()
     )
-    lesson_map = {lp.lesson_id: lp.is_completed for lp in user_lessons}
+    lesson_map = {lp.lesson_id: lp for lp in user_lessons}
 
-    lesson_summaries = [
-        LessonSummary(
-            id=l.id,
-            skill_id=l.skill_id,
-            title=l.title,
-            order=l.order,
-            xp_reward=l.xp_reward,
-            is_completed=lesson_map.get(l.id, False),
+    lesson_summaries = []
+    for l in skill.lessons:
+        lp = lesson_map.get(l.id)
+        is_comp = lp.is_completed if lp else False
+        l_status = lp.status if (lp and lp.status) else ("COMPLETED" if is_comp else "LOCKED")
+        lesson_summaries.append(
+            LessonSummary(
+                id=l.id,
+                skill_id=l.skill_id,
+                title=l.title,
+                order=l.order,
+                xp_reward=l.xp_reward,
+                is_completed=is_comp,
+                completed=is_comp,
+                status=l_status,
+            )
         )
-        for l in skill.lessons
-    ]
 
     return SkillRead(
         id=skill.id,

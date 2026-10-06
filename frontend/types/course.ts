@@ -1,5 +1,14 @@
 export type SkillStatus = 'LOCKED' | 'AVAILABLE' | 'COMPLETED' | 'CURRENT';
 
+export interface LessonNode {
+  id: number;
+  title: string;
+  order: number;
+  xpReward?: number;
+  status: 'LOCKED' | 'AVAILABLE' | 'IN_PROGRESS' | 'COMPLETED';
+  isCompleted: boolean;
+}
+
 export interface SkillNode {
   id: string;
   title: string;
@@ -11,6 +20,8 @@ export interface SkillNode {
   crowns: number;
   maxCrowns: number;
   positionOffset: number; // -40 to 40 for curved path offset
+  lessons?: LessonNode[];
+  activeLessonId?: number;
 }
 
 export interface Unit {

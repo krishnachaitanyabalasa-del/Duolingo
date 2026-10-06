@@ -44,6 +44,7 @@ def init_and_migrate_db():
             ])
             _add_missing_columns(conn, inspector, "user_lesson_progress", [
                 ("status", "VARCHAR DEFAULT 'LOCKED'"),
+                ("score", "INTEGER DEFAULT 0"),
             ])
             _add_missing_columns(conn, inspector, "achievements", [
                 ("reward_xp", "INTEGER NOT NULL DEFAULT 0"),
@@ -54,6 +55,75 @@ def init_and_migrate_db():
                 ("reward_awarded_at", "DATETIME"),
             ])
             conn.commit()
+
+            # Deduplicate user_lesson_progress rows before applying unique index
+            if "user_lesson_progress" in inspector.get_table_names():
+                try:
+                    conn.execute(text("""
+                        DELETE FROM user_lesson_progress
+                        WHERE id NOT IN (
+                            SELECT id FROM (
+                                SELECT id, ROW_NUMBER() OVER (
+                                    PARTITION BY user_id, lesson_id
+                                    ORDER BY is_completed DESC, attempts_count DESC, id DESC
+                                ) as rn
+                                FROM user_lesson_progress
+                            ) WHERE rn = 1
+                        )
+                    """))
+                    conn.execute(text(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS uq_user_lesson_progress_idx "
+                        "ON user_lesson_progress (user_id, lesson_id)"
+                    ))
+                    conn.commit()
+                except Exception as lp_err:
+                    print(f"Migration notice (user_lesson_progress deduplication/index): {lp_err}")
+
+            # Deduplicate user_skill_progress rows before applying unique index
+            if "user_skill_progress" in inspector.get_table_names():
+                try:
+                    conn.execute(text("""
+                        DELETE FROM user_skill_progress
+                        WHERE id NOT IN (
+                            SELECT id FROM (
+                                SELECT id, ROW_NUMBER() OVER (
+                                    PARTITION BY user_id, skill_id
+                                    ORDER BY (CASE status WHEN 'COMPLETED' THEN 3 WHEN 'IN_PROGRESS' THEN 2 WHEN 'AVAILABLE' THEN 1 ELSE 0 END) DESC, crown_level DESC, id DESC
+                                ) as rn
+                                FROM user_skill_progress
+                            ) WHERE rn = 1
+                        )
+                    """))
+                    conn.execute(text(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS uq_user_skill_progress_idx "
+                        "ON user_skill_progress (user_id, skill_id)"
+                    ))
+                    conn.commit()
+                except Exception as sp_err:
+                    print(f"Migration notice (user_skill_progress deduplication/index): {sp_err}")
+
+            # Deduplicate user_unit_progress rows before applying unique index
+            if "user_unit_progress" in inspector.get_table_names():
+                try:
+                    conn.execute(text("""
+                        DELETE FROM user_unit_progress
+                        WHERE id NOT IN (
+                            SELECT id FROM (
+                                SELECT id, ROW_NUMBER() OVER (
+                                    PARTITION BY user_id, unit_id
+                                    ORDER BY (CASE status WHEN 'COMPLETED' THEN 3 WHEN 'IN_PROGRESS' THEN 2 WHEN 'AVAILABLE' THEN 1 ELSE 0 END) DESC, progress_percentage DESC, id DESC
+                                ) as rn
+                                FROM user_unit_progress
+                            ) WHERE rn = 1
+                        )
+                    """))
+                    conn.execute(text(
+                        "CREATE UNIQUE INDEX IF NOT EXISTS uq_user_unit_progress_idx "
+                        "ON user_unit_progress (user_id, unit_id)"
+                    ))
+                    conn.commit()
+                except Exception as up_err:
+                    print(f"Migration notice (user_unit_progress deduplication/index): {up_err}")
 
             # Guarantee one progress row per (user, achievement) on pre-existing databases.
             if "user_achievements" in inspector.get_table_names():

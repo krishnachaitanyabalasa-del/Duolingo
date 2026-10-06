@@ -53,9 +53,14 @@ interface RawAnswerResponse {
 }
 
 interface RawCompleteResponse {
+  lesson_id?: number;
+  status?: string;
   completed: boolean;
+  xp_earned?: number;
   xp_awarded: number;
   total_xp: number;
+  next_lesson_id?: number | null;
+  next_lesson_unlocked?: boolean;
   skill_completed: boolean;
   current_streak: number;
   accuracy?: number;
@@ -360,6 +365,10 @@ export async function completeLesson(
   streak: number;
   accuracy?: number;
   sessionXp?: number;
+  status?: string;
+  completed?: boolean;
+  nextLessonId?: number | null;
+  nextLessonUnlocked?: boolean;
 }> {
   const numericId = toNumericLessonId(lessonId);
   const data = await apiFetch<RawCompleteResponse>(`/api/lessons/${numericId}/complete`, {
@@ -373,6 +382,10 @@ export async function completeLesson(
       streak: typeof data.current_streak === 'number' ? data.current_streak : 1,
       accuracy: typeof data.accuracy === 'number' ? data.accuracy : undefined,
       sessionXp: typeof data.session_xp === 'number' ? data.session_xp : undefined,
+      status: data.status,
+      completed: data.completed,
+      nextLessonId: data.next_lesson_id,
+      nextLessonUnlocked: data.next_lesson_unlocked,
     };
   }
 
@@ -380,5 +393,7 @@ export async function completeLesson(
     xpEarned: 10,
     newTotalXp: 0,
     streak: 1,
+    status: 'COMPLETED',
+    completed: true,
   };
 }

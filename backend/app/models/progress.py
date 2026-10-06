@@ -1,11 +1,14 @@
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, Float, Boolean, ForeignKey, DateTime, UniqueConstraint
 from sqlalchemy.orm import relationship
 from app.database import Base
 
 
 class UserUnitProgress(Base):
     __tablename__ = "user_unit_progress"
+    __table_args__ = (
+        UniqueConstraint("user_id", "unit_id", name="uq_user_unit_progress"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -22,6 +25,9 @@ class UserUnitProgress(Base):
 
 class UserSkillProgress(Base):
     __tablename__ = "user_skill_progress"
+    __table_args__ = (
+        UniqueConstraint("user_id", "skill_id", name="uq_user_skill_progress"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -39,17 +45,30 @@ class UserSkillProgress(Base):
 
 class UserLessonProgress(Base):
     __tablename__ = "user_lesson_progress"
+    __table_args__ = (
+        UniqueConstraint("user_id", "lesson_id", name="uq_user_lesson_progress"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     lesson_id = Column(Integer, ForeignKey("lessons.id"), nullable=False)
+    status = Column(String, default="LOCKED", nullable=False)  # LOCKED, AVAILABLE, IN_PROGRESS, COMPLETED
     is_completed = Column(Boolean, default=False, nullable=False)
+    score = Column(Integer, default=0, nullable=False)
     completed_at = Column(DateTime, nullable=True)
     attempts_count = Column(Integer, default=0, nullable=False)
 
     # Relationships
     user = relationship("User", back_populates="lesson_progress")
     lesson = relationship("Lesson", back_populates="user_progress")
+
+    @property
+    def completed(self) -> bool:
+        return self.is_completed
+
+    @completed.setter
+    def completed(self, value: bool):
+        self.is_completed = value
 
 
 class LessonAttempt(Base):

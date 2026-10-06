@@ -69,13 +69,19 @@ def initialize_user_progress(db: Session, user: User):
                     .first()
                 )
                 if not existing_lp:
+                    lesson_status = "AVAILABLE" if (idx == 0 and s_idx == 0 and l_idx == 0) else "LOCKED"
                     db.add(
                         UserLessonProgress(
                             user_id=user.id,
                             lesson_id=lesson.id,
+                            status=lesson_status,
                             is_completed=False,
                         )
                     )
+                else:
+                    # If first lesson was somehow created as LOCKED and no progress made, ensure it's AVAILABLE
+                    if idx == 0 and s_idx == 0 and l_idx == 0 and not existing_lp.is_completed and existing_lp.status == "LOCKED":
+                        existing_lp.status = "AVAILABLE"
 
     db.commit()
 

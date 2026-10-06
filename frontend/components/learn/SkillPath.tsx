@@ -29,7 +29,7 @@ export const SkillPath: React.FC<SkillPathProps> = ({ course, units: apiUnits, o
   // Sync state if course or apiUnits props change
   useEffect(() => {
     if (course?.units && course.units.length > 0) {
-      setDisplayUnits((prev) => (prev.length <= course.units.length ? course.units : prev));
+      setDisplayUnits(course.units);
     } else if (apiUnits && apiUnits.length > 0) {
       // Map CoursePathUnit to Unit type
       const mappedUnits: Unit[] = apiUnits.map((u, uIdx) => ({
@@ -45,9 +45,22 @@ export const SkillPath: React.FC<SkillPathProps> = ({ course, units: apiUnits, o
             convertedStatus = sIdx === 0 || s.status === 'IN_PROGRESS' ? 'CURRENT' : 'AVAILABLE';
           }
 
-          const totalLessons = s.lessons?.length || 4;
+          const lessons = (s.lessons || []).map((l) => ({
+            id: l.id,
+            title: l.title,
+            order: l.order,
+            xpReward: l.xp_reward,
+            status: (l.status || (l.is_completed || l.completed ? 'COMPLETED' : 'LOCKED')) as 'LOCKED' | 'AVAILABLE' | 'IN_PROGRESS' | 'COMPLETED',
+            isCompleted: Boolean(l.is_completed || l.completed),
+          }));
+
+          const totalLessons = lessons.length || 2;
           const completedLessons =
-            s.lessons?.filter((l) => l.is_completed).length || (s.status === 'COMPLETED' ? totalLessons : 0);
+            lessons.filter((l) => l.isCompleted).length || (s.status === 'COMPLETED' ? totalLessons : 0);
+
+          // Find active/next lesson in this skill
+          const nextLesson = lessons.find((l) => !l.isCompleted && l.status !== 'LOCKED') || lessons.find((l) => !l.isCompleted);
+          const activeLessonId = nextLesson?.id || lessons[0]?.id || parseInt(s.id.toString(), 10);
 
           const sineOffsets = [0, 45, 80, 80, 45, 0, -45, -80, -45];
           const positionOffset = sineOffsets[sIdx % sineOffsets.length];
@@ -63,10 +76,17 @@ export const SkillPath: React.FC<SkillPathProps> = ({ course, units: apiUnits, o
             crowns: s.status === 'COMPLETED' ? 3 : 0,
             maxCrowns: 3,
             positionOffset,
+            lessons,
+            activeLessonId,
           };
         }),
       }));
-      setDisplayUnits((prev) => (prev.length <= mappedUnits.length ? mappedUnits : prev));
+      setDisplayUnits((prev) => {
+        if (prev.length <= mappedUnits.length) {
+          return mappedUnits;
+        }
+        return [...mappedUnits, ...prev.slice(mappedUnits.length)];
+      });
     }
   }, [course, apiUnits]);
 
@@ -127,7 +147,9 @@ export const SkillPath: React.FC<SkillPathProps> = ({ course, units: apiUnits, o
               {unit.skills.map((skill, idx) => {
                 const nextSkillOffset = unit.skills[idx + 1]?.positionOffset ?? skill.positionOffset;
                 const rewardOffset = Math.round((skill.positionOffset + nextSkillOffset) / 2);
-                const isChestUnlocked = unit.skills.slice(0, 3).every((s) => s.status === 'COMPLETED');
+                const priorSkills = unit.skills.slice(0, idx + 1);
+                const isChestUnlocked = priorSkills.length > 0 && priorSkills.every((s) => s.status === 'COMPLETED');
+                const showChest = idx === 2 || (unit.skills.length < 3 && idx === unit.skills.length - 1);
 
                 return (
                   <React.Fragment key={skill.id}>
@@ -136,8 +158,8 @@ export const SkillPath: React.FC<SkillPathProps> = ({ course, units: apiUnits, o
                       unitNumber={unit.number}
                       onClick={() => setSelectedSkill(skill)}
                     />
-                    {/* Insert a Reward Treasure Chest Node after 3rd skill */}
-                    {idx === 2 && (
+                    {/* Insert a Reward Treasure Chest Node */}
+                    {showChest && (
                       <RewardNode
                         positionOffset={rewardOffset}
                         isUnlocked={isChestUnlocked}

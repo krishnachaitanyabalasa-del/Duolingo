@@ -34,12 +34,19 @@ class AnswerResponse(BaseModel):
 
 
 class LessonCompleteResponse(BaseModel):
-    completed: bool
-    xp_awarded: int
+    lesson_id: int
+    status: str = "COMPLETED"
+    completed: bool = True
+    xp_earned: int = 10
+    xp_awarded: int = 10
     total_xp: int
-    skill_completed: bool
+    next_lesson_id: Optional[int] = None
+    next_lesson_unlocked: bool = False
+    skill_completed: bool = False
     next_skill_unlocked: Optional[dict] = None
-    current_streak: int
+    current_streak: int = 1
     accuracy: Optional[float] = None
     session_xp: Optional[int] = None
+
+    model_config = ConfigDict(from_attributes=True)
 

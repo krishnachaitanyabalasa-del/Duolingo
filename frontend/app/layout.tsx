@@ -18,6 +18,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: 'Duolingo - Learn Languages Free',
   description: 'Learn languages with playful, bite-sized lessons inspired by Duolingo.',
+  icons: {
+    icon: '/duolingoimg.png',
+    shortcut: '/duolingoimg.png',
+    apple: '/duolingoimg.png',
+  },
 };
 
 const themeScript = `
@@ -46,6 +51,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/duolingoimg.png" type="image/png" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white dark:bg-[#131f24] text-[#3c3c3c] dark:text-[#f7f9fa] min-h-screen transition-colors duration-150`}>
