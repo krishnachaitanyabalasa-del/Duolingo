@@ -58,6 +58,8 @@ interface RawCompleteResponse {
   total_xp: number;
   skill_completed: boolean;
   current_streak: number;
+  accuracy?: number;
+  session_xp?: number;
 }
 
 function toNumericLessonId(lessonId: string): number {
@@ -352,7 +354,13 @@ export async function submitAnswer(
 
 export async function completeLesson(
   lessonId: string
-): Promise<{ xpEarned: number; newTotalXp: number; streak: number }> {
+): Promise<{
+  xpEarned: number;
+  newTotalXp: number;
+  streak: number;
+  accuracy?: number;
+  sessionXp?: number;
+}> {
   const numericId = toNumericLessonId(lessonId);
   const data = await apiFetch<RawCompleteResponse>(`/api/lessons/${numericId}/complete`, {
     method: 'POST',
@@ -360,15 +368,17 @@ export async function completeLesson(
 
   if (data) {
     return {
-      xpEarned: data.xp_awarded || 10,
-      newTotalXp: data.total_xp || 130,
-      streak: data.current_streak || 5,
+      xpEarned: typeof data.xp_awarded === 'number' ? data.xp_awarded : 10,
+      newTotalXp: typeof data.total_xp === 'number' ? data.total_xp : 0,
+      streak: typeof data.current_streak === 'number' ? data.current_streak : 1,
+      accuracy: typeof data.accuracy === 'number' ? data.accuracy : undefined,
+      sessionXp: typeof data.session_xp === 'number' ? data.session_xp : undefined,
     };
   }
 
   return {
-    xpEarned: 15,
-    newTotalXp: 1265,
-    streak: 15,
+    xpEarned: 10,
+    newTotalXp: 0,
+    streak: 1,
   };
 }

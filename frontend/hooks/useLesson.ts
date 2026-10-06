@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Lesson, AnswerResult } from '@/types/lesson';
 import { getLesson, submitAnswer as apiSubmitAnswer, completeLesson as apiCompleteLesson } from '@/lib/api/lesson';
 import { sounds } from '@/lib/sound';
 import { useUserContext } from '@/context/UserContext';
 
 export function useLesson(lessonId: string, initialHearts = 5) {
-  const { refreshUser } = useUserContext();
+  const { user, refreshUser } = useUserContext();
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -17,14 +17,28 @@ export function useLesson(lessonId: string, initialHearts = 5) {
   const [hearts, setHearts] = useState(initialHearts);
   const [isOutOfHearts, setIsOutOfHearts] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+
+  // Calculated session statistics
   const [xpEarnedTotal, setXpEarnedTotal] = useState(0);
+  const [streakEarned, setStreakEarned] = useState(user?.streak || 1);
+  const [accuracyEarned, setAccuracyEarned] = useState(100);
+
+  // Refs for tracking attempt accurately across closures
+  const correctCountRef = useRef(0);
+  const answersXpRef = useRef(0);
 
   const fetchLessonData = useCallback(async () => {
     setLoading(true);
+    correctCountRef.current = 0;
+    answersXpRef.current = 0;
+    setXpEarnedTotal(0);
+    setAccuracyEarned(100);
+    setStreakEarned(user?.streak || 1);
+
     const data = await getLesson(lessonId);
     setLesson(data);
     setLoading(false);
-  }, [lessonId]);
+  }, [lessonId, user?.streak]);
 
   useEffect(() => {
     fetchLessonData();
@@ -56,7 +70,10 @@ export function useLesson(lessonId: string, initialHearts = 5) {
 
     if (result.isCorrect) {
       sounds.playCorrect();
-      setXpEarnedTotal((prev) => prev + (result.xpEarned || 3));
+      const gained = result.xpEarned || 1;
+      answersXpRef.current += gained;
+      correctCountRef.current += 1;
+      setXpEarnedTotal(answersXpRef.current);
     } else {
       sounds.playIncorrect();
       if (result.isOutOfHearts) {
@@ -76,12 +93,33 @@ export function useLesson(lessonId: string, initialHearts = 5) {
     if (currentIndex + 1 < lesson.exercises.length) {
       setCurrentIndex((prev) => prev + 1);
     } else {
-      // Lesson Complete!
+      // Lesson Complete! Calculate real stats
       sounds.playFanfare();
       const compRes = await apiCompleteLesson(lesson.id.toString());
-      if (compRes?.xpEarned !== undefined) {
-        setXpEarnedTotal(compRes.xpEarned);
-      }
+
+      // 1. Calculated Total Session XP
+      const bonusXp = typeof compRes?.xpEarned === 'number' ? compRes.xpEarned : 10;
+      const totalSessionXp =
+        typeof compRes?.sessionXp === 'number'
+          ? compRes.sessionXp
+          : answersXpRef.current + bonusXp;
+      setXpEarnedTotal(totalSessionXp);
+
+      // 2. Persistent User Streak
+      const streakVal =
+        typeof compRes?.streak === 'number' && compRes.streak > 0
+          ? compRes.streak
+          : user?.streak || 1;
+      setStreakEarned(streakVal);
+
+      // 3. Calculated Accuracy Percentage
+      const totalEx = lesson.exercises.length || 1;
+      const calculatedAccuracy =
+        typeof compRes?.accuracy === 'number'
+          ? Math.round(compRes.accuracy)
+          : Math.min(100, Math.max(0, Math.round((correctCountRef.current / totalEx) * 100)));
+      setAccuracyEarned(calculatedAccuracy);
+
       setIsCompleted(true);
       refreshUser();
     }
@@ -105,6 +143,8 @@ export function useLesson(lessonId: string, initialHearts = 5) {
     isOutOfHearts,
     isCompleted,
     xpEarnedTotal,
+    streakEarned,
+    accuracyEarned,
     handleSelectAnswer,
     handleCheckAnswer,
     handleNextExercise,

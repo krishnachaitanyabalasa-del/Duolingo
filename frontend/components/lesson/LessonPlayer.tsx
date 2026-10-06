@@ -27,6 +27,8 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lessonId }) => {
     isOutOfHearts,
     isCompleted,
     xpEarnedTotal,
+    streakEarned,
+    accuracyEarned,
     handleSelectAnswer,
     handleCheckAnswer,
     handleNextExercise,
@@ -43,7 +45,13 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lessonId }) => {
   }
 
   if (isCompleted) {
-    return <LessonComplete xpEarned={xpEarnedTotal || 15} />;
+    return (
+      <LessonComplete
+        xpEarned={xpEarnedTotal}
+        streak={streakEarned}
+        accuracy={accuracyEarned}
+      />
+    );
   }
 
   if (!lesson || !currentExercise) {

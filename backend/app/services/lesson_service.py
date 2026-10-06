@@ -191,6 +191,24 @@ def validate_and_submit_answer(
     else:
         user.hearts = max(0, user.hearts - 1)
 
+    # Update active attempt if exists
+    attempt = (
+        db.query(LessonAttempt)
+        .filter(
+            LessonAttempt.user_id == user.id,
+            LessonAttempt.lesson_id == lesson_id,
+            LessonAttempt.status == "IN_PROGRESS"
+        )
+        .order_by(LessonAttempt.started_at.desc())
+        .first()
+    )
+    if attempt:
+        if is_correct:
+            attempt.score += 1
+            attempt.xp_earned += 1
+        else:
+            attempt.hearts_spent += 1
+
     record_answers(db, user, correct=1 if is_correct else 0, total=1)
     sync_quest_progress(db, user)
     check_user_achievements(db, user)
@@ -259,6 +277,10 @@ def complete_lesson(db: Session, lesson_id: int, user_id: int) -> LessonComplete
         db.flush()
 
     # Update active attempt session if exists
+    session_accuracy = 100.0
+    session_xp = xp_awarded
+    total_ex = len(lesson.exercises) if lesson.exercises else 1
+
     attempt = (
         db.query(LessonAttempt)
         .filter(
@@ -273,6 +295,8 @@ def complete_lesson(db: Session, lesson_id: int, user_id: int) -> LessonComplete
         attempt.status = "COMPLETED"
         attempt.completed_at = datetime.utcnow()
         attempt.xp_earned += xp_awarded
+        session_xp = attempt.xp_earned
+        session_accuracy = round((attempt.score / max(1, total_ex)) * 100.0, 1)
 
     # Update Skill Progress
     skill = lesson.skill
@@ -389,4 +413,6 @@ def complete_lesson(db: Session, lesson_id: int, user_id: int) -> LessonComplete
         skill_completed=skill_just_completed,
         next_skill_unlocked=next_skill_unlocked_info,
         current_streak=user.streak,
+        accuracy=session_accuracy,
+        session_xp=session_xp,
     )
