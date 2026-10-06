@@ -151,8 +151,45 @@ export async function getCourse(): Promise<Course> {
   }
 }
 
-export async function getCoursePath(): Promise<CoursePathResponse | null> {
-  return await apiFetch<CoursePathResponse>('/api/course/path');
+export async function getCoursePath(): Promise<CoursePathResponse> {
+  const data = await apiFetch<CoursePathResponse>('/api/course/path');
+  if (data) return data;
+
+  // Fallback to rich mock course path
+  const mockCourse = await getCourse();
+  return {
+    course: {
+      id: mockCourse.id,
+      name: mockCourse.name,
+    },
+    units: mockCourse.units.map((u, uIdx) => ({
+      id: u.id,
+      name: u.title,
+      description: u.description,
+      status: uIdx === 0 ? 'IN_PROGRESS' : 'LOCKED',
+      progress_percent: uIdx === 0 ? 40 : 0,
+      skills: u.skills.map((s, sIdx) => ({
+        id: sIdx + 1 + uIdx * 10,
+        name: s.title,
+        status: s.status === 'COMPLETED' ? 'COMPLETED' : s.status === 'CURRENT' ? 'IN_PROGRESS' : 'LOCKED',
+        progress_percent: s.completedLessons * 25,
+        lessons: Array.from({ length: s.totalLessons }).map((_, lIdx) => ({
+          id: lIdx + 1,
+          skill_id: sIdx + 1,
+          title: `Lesson ${lIdx + 1}`,
+          order: lIdx + 1,
+          xp_reward: 10,
+          is_completed: lIdx < s.completedLessons,
+        })),
+      })),
+      test: {
+        id: u.id,
+        name: `Unit ${u.number} Mastery Test`,
+        status: uIdx === 0 ? 'AVAILABLE' : 'LOCKED',
+        locked: uIdx !== 0,
+      },
+    })),
+  };
 }
 
 export async function getUnitTest(testId: number): Promise<UnitTestDetail | null> {

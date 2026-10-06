@@ -20,8 +20,8 @@ export const TopBar: React.FC<TopBarProps> = ({ user, onRefillClick }) => {
       {/* Flag / Course Selector */}
       <div className="flex items-center gap-3">
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 border-gray-200 dark:border-[#20323d] hover:bg-gray-100 dark:hover:bg-[#182730] transition-colors cursor-pointer">
-          <span className="text-xl">🇪🇸</span>
-          <span className="font-extrabold text-sm text-gray-700 dark:text-gray-200 hidden sm:inline">Spanish</span>
+          <span className="text-xl">🇺🇸</span>
+          <span className="font-extrabold text-sm text-gray-700 dark:text-gray-200 hidden sm:inline">English</span>
         </div>
       </div>
 

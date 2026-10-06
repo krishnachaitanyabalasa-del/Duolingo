@@ -83,9 +83,6 @@ export default function LearnPage() {
         <h1 className="text-lg font-extrabold text-gray-800 dark:text-white uppercase tracking-wider">
           {coursePath.course.name}
         </h1>
-        <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">
-          Showing {visibleUnits.length} of {coursePath.units.length} Units (Scroll to load more)
-        </p>
       </div>
 
       <SkillPath units={visibleUnits} onRefresh={fetchPath} />

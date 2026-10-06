@@ -12,10 +12,10 @@ interface GuidebookModalProps {
 }
 
 const KEY_PHRASES = [
-  { spanish: '¡Hola! ¿Cómo estás?', english: 'Hello! How are you?' },
-  { spanish: 'Me llamo Alex.', english: 'My name is Alex.' },
-  { spanish: 'Un café con leche, por favor.', english: 'A coffee with milk, please.' },
-  { spanish: 'Mucho gusto en conocerte.', english: 'Nice to meet you.' },
+  { spanish: 'Hello! How are you?', english: 'Basic Greeting & Check-in' },
+  { spanish: 'My name is Alex.', english: 'Introducing Yourself' },
+  { spanish: 'A coffee with milk, please.', english: 'Ordering Food & Drinks' },
+  { spanish: 'Nice to meet you.', english: 'Polite Response' },
 ];
 
 export const GuidebookModal: React.FC<GuidebookModalProps> = ({ unit, onClose }) => {
@@ -74,13 +74,13 @@ export const GuidebookModal: React.FC<GuidebookModalProps> = ({ unit, onClose })
           <div className="p-4 rounded-2xl bg-amber-50 dark:bg-[#ff9600]/10 border-2 border-amber-200 dark:border-[#ff9600]/30 space-y-2">
             <h5 className="font-black text-sm text-amber-600 dark:text-[#ff9600]">Grammar Tip: Polite Greetings</h5>
             <p className="text-xs font-bold text-gray-700 dark:text-[#dce6eb] leading-relaxed">
-              In Spanish, greetings change depending on the time of day:
+              In English, greetings change depending on the time of day:
               <br />
-              • <strong>Buenos días</strong> = Good morning (until noon)
+              • <strong>Good morning</strong> = Morning greeting (until noon)
               <br />
-              • <strong>Buenas tardes</strong> = Good afternoon (after noon)
+              • <strong>Good afternoon</strong> = Afternoon greeting (12 PM - 5 PM)
               <br />
-              • <strong>Buenas noches</strong> = Good evening / night
+              • <strong>Good evening</strong> = Evening greeting (after 5 PM)
             </p>
           </div>
 

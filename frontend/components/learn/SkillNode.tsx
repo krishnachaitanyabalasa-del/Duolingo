@@ -18,9 +18,9 @@ import {
   Smile,
   Home as HomeIcon,
   UserCheck,
-  Sparkles,
 } from 'lucide-react';
 import { getUnitTheme } from '@/lib/unitTheme';
+import { DuoMascot } from '@/components/mascot/DuoMascot';
 
 interface SkillNodeProps {
   skill: SkillNodeType;
@@ -63,6 +63,22 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ skill, onClick, unitNumber
       style={{ transform: `translateX(${skill.positionOffset}px)` }}
     >
       <div className="relative flex items-center justify-center">
+        {/* Duo Owl Mascot standing beside active node */}
+        {isCurrent && (
+          <div
+            className={clsx(
+              'absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none flex flex-col items-center transition-all duration-300',
+              skill.positionOffset > 0 ? '-left-24 sm:-left-28' : '-right-24 sm:-right-28'
+            )}
+          >
+            <div className="relative mb-1 bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] text-[#58cc02] font-black text-[11px] px-2.5 py-0.5 rounded-xl shadow-md uppercase tracking-wider animate-bounce">
+              START!
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-white dark:bg-[#182730] border-r-2 border-b-2 border-gray-200 dark:border-[#20323d] rotate-45" />
+            </div>
+            <DuoMascot variant="standing" size={75} />
+          </div>
+        )}
+
         {/* IN_PROGRESS: Animated Circular Progress Ring */}
         {isCurrent && (
           <div className="absolute -inset-3.5 pointer-events-none z-10">
@@ -93,17 +109,6 @@ export const SkillNode: React.FC<SkillNodeProps> = ({ skill, onClick, unitNumber
               />
             </svg>
           </div>
-        )}
-
-        {/* COMPLETED: Sparkle Celebration Accents */}
-        {isCompleted && (
-          <motion.div
-            animate={{ rotate: 360, scale: [0.9, 1.1, 0.9] }}
-            transition={{ repeat: Infinity, duration: 6, ease: 'linear' }}
-            className="absolute -top-1.5 -right-1.5 text-amber-400 z-10 pointer-events-none"
-          >
-            <Sparkles className="w-5 h-5 fill-amber-300" />
-          </motion.div>
         )}
 
         {/* Main Interactive Skill Node Button */}

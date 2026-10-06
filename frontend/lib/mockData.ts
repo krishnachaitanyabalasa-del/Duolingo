@@ -78,9 +78,9 @@ export const MOCK_LEADERBOARD: LeaderboardData = {
 
 export const MOCK_COURSE: Course = {
   id: 1,
-  name: 'Spanish Course',
-  code: 'es',
-  flag: '🇪🇸',
+  name: 'English Foundations Course',
+  code: 'en',
+  flag: '🇺🇸',
   units: [
     {
       id: 1,
@@ -487,7 +487,7 @@ export const MOCK_COURSE: Course = {
         },
         {
           id: 'sk_culture',
-          title: 'Spanish Culture',
+          title: 'English Culture',
           description: 'Explore traditions, food customs, and festivals',
           icon: 'UserCheck',
           status: 'LOCKED',
@@ -512,7 +512,7 @@ export const MOCK_COURSE: Course = {
         {
           id: 'sk_literature',
           title: 'Books & Stories',
-          description: 'Read Spanish short stories and novels',
+          description: 'Read English short stories and novels',
           icon: 'Book',
           status: 'LOCKED',
           totalLessons: 5,
@@ -535,7 +535,7 @@ export const MOCK_COURSE: Course = {
         },
         {
           id: 'sk_idioms',
-          title: 'Spanish Idioms',
+          title: 'English Idioms',
           description: 'Master colorful proverbs and local slang',
           icon: 'MessageSquare',
           status: 'LOCKED',
