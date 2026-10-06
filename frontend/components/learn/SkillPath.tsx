@@ -23,17 +23,22 @@ export const SkillPath: React.FC<SkillPathProps> = ({ course }) => {
 
           {/* Vertical Snake Path of Skills */}
           <div className="relative flex flex-col items-center py-4 w-full">
-            {unit.skills.map((skill, idx) => (
-              <React.Fragment key={skill.id}>
-                <SkillNode
-                  skill={skill}
-                  unitNumber={unit.number}
-                  onClick={() => setSelectedSkill(skill)}
-                />
-                {/* Insert a Reward Treasure Chest Node after 3rd skill */}
-                {idx === 2 && <RewardNode positionOffset={-20} />}
-              </React.Fragment>
-            ))}
+            {unit.skills.map((skill, idx) => {
+              const nextSkillOffset = unit.skills[idx + 1]?.positionOffset ?? skill.positionOffset;
+              const rewardOffset = Math.round((skill.positionOffset + nextSkillOffset) / 2);
+
+              return (
+                <React.Fragment key={skill.id}>
+                  <SkillNode
+                    skill={skill}
+                    unitNumber={unit.number}
+                    onClick={() => setSelectedSkill(skill)}
+                  />
+                  {/* Insert a Reward Treasure Chest Node after 3rd skill */}
+                  {idx === 2 && <RewardNode positionOffset={rewardOffset} />}
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
       ))}

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Gift, Sparkles } from 'lucide-react';
+import { Sparkles, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { sounds } from '@/lib/sound';
@@ -16,6 +16,7 @@ export const RewardNode: React.FC<RewardNodeProps> = ({ positionOffset = 0 }) =>
   const [showModal, setShowModal] = useState(false);
 
   const handleClaim = () => {
+    if (claimed) return;
     sounds.playFanfare();
     try {
       confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
@@ -28,27 +29,31 @@ export const RewardNode: React.FC<RewardNodeProps> = ({ positionOffset = 0 }) =>
 
   return (
     <div
-      className="relative flex flex-col items-center my-6"
+      className="relative flex flex-col items-center my-4 group z-10"
       style={{ transform: `translateX(${positionOffset}px)` }}
     >
       <motion.button
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={!claimed ? { scale: 1.08 } : {}}
+        whileTap={!claimed ? { scale: 0.95 } : {}}
         onClick={handleClaim}
         className={clsx(
-          'w-20 h-20 rounded-2xl border-2 border-b-4 flex items-center justify-center shadow-lg cursor-pointer transition-colors',
+          'w-20 h-20 rounded-2xl border-b-4 flex items-center justify-center shadow-lg cursor-pointer transition-all',
           claimed
             ? 'bg-[#e5e5e5] dark:bg-[#182730] border-[#d0d0d0] dark:border-[#20323d] text-gray-400 dark:text-gray-500'
-            : 'bg-[#ff9600] border-[#e07300] text-white animate-bounce'
+            : 'bg-[#ffc800] border-[#e0a200] text-amber-950 hover:bg-[#ffd014]'
         )}
       >
-        <Gift className="w-10 h-10" />
+        {claimed ? (
+          <Check className="w-9 h-9 text-gray-400 dark:text-gray-500 stroke-[3]" />
+        ) : (
+          <span className="text-4xl select-none">🎁</span>
+        )}
       </motion.button>
 
       {/* Claimed Modal */}
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs select-none">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -60,7 +65,7 @@ export const RewardNode: React.FC<RewardNodeProps> = ({ positionOffset = 0 }) =>
               <p className="text-xs font-bold text-gray-500 dark:text-[#93a7b1]">You received +50 Gems!</p>
               <button
                 onClick={() => setShowModal(false)}
-                className="w-full duo-button duo-button-amber text-xs py-3"
+                className="w-full duo-button duo-button-amber text-xs py-3 cursor-pointer"
               >
                 AWESOME!
               </button>
