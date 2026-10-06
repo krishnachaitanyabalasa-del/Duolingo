@@ -7,6 +7,13 @@ from app.schemas.user import UserRead, UserStats
 from app.services.user_service import get_user_stats
 
 router = APIRouter(prefix="/user", tags=["User"])
+me_router = APIRouter(tags=["User"])
+
+
+@me_router.get("/me", response_model=UserRead, summary="Get current authenticated learner profile")
+def read_current_me(current_user: User = Depends(get_current_user)):
+    """Retrieves profile and global economy state for the authenticated learner."""
+    return current_user
 
 
 @router.get("", response_model=UserRead, summary="Get current authenticated learner profile")

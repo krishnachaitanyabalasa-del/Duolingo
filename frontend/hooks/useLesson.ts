@@ -4,8 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { Lesson, AnswerResult } from '@/types/lesson';
 import { getLesson, submitAnswer as apiSubmitAnswer, completeLesson as apiCompleteLesson } from '@/lib/api/lesson';
 import { sounds } from '@/lib/sound';
+import { useUserContext } from '@/context/UserContext';
 
 export function useLesson(lessonId: string, initialHearts = 5) {
+  const { refreshUser } = useUserContext();
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -76,8 +78,12 @@ export function useLesson(lessonId: string, initialHearts = 5) {
     } else {
       // Lesson Complete!
       sounds.playFanfare();
-      await apiCompleteLesson(lesson.id.toString());
+      const compRes = await apiCompleteLesson(lesson.id.toString());
+      if (compRes?.xpEarned !== undefined) {
+        setXpEarnedTotal(compRes.xpEarned);
+      }
       setIsCompleted(true);
+      refreshUser();
     }
   };
 

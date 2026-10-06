@@ -10,12 +10,14 @@ from app.seed.seed_data import seed_database
 from app.routers import (
     course_router,
     user_router,
+    me_router,
     profile_router,
     progress_router,
     lesson_router,
     gamification_router,
     achievement_router,
     sound_router,
+    quest_router,
 )
 
 
@@ -75,9 +77,11 @@ api_prefix = settings.API_V1_STR
 
 app.include_router(course_router, prefix=api_prefix)
 app.include_router(user_router, prefix=api_prefix)
+app.include_router(me_router, prefix=api_prefix)
 app.include_router(profile_router, prefix=api_prefix)
 app.include_router(progress_router, prefix=api_prefix)
 app.include_router(lesson_router, prefix=api_prefix)
 app.include_router(gamification_router, prefix=api_prefix)
 app.include_router(achievement_router, prefix=api_prefix)
 app.include_router(sound_router, prefix=api_prefix)
+app.include_router(quest_router, prefix=api_prefix)

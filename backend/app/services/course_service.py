@@ -24,7 +24,14 @@ from app.schemas.course import (
 from app.schemas.lesson import LessonDetail
 from app.utils.auth import initialize_user_progress
 from app.utils.answer_utils import normalize_answer
+from app.utils.date_utils import update_user_streak
 from app.services.achievement_service import check_user_achievements
+from app.services.economy_service import (
+    record_xp,
+    record_answers,
+    record_test_passed,
+)
+from app.services.quest_service import sync_quest_progress
 
 
 def get_all_courses(db: Session) -> list[Course]:
@@ -331,12 +338,27 @@ def submit_unit_test(db: Session, test_id: int, request: TestSubmitRequest, user
     percentage = (correct_count / total_questions * 100.0) if total_questions > 0 else 0.0
     passed = percentage >= (test.passing_score_percentage or 80.0)
 
+    # Record accuracy from test answers
+    record_answers(db, user, correct=correct_count, total=total_questions)
+
+    # Check if this test was already passed previously by this user
+    already_passed = db.query(UserTestAttempt).filter(
+        UserTestAttempt.user_id == user.id,
+        UserTestAttempt.test_id == test.id,
+        UserTestAttempt.passed == True
+    ).first() is not None
+
     xp_gained = 0
     next_unit_unlocked_id = None
 
     if passed:
-        xp_gained = test.xp_reward or 50
-        user.xp += xp_gained
+        record_test_passed(db, user)
+        update_user_streak(user)
+
+        # Award test XP only on first passing attempt
+        if not already_passed:
+            xp_gained = test.xp_reward or 50
+            record_xp(db, user, xp_gained)
 
         # Update UserUnitProgress for current unit
         u_prog = (
@@ -385,7 +407,9 @@ def submit_unit_test(db: Session, test_id: int, request: TestSubmitRequest, user
                 elif sp.status == "LOCKED":
                     sp.status = "AVAILABLE"
 
-        check_user_achievements(db, user)
+    # Sync daily quests & check achievements
+    sync_quest_progress(db, user)
+    check_user_achievements(db, user)
 
     attempt = UserTestAttempt(
         user_id=user.id,

@@ -55,24 +55,24 @@ def get_profile_data(db: Session, user_id: int = settings.DEFAULT_USER_ID) -> Pr
     stats = ProfileStats(
         streak=user.streak,
         total_xp=user.xp,
-        league=user.league or "Amethyst",
-        top_three_finishes=user.top_three_finishes or 7,
+        league=user.league or "Bronze",
+        top_three_finishes=user.top_three_finishes if user.top_three_finishes is not None else 0,
         gems=user.gems,
         hearts=user.hearts,
         lessons_completed=lessons_completed,
         skills_completed=skills_completed,
-        words_learned=skills_completed * 25 + 30,
+        words_learned=skills_completed * 25,
     )
 
     return ProfileRead(
         id=user.id,
-        username="krishnacha97971" if user.username == "learner" else user.username,
-        display_name=user.display_name or user.username or "krishnachaitanyabalasa",
+        username=user.username,
+        display_name=user.display_name or user.username,
         avatar_id=user.avatar_id or "avatar_01",
         bio=user.bio or "Learning languages every day!",
         joined_date=user.joined_date or "Joined April 2025",
         following_count=user.following_count or 0,
-        followers_count=user.followers_count or 1,
+        followers_count=user.followers_count or 0,
         stats=stats,
         courses=courses_list,
     )

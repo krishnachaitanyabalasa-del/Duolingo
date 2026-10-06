@@ -11,6 +11,8 @@ from app.schemas.sound import (
     PracticeSoundResponse,
 )
 from app.services.user_service import get_default_user
+from app.services.economy_service import record_practice_session, record_answers
+from app.services.quest_service import sync_quest_progress
 
 
 def get_sounds_overview(db: Session, user_id: int) -> SoundsOverviewResponse:
@@ -150,6 +152,11 @@ def practice_sound(db: Session, sound_id: int, user_id: int, correct: bool) -> P
         prog.mastered = True
 
     prog.last_practiced_at = datetime.utcnow()
+
+    # Record practice and accuracy toward daily activity & quests
+    record_practice_session(db, user)
+    record_answers(db, user, correct=1 if correct else 0, total=1)
+    sync_quest_progress(db, user)
 
     db.commit()
     db.refresh(prog)

@@ -1,5 +1,5 @@
 import { apiFetch } from './client';
-import { UserProfile, Achievement, FullProfile, FollowerUser } from '@/types/user';
+import { UserProfile, Achievement, FullProfile, FollowerUser, DailyQuest, QuestClaimResponse } from '@/types/user';
 import { MOCK_USER, MOCK_ACHIEVEMENTS } from '../mockData';
 
 interface RawBackendUser {
@@ -16,6 +16,10 @@ interface RawBackendUser {
   display_name?: string;
   bio?: string;
   joined_date?: string;
+  league?: string;
+  top_three_finishes?: number;
+  following_count?: number;
+  followers_count?: number;
   completed_skills?: number;
   total_skills?: number;
 }
@@ -32,36 +36,54 @@ interface RawBackendAchievement {
 }
 
 export async function getUserProfile(): Promise<UserProfile> {
-  const data = await apiFetch<RawBackendUser>('/api/user');
+  let data = await apiFetch<RawBackendUser>('/api/me');
+  if (!data) {
+    data = await apiFetch<RawBackendUser>('/api/user');
+  }
   if (!data) return MOCK_USER;
 
   try {
     return {
       id: data.id.toString(),
       username: data.username,
-      displayName: data.display_name || 'krishnachaitanyabalasa',
+      displayName: data.display_name || data.username || 'Learner',
       avatarId: data.avatar_id || 'avatar_01',
       avatarUrl: data.avatar_url || MOCK_USER.avatarUrl,
       streak: data.streak,
-      longestStreak: data.longest_streak || data.streak,
+      longestStreak: data.longest_streak ?? data.streak,
       xp: data.xp,
       hearts: data.hearts,
       maxHearts: 5,
       gems: data.gems,
-      completedSkills: data.completed_skills || 6,
-      totalSkills: data.total_skills || 18,
+      completedSkills: data.completed_skills ?? 0,
+      totalSkills: data.total_skills ?? 10,
       dailyGoal: 50,
-      dailyGoalProgress: 35,
-      league: 'Amethyst',
+      dailyGoalProgress: Math.min(50, data.xp),
+      league: data.league || 'Bronze',
       leagueRank: 4,
+      topThreeFinishes: data.top_three_finishes ?? 0,
       joinedDate: data.joined_date || 'Joined April 2025',
-      followingCount: 0,
-      followersCount: 1,
+      followingCount: data.following_count ?? 0,
+      followersCount: data.followers_count ?? 0,
     };
   } catch (err) {
     console.warn('Error parsing user payload:', err);
     return MOCK_USER;
   }
+}
+
+export async function getDailyQuests(): Promise<DailyQuest[]> {
+  const data = await apiFetch<DailyQuest[]>('/api/daily-quests');
+  if (data) return data;
+  return [];
+}
+
+export async function claimDailyQuest(questId: number): Promise<QuestClaimResponse> {
+  const data = await apiFetch<QuestClaimResponse>(`/api/daily-quests/${questId}/claim`, {
+    method: 'POST',
+  });
+  if (data) return data;
+  throw new Error('Failed to claim quest');
 }
 
 export async function getFullProfile(): Promise<FullProfile> {
@@ -70,28 +92,26 @@ export async function getFullProfile(): Promise<FullProfile> {
 
   return {
     id: 1,
-    username: 'krishnacha97971',
-    display_name: 'krishnachaitanyabalasa',
+    username: 'learner',
+    display_name: 'Learner',
     avatar_id: 'avatar_01',
     bio: 'Learning languages every day!',
     joined_date: 'Joined April 2025',
     following_count: 0,
-    followers_count: 1,
+    followers_count: 0,
     stats: {
       streak: 0,
-      total_xp: 47458,
-      league: 'Amethyst',
-      top_three_finishes: 7,
-      gems: 6450,
+      total_xp: 0,
+      league: 'Bronze',
+      top_three_finishes: 0,
+      gems: 100,
       hearts: 5,
-      lessons_completed: 12,
-      skills_completed: 4,
-      words_learned: 150,
+      lessons_completed: 0,
+      skills_completed: 0,
+      words_learned: 0,
     },
     courses: [
-      { id: 'es', name: 'Spanish', flag: '🇪🇸' },
-      { id: 'en', name: 'English', flag: '🇺🇸' },
-      { id: 'math', name: 'Math', flag: '➗' },
+      { id: 'en', name: 'English Foundations', flag: '🇬🇧' },
     ],
   };
 }

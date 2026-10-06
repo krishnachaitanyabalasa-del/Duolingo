@@ -18,12 +18,15 @@ export const InviteFriendsModal: React.FC<InviteFriendsModalProps> = ({
 
   if (!isOpen) return null;
 
-  const inviteUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/invite/${username}`
-    : `https://duolingo.clone/invite/${username}`;
+  const inviteUrl =
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/invite/${username}`
+      : `https://duolingo.clone/invite/${username}`;
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(inviteUrl);
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(inviteUrl);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
@@ -33,9 +36,12 @@ export const InviteFriendsModal: React.FC<InviteFriendsModalProps> = ({
       <div className="bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-3xl w-full max-w-md overflow-hidden shadow-xl space-y-0 text-center">
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b-2 border-gray-100 dark:border-[#20323d]">
-          <h2 className="text-xl font-black text-gray-900 dark:text-white">
-            Invite Friends
-          </h2>
+          <div className="flex items-center gap-2">
+            <Share2 className="w-5 h-5 text-[#1cb0f6]" />
+            <h2 className="text-xl font-black text-gray-900 dark:text-white">
+              Invite Friends
+            </h2>
+          </div>
           <button
             onClick={onClose}
             className="w-9 h-9 rounded-xl bg-gray-100 dark:bg-[#131f24] hover:bg-gray-200 dark:hover:bg-[#20323d] flex items-center justify-center text-gray-500 dark:text-[#93a7b1] transition-colors cursor-pointer"

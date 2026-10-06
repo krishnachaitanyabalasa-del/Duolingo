@@ -7,9 +7,11 @@ import { HeartsDisplay } from '../gamification/HeartsDisplay';
 import { GemsDisplay } from '../gamification/GemsDisplay';
 import { usePathname } from 'next/navigation';
 import { ProfileRightPanel } from '../profile/ProfileRightPanel';
-import { getFullProfile, getFollowers, getFollowing, toggleFollow } from '@/lib/api/user';
-import type { FullProfile, FollowerUser, UserProfile } from '@/types/user';
+import { getFullProfile, getFollowers, getFollowing, toggleFollow, getDailyQuests } from '@/lib/api/user';
+import type { FullProfile, FollowerUser, UserProfile, DailyQuest } from '@/types/user';
 import { Zap, Shield, Sparkles } from 'lucide-react';
+
+import { DuoMascot } from '../mascot/DuoMascot';
 
 interface RightPanelProps {
   user: UserProfile;
@@ -22,6 +24,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
   const [profile, setProfile] = React.useState<FullProfile | null>(null);
   const [followers, setFollowers] = React.useState<FollowerUser[]>([]);
   const [following, setFollowing] = React.useState<FollowerUser[]>([]);
+  const [dailyQuest, setDailyQuest] = React.useState<DailyQuest | null>(null);
 
   React.useEffect(() => {
     if (isProfile) {
@@ -32,8 +35,14 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
           setFollowing(flg);
         }
       );
+    } else {
+      getDailyQuests().then((qs) => {
+        if (qs && qs.length > 0) {
+          setDailyQuest(qs[0]);
+        }
+      }).catch(() => {});
     }
-  }, [isProfile]);
+  }, [isProfile, user.xp]);
 
   const handleToggleFollow = async (userId: number | string) => {
     await toggleFollow(userId);
@@ -76,7 +85,7 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
           <span className="inline-block bg-gradient-to-r from-[#1cb0f6] via-[#ce82ff] to-[#ff4b4b] text-white font-black text-[10px] uppercase px-2.5 py-0.5 rounded-md tracking-wider">
             SUPER
           </span>
-          <Sparkles className="w-6 h-6 text-[#ce82ff] animate-pulse" />
+          <DuoMascot variant="super" size={52} />
         </div>
 
         <div>
@@ -91,10 +100,12 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
         </button>
       </div>
 
-      {/* 2. League Card (Amethyst League) */}
+      {/* 2. League Card */}
       <div className="duo-card p-5 rounded-3xl space-y-3.5 bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d]">
         <div className="flex items-center justify-between">
-          <h4 className="font-black text-base text-gray-900 dark:text-white">Amethyst League</h4>
+          <h4 className="font-black text-base text-gray-900 dark:text-white">
+            {user.league || 'Bronze'} League
+          </h4>
           <Link
             href="/leaderboard"
             className="text-[11px] font-black text-[#1cb0f6] hover:text-[#1899d6] uppercase tracking-wider transition-colors"
@@ -103,11 +114,9 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
           </Link>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-[#ce82ff]/15 dark:bg-[#ce82ff]/20 border-2 border-[#ce82ff]/40 dark:border-[#ce82ff] flex items-center justify-center shrink-0">
-            <Shield className="w-6 h-6 text-[#ce82ff] fill-[#ce82ff]" />
-          </div>
-          <p className="text-xs font-bold text-gray-500 dark:text-[#93a7b1] leading-relaxed">
+        <div className="flex items-center gap-3">
+          <DuoMascot variant="sleeping" size={54} />
+          <p className="text-xs font-bold text-gray-500 dark:text-[#93a7b1] leading-relaxed flex-1">
             Complete a lesson to join this week&apos;s leaderboard and compete against other learners
           </p>
         </div>
@@ -131,14 +140,27 @@ export const RightPanel: React.FC<RightPanelProps> = ({ user }) => {
               <div className="w-9 h-9 rounded-xl bg-[#ffc800]/15 dark:bg-[#ffc800]/20 border-2 border-[#ffc800]/40 dark:border-[#ffc800] flex items-center justify-center text-[#ffc800] shrink-0">
                 <Zap className="w-5 h-5 fill-[#ffc800]" />
               </div>
-              <span className="font-extrabold text-xs text-gray-900 dark:text-white">Earn 10 XP</span>
+              <span className="font-extrabold text-xs text-gray-900 dark:text-white">
+                {dailyQuest ? dailyQuest.title : 'Earn 30 XP'}
+              </span>
             </div>
-            <span className="font-black text-xs text-gray-400 dark:text-[#52656d]">0 / 10</span>
+            <span className="font-black text-xs text-gray-400 dark:text-[#52656d]">
+              {dailyQuest ? Math.min(dailyQuest.current_progress, dailyQuest.target) : 0} / {dailyQuest ? dailyQuest.target : 30}
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="flex-1 h-3.5 bg-gray-100 dark:bg-[#20323d] border border-gray-200 dark:border-transparent rounded-full overflow-hidden p-0.5">
-              <div className="h-full bg-[#ffc800] rounded-full w-0 transition-all duration-300" />
+              <div
+                className="h-full bg-[#ffc800] rounded-full transition-all duration-300"
+                style={{
+                  width: `${
+                    dailyQuest && dailyQuest.target > 0
+                      ? Math.min(100, Math.round((dailyQuest.current_progress / dailyQuest.target) * 100))
+                      : 0
+                  }%`,
+                }}
+              />
             </div>
             <span className="text-lg">📦</span>
           </div>

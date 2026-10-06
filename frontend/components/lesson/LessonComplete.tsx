@@ -6,6 +6,8 @@ import confetti from 'canvas-confetti';
 import { Zap, Flame, Target } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+import { DuoMascot } from '../mascot/DuoMascot';
+
 interface LessonCompleteProps {
   xpEarned: number;
 }
@@ -32,9 +34,9 @@ export const LessonComplete: React.FC<LessonCompleteProps> = ({ xpEarned }) => {
         transition={{ type: 'spring', damping: 15 }}
         className="max-w-md w-full flex flex-col items-center"
       >
-        {/* Celebration Trophy Icon */}
-        <div className="w-28 h-28 bg-amber-100 dark:bg-amber-950/40 rounded-full flex items-center justify-center mb-6 border-4 border-amber-300 dark:border-amber-700/60 shadow-xl">
-          <span className="text-6xl animate-bounce">🎉</span>
+        {/* Celebration Mascot */}
+        <div className="mb-4">
+          <DuoMascot variant="celebrate" size={130} />
         </div>
 
         <h1 className="text-3xl sm:text-4xl font-black text-amber-500 mb-2">Lesson Complete!</h1>

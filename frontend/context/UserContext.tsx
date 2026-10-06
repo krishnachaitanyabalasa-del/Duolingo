@@ -13,6 +13,7 @@ interface UserContextType {
   deductHeart: () => void;
   refillHearts: () => Promise<void>;
   buyItem: (item: string, cost: number) => boolean;
+  updateGemsAndXp: (gems: number, xp: number) => void;
   refreshUser: () => Promise<void>;
 }
 
@@ -74,6 +75,14 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return true;
   };
 
+  const updateGemsAndXp = (gems: number, xp: number) => {
+    setUser((prev) => ({
+      ...prev,
+      gems,
+      xp,
+    }));
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -84,6 +93,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
         deductHeart,
         refillHearts: refillHeartsAction,
         buyItem,
+        updateGemsAndXp,
         refreshUser: loadData,
       }}
     >

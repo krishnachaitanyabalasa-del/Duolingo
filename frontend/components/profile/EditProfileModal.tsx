@@ -14,7 +14,7 @@ interface EditProfileModalProps {
     username: string;
     bio: string;
     avatar_id: string;
-  }) => Promise<void>;
+  }) => Promise<void> | void;
 }
 
 export const EditProfileModal: React.FC<EditProfileModalProps> = ({
@@ -23,7 +23,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   onClose,
   onSave,
 }) => {
-  const [displayName, setDisplayName] = useState(profile.display_name || '');
+  const [displayName, setDisplayName] = useState(profile.display_name || profile.username || '');
   const [username, setUsername] = useState(profile.username || '');
   const [bio, setBio] = useState(profile.bio || '');
   const [selectedAvatarId, setSelectedAvatarId] = useState(profile.avatar_id || 'avatar_01');
@@ -166,8 +166,8 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
               disabled={saving}
               className="px-6 py-3 rounded-2xl bg-[#58cc02] hover:bg-[#46a302] text-white font-black text-xs uppercase tracking-wider shadow-[0_4px_0_0_#46a302] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              {saving && <Loader2 className="w-4 h-4 animate-spin" />}
-              <span>SAVE CHANGES</span>
+              {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4 stroke-[3]" />}
+              <span>{saving ? 'SAVING...' : 'SAVE CHANGES'}</span>
             </button>
           </div>
         </form>

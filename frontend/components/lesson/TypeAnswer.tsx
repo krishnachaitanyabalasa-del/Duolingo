@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { TypeAnswerExercise } from '@/types/lesson';
 import { SpeakButton } from '../audio/SpeakButton';
 import { MicrophoneButton } from '../audio/MicrophoneButton';
@@ -24,17 +24,27 @@ export const TypeAnswer: React.FC<TypeAnswerProps> = ({
     setText('');
   }, [exercise.id]);
 
-  const handleChange = (val: string) => {
-    if (disabled) return;
-    setText(val);
-    onSelect(val);
-  };
+  const handleChange = useCallback(
+    (val: string) => {
+      if (disabled) return;
+      setText(val);
+      onSelect(val);
+    },
+    [disabled, onSelect]
+  );
+
+  const handleSpeechTranscript = useCallback(
+    (spoken: string) => {
+      if (disabled || !spoken) return;
+      handleChange(spoken);
+    },
+    [disabled, handleChange]
+  );
 
   const insertChar = (char: string) => {
     if (disabled) return;
     const newText = text + char;
-    setText(newText);
-    onSelect(newText);
+    handleChange(newText);
   };
 
   const displayPromptText = exercise.prompt || exercise.question || exercise.audioText || '';
@@ -67,9 +77,7 @@ export const TypeAnswer: React.FC<TypeAnswerProps> = ({
         />
 
         <div className="flex justify-center">
-          <MicrophoneButton
-            onTranscriptChange={(spoken) => handleChange(text ? `${text} ${spoken}` : spoken)}
-          />
+          <MicrophoneButton lang="es-ES" onTranscriptChange={handleSpeechTranscript} />
         </div>
       </div>
 
@@ -78,6 +86,7 @@ export const TypeAnswer: React.FC<TypeAnswerProps> = ({
         {SPECIAL_CHARS.map((char) => (
           <button
             key={char}
+            type="button"
             disabled={disabled}
             onClick={() => insertChar(char)}
             className="px-3.5 py-2 bg-white dark:bg-[#182730] border-2 border-b-4 border-gray-200 dark:border-[#20323d] rounded-xl font-extrabold text-base hover:bg-gray-100 dark:hover:bg-[#20323d] text-gray-800 dark:text-white cursor-pointer transition-all active:translate-y-0.5 shadow-xs"

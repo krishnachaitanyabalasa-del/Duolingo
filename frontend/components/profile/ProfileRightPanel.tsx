@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Search, Mail, UserPlus, UserCheck, Flame, Heart, Zap, Sparkles } from 'lucide-react';
+import { Flame, Heart } from 'lucide-react';
 import { FullProfile, FollowerUser } from '@/types/user';
 import { CartoonAvatar } from './Avatars';
 
@@ -10,9 +10,9 @@ interface ProfileRightPanelProps {
   profile: FullProfile;
   followers: FollowerUser[];
   following: FollowerUser[];
-  onFindFriendsClick: () => void;
-  onInviteFriendsClick: () => void;
-  onToggleFollow: (userId: number | string) => void;
+  onFindFriendsClick?: () => void;
+  onInviteFriendsClick?: () => void;
+  onToggleFollow?: (userId: number | string) => void;
   activeTab?: 'following' | 'followers';
   onTabChange?: (tab: 'following' | 'followers') => void;
 }
@@ -28,7 +28,7 @@ export const ProfileRightPanel: React.FC<ProfileRightPanelProps> = ({
   onTabChange,
 }) => {
   const [internalTab, setInternalTab] = useState<'following' | 'followers'>('following');
-  const activeTab = externalTab || internalTab;
+  const activeTab = externalTab ?? internalTab;
 
   const handleTabClick = (tab: 'following' | 'followers') => {
     setInternalTab(tab);
@@ -50,23 +50,23 @@ export const ProfileRightPanel: React.FC<ProfileRightPanelProps> = ({
         {/* Streak */}
         <div className="flex items-center gap-1.5 px-2 py-1 font-extrabold text-xs text-gray-500 dark:text-[#52656d]">
           <Flame className="w-4 h-4 text-gray-400 dark:text-[#52656d]" />
-          <span>{profile.stats.streak}</span>
+          <span>{profile.stats?.streak ?? 0}</span>
         </div>
 
         {/* Gems */}
         <div className="flex items-center gap-1.5 px-2 py-1 font-extrabold text-xs text-[#1cb0f6]">
           <span className="text-base">💎</span>
-          <span>{profile.stats.gems}</span>
+          <span>{profile.stats?.gems ?? 0}</span>
         </div>
 
         {/* Hearts */}
         <div className="flex items-center gap-1.5 px-2 py-1 font-extrabold text-xs text-[#ff4b4b]">
           <Heart className="w-4 h-4 fill-[#ff4b4b] text-[#ff4b4b]" />
-          <span>{profile.stats.hearts}</span>
+          <span>{profile.stats?.hearts ?? 5}</span>
         </div>
       </div>
 
-      {/* 2. Following / Followers Card matching Screenshot 1 */}
+      {/* 2. Following / Followers Card */}
       <div className="duo-card bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-3xl overflow-hidden shadow-sm">
         {/* Tab Headers */}
         <div className="flex border-b-2 border-gray-100 dark:border-[#20323d]">
@@ -78,7 +78,7 @@ export const ProfileRightPanel: React.FC<ProfileRightPanelProps> = ({
                 : 'text-gray-400 dark:text-[#52656d] hover:text-gray-700 dark:hover:text-[#93a7b1]'
             }`}
           >
-            FOLLOWING
+            FOLLOWING ({following?.length || profile.following_count || 0})
             {activeTab === 'following' && (
               <div className="absolute bottom-0 left-4 right-4 h-1 bg-[#1cb0f6] rounded-full" />
             )}
@@ -92,7 +92,7 @@ export const ProfileRightPanel: React.FC<ProfileRightPanelProps> = ({
                 : 'text-gray-400 dark:text-[#52656d] hover:text-gray-700 dark:hover:text-[#93a7b1]'
             }`}
           >
-            FOLLOWERS
+            FOLLOWERS ({followers?.length || profile.followers_count || 0})
             {activeTab === 'followers' && (
               <div className="absolute bottom-0 left-4 right-4 h-1 bg-[#1cb0f6] rounded-full" />
             )}
@@ -102,7 +102,7 @@ export const ProfileRightPanel: React.FC<ProfileRightPanelProps> = ({
         {/* Tab Content */}
         <div className="p-5">
           {list && list.length > 0 ? (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
               {list.map((u) => (
                 <div key={u.id} className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
@@ -117,23 +117,24 @@ export const ProfileRightPanel: React.FC<ProfileRightPanelProps> = ({
                     </div>
                   </div>
 
-                  <button
-                    onClick={() => onToggleFollow(u.id)}
-                    className={`px-3 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
-                      u.is_following
-                        ? 'bg-gray-100 dark:bg-[#131f24] text-gray-500 dark:text-[#93a7b1] border border-gray-200 dark:border-[#20323d]'
-                        : 'bg-[#1cb0f6] text-white hover:bg-[#1899d6]'
-                    }`}
-                  >
-                    {u.is_following ? 'Following' : 'Follow'}
-                  </button>
+                  {onToggleFollow && (
+                    <button
+                      onClick={() => onToggleFollow(u.id)}
+                      className={`px-3 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                        u.is_following
+                          ? 'bg-gray-100 dark:bg-[#131f24] text-gray-500 dark:text-[#93a7b1] border border-gray-200 dark:border-[#20323d]'
+                          : 'bg-[#1cb0f6] text-white hover:bg-[#1899d6]'
+                      }`}
+                    >
+                      {u.is_following ? 'Following' : 'Follow'}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
           ) : (
-            // Empty State with Friends Illustration matching Screenshot 1
+            // Empty State with Friends Illustration
             <div className="text-center py-4 space-y-4">
-              {/* Group Friends SVG Illustration */}
               <div className="flex justify-center">
                 <svg viewBox="0 0 200 90" className="w-48 h-24 select-none">
                   {/* Friend 1 (Pink) */}
@@ -187,7 +188,7 @@ export const ProfileRightPanel: React.FC<ProfileRightPanelProps> = ({
         </div>
       </div>
 
-      {/* 3. Add Friends Card matching Screenshot 1 */}
+      {/* 3. Add Friends Card */}
       <div className="duo-card bg-white dark:bg-[#182730] border-2 border-gray-200 dark:border-[#20323d] rounded-3xl p-5 space-y-3.5 shadow-sm">
         <h4 className="font-black text-base text-gray-900 dark:text-white">
           Add friends
@@ -228,7 +229,7 @@ export const ProfileRightPanel: React.FC<ProfileRightPanelProps> = ({
         </div>
       </div>
 
-      {/* 4. Footer Links matching Screenshot 2 */}
+      {/* 4. Footer Links */}
       <div className="pt-2 px-1 flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] font-extrabold text-gray-400 dark:text-[#52656d] uppercase tracking-wider">
         <Link href="#" className="hover:text-gray-600 dark:hover:text-[#93a7b1] transition-colors">ABOUT</Link>
         <Link href="#" className="hover:text-gray-600 dark:hover:text-[#93a7b1] transition-colors">BLOG</Link>

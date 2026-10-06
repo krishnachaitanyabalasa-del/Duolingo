@@ -490,20 +490,20 @@ def seed_database(db: Session = None):
         # 4. Seed Achievements & User Achievements
         if db.query(Achievement).count() == 0:
             achievements = [
-                Achievement(id=1, code="wildfire", title="Wildfire", description="Reach a 3-day streak", icon="🔥", target_value=3),
-                Achievement(id=2, code="overachiever", title="Overachiever", description="Earn 100 XP", icon="⚡", target_value=100),
-                Achievement(id=3, code="scholar", title="Scholar", description="Complete 5 lessons", icon="🎓", target_value=5),
-                Achievement(id=4, code="sharp_mind", title="Sharp Mind", description="Complete a lesson with full hearts", icon="🎯", target_value=1),
-                Achievement(id=5, code="champion", title="Champion", description="Reach 500 XP", icon="🏆", target_value=500),
+                Achievement(id=1, code="wildfire", title="Wildfire", description="Reach a 3-day streak", icon="🔥", target_value=3, reward_xp=20, reward_gems=50),
+                Achievement(id=2, code="overachiever", title="Overachiever", description="Earn 100 XP", icon="⚡", target_value=100, reward_xp=25, reward_gems=50),
+                Achievement(id=3, code="scholar", title="Scholar", description="Complete 5 lessons", icon="🎓", target_value=5, reward_xp=30, reward_gems=60),
+                Achievement(id=4, code="sharp_mind", title="Sharp Mind", description="Complete a lesson with full hearts", icon="🎯", target_value=1, reward_xp=15, reward_gems=30),
+                Achievement(id=5, code="champion", title="Champion", description="Reach 500 XP", icon="🏆", target_value=500, reward_xp=50, reward_gems=100),
             ]
             db.add_all(achievements)
             db.commit()
 
-            ua1 = UserAchievement(user_id=learner.id, achievement_id=1, progress=5, is_unlocked=True, unlocked_at=datetime.utcnow() - timedelta(days=1))
-            ua2 = UserAchievement(user_id=learner.id, achievement_id=2, progress=120, is_unlocked=True, unlocked_at=datetime.utcnow() - timedelta(days=1))
-            ua3 = UserAchievement(user_id=learner.id, achievement_id=3, progress=4, is_unlocked=False)
-            ua4 = UserAchievement(user_id=learner.id, achievement_id=4, progress=1, is_unlocked=True, unlocked_at=datetime.utcnow() - timedelta(days=2))
-            ua5 = UserAchievement(user_id=learner.id, achievement_id=5, progress=120, is_unlocked=False)
+            ua1 = UserAchievement(user_id=learner.id, achievement_id=1, progress=5, is_unlocked=True, unlocked_at=datetime.utcnow() - timedelta(days=1), reward_awarded=True)
+            ua2 = UserAchievement(user_id=learner.id, achievement_id=2, progress=120, is_unlocked=True, unlocked_at=datetime.utcnow() - timedelta(days=1), reward_awarded=True)
+            ua3 = UserAchievement(user_id=learner.id, achievement_id=3, progress=4, is_unlocked=False, reward_awarded=False)
+            ua4 = UserAchievement(user_id=learner.id, achievement_id=4, progress=1, is_unlocked=True, unlocked_at=datetime.utcnow() - timedelta(days=2), reward_awarded=True)
+            ua5 = UserAchievement(user_id=learner.id, achievement_id=5, progress=120, is_unlocked=False, reward_awarded=False)
 
             db.add_all([ua1, ua2, ua3, ua4, ua5])
             db.commit()

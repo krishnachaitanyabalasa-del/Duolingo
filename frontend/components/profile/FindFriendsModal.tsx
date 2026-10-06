@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Search, UserPlus, UserCheck } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 import { CartoonAvatar } from './Avatars';
 
 interface FindFriendsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onToggleFollow: (userId: number | string) => void;
+  onToggleFollow?: (userId: number | string) => void;
 }
 
 export const FindFriendsModal: React.FC<FindFriendsModalProps> = ({
@@ -36,7 +36,9 @@ export const FindFriendsModal: React.FC<FindFriendsModalProps> = ({
     setMockFriends((prev) =>
       prev.map((f) => (f.id === id ? { ...f, is_following: !f.is_following } : f))
     );
-    onToggleFollow(id);
+    if (onToggleFollow) {
+      onToggleFollow(id);
+    }
   };
 
   return (
@@ -71,35 +73,41 @@ export const FindFriendsModal: React.FC<FindFriendsModalProps> = ({
 
           {/* User List */}
           <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
-            {filtered.map((user) => (
-              <div
-                key={user.id}
-                className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-[#131f24] border border-gray-200 dark:border-[#20323d]"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <CartoonAvatar avatarId={user.avatar_id} size={40} />
-                  <div className="min-w-0">
-                    <div className="font-extrabold text-sm text-gray-900 dark:text-white truncate">
-                      {user.display_name}
-                    </div>
-                    <div className="text-xs font-bold text-gray-400 dark:text-[#52656d]">
-                      @{user.username} • {user.xp} XP
+            {filtered.length === 0 ? (
+              <div className="py-6 text-center text-xs font-bold text-gray-400">
+                No matching learners found.
+              </div>
+            ) : (
+              filtered.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-[#131f24] border border-gray-200 dark:border-[#20323d]"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <CartoonAvatar avatarId={user.avatar_id} size={40} />
+                    <div className="min-w-0">
+                      <div className="font-extrabold text-sm text-gray-900 dark:text-white truncate">
+                        {user.display_name}
+                      </div>
+                      <div className="text-xs font-bold text-gray-400 dark:text-[#52656d]">
+                        @{user.username} • {user.xp} XP
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <button
-                  onClick={() => handleFollowClick(user.id)}
-                  className={`px-3.5 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
-                    user.is_following
-                      ? 'bg-gray-200 dark:bg-[#20323d] text-gray-600 dark:text-[#93a7b1]'
-                      : 'bg-[#1cb0f6] hover:bg-[#1899d6] text-white shadow-[0_2px_0_0_#1899d6]'
-                  }`}
-                >
-                  {user.is_following ? 'Following' : '+ Follow'}
-                </button>
-              </div>
-            ))}
+                  <button
+                    onClick={() => handleFollowClick(user.id)}
+                    className={`px-3.5 py-1.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer ${
+                      user.is_following
+                        ? 'bg-gray-200 dark:bg-[#20323d] text-gray-600 dark:text-[#93a7b1]'
+                        : 'bg-[#1cb0f6] hover:bg-[#1899d6] text-white shadow-[0_2px_0_0_#1899d6]'
+                    }`}
+                  >
+                    {user.is_following ? 'Following' : '+ Follow'}
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

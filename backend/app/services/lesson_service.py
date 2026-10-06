@@ -15,6 +15,12 @@ from app.schemas.lesson import (
 from app.services.course_service import get_lesson_detail
 from app.services.user_service import get_default_user
 from app.services.achievement_service import check_user_achievements
+from app.services.economy_service import (
+    record_xp,
+    record_answers,
+    record_lesson_completed,
+)
+from app.services.quest_service import sync_quest_progress
 from app.utils.date_utils import update_user_streak
 
 
@@ -181,9 +187,13 @@ def validate_and_submit_answer(
     xp_gained = 0
     if is_correct:
         xp_gained = 1
-        user.xp += 1
+        record_xp(db, user, 1)
     else:
         user.hearts = max(0, user.hearts - 1)
+
+    record_answers(db, user, correct=1 if is_correct else 0, total=1)
+    sync_quest_progress(db, user)
+    check_user_achievements(db, user)
 
     db.commit()
     db.refresh(user)
@@ -200,7 +210,7 @@ def validate_and_submit_answer(
 def complete_lesson(db: Session, lesson_id: int, user_id: int) -> LessonCompleteResponse:
     """
     Completes a lesson attempt for the user.
-    Awards lesson completion bonus XP (+10 XP).
+    Awards lesson completion bonus XP (+10 XP) if completed for the first time.
     Updates user lesson progress & skill progress %.
     Unlocks next skill if skill reaches 100% completion.
     Updates daily streak and checks achievements.
@@ -241,9 +251,11 @@ def complete_lesson(db: Session, lesson_id: int, user_id: int) -> LessonComplete
         lesson_prog.is_completed = True
         lesson_prog.completed_at = datetime.utcnow()
 
-        # Award lesson completion XP bonus (+10 XP)
+        # Award lesson completion XP bonus (+10 XP) exactly once
         xp_awarded = lesson.xp_reward or 10
-        user.xp += xp_awarded
+        record_xp(db, user, xp_awarded)
+        record_lesson_completed(db, user)
+        sync_quest_progress(db, user)
         db.flush()
 
     # Update active attempt session if exists
