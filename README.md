@@ -1,176 +1,428 @@
-# 🦉 Duolingo Web App Clone — SDE Fullstack Assignment
+# Duolingo Web App
 
-A functional, pixel-perfect clone of the **Duolingo** web application built with **Next.js (TypeScript)** on the frontend, **Python (FastAPI)** on the backend, and **SQLite (SQLAlchemy ORM)** for database persistence.
+A full-stack **Duolingo clone** built for the SDE Fullstack Assignment. The application recreates the core Duolingo learning experience with a gamified learning path, interactive lessons, progress tracking, XP, streaks, hearts, rewards, achievements, and a learner profile.
 
-This project replicates Duolingo's iconic dark-mode interface, serpentine learning path, interactive exercise player, audio pronunciation, and real-time gamification systems (XP, Streaks, Hearts, Gems, and Leaderboards).
+## Live Links
 
----
+| Resource | Link |
+|---|---|
+| Live Application | `https://duolingo-cbdd2.web.app` |
+| GitHub Repository | `https://github.com/krishnachaitanyabalasa-del/Duolingo` |
 
-## 📸 Visual UI & Design References
+## Tech Stack
 
-The application matches the original Duolingo Web UX across three primary views:
-1. **Learning Path / Home View**: Serpentine unit path with circular skill nodes (`👋`, `🤝`, `📚`, `🍎`, `🏃`), crowns, locked states, unit headers, and an animated mascot riding along the path.
-2. **Interactive Lesson Player**: Screen with audio text-to-speech (`🔊`), dotted pronunciation underlines, option cards (`[ 1 ]`, `[ 2 ]`, `[ 3 ]`), and signature bottom feedback bar (`SKIP` / `CHECK` / `CONTINUE`).
-3. **Desktop & Mobile Navigation**: Fixed left sidebar, top stats bar (🔥 Streak, ⚡ XP, 💎 Gems, ❤️ Hearts), and right-side widgets (Super Duolingo promo & Amethyst League leaderboard card).
+| Technology | Purpose |
+|---|---|
+| **Next.js 16** | Frontend framework and App Router |
+| **React 19** | Interactive UI components |
+| **TypeScript** | Type-safe development |
+| **Tailwind CSS** | Styling and responsive design |
+| **Framer Motion** | UI animations and transitions |
+| **Lucide React** | Icons |
+| **Canvas Confetti** | Lesson/reward celebrations |
+| **FastAPI** | Backend REST API |
+| **Python** | Backend development |
+| **SQLAlchemy** | Database ORM |
+| **SQLite** | Relational database |
+| **Firebase Authentication** | User authentication |
 
----
+## Features
 
-## 🛠️ Technology Stack
+### 1. Learning Path
 
-### **Frontend** (`/frontend`)
-- **Framework**: Next.js 15 (App Router, React 19, TypeScript)
-- **Styling**: Tailwind CSS v4, Custom 3D Tactile Buttons (`duo-button`), Dark Theme (`#131f24`)
-- **Animations**: Framer Motion, Canvas Confetti
-- **Icons**: Lucide React
-- **Audio & Speech**: Web Audio API Sound Synthesizer (`lib/sound.ts`), Web Speech Synthesis API (`SpeakButton`), Web Speech Recognition API (`MicrophoneButton`)
+A Duolingo-style learning path allows learners to progress through units, skills, and lessons.
 
-### **Backend** (`/backend`)
-- **Framework**: Python 3.10+ with FastAPI, Uvicorn
-- **Database**: SQLite with SQLAlchemy ORM
-- **Schemas**: Pydantic v2
-- **Testing**: Pytest automated test suite (25 test cases passing)
-
----
-
-## 🗄️ Database Schema & Relational Design
-
-The backend implements a clean relational schema in SQLite via SQLAlchemy:
+- Locked, available, and completed lessons
+- Sequential progression
+- Skill progress indicators
+- XP and streak display
+- Hearts and gems
+- Reward/gift nodes
+- Persistent progress
 
 ```text
-+-------------------+       +-------------------+       +-------------------+
-|      User         |       |      Course       |       |       Unit        |
-+-------------------+       +-------------------+       +-------------------+
-| id (PK)           |       | id (PK)           |       | id (PK)           |
-| username          |       | title             |   +-->| course_id (FK)    |
-| email             |       | description       |   |   | title             |
-| xp                |       | language_code     |   |   | order             |
-| streak            |       | icon              |   |   +-------------------+
-| longest_streak    |       +-------------------+   |             |
-| hearts            |                 |             |             v
-| gems              |                 +-------------+   +-------------------+
-| last_activity_date|                                   |       Skill       |
-+-------------------+                                   +-------------------+
-          |                                             | id (PK)           |
-          |                                             | unit_id (FK)      |
-          |                                             | title, icon, order|
-          v                                             +-------------------+
-+------------------------+                                        |
-| UserSkillProgress      |                                        v
-+------------------------+                              +-------------------+
-| user_id (FK)           |                              |      Lesson       |
-| skill_id (FK)          |                              +-------------------+
-| status (COMPLETED/...) |                              | id (PK)           |
-| crown_level            |                              | skill_id (FK)     |
-| progress_percentage    |                              | title, order      |
-+------------------------+                              +-------------------+
-          |                                                       |
-          v                                                       v
-+------------------------+                              +-------------------+
-| UserLessonProgress    |                              |     Exercise      |
-+------------------------+                              +-------------------+
-| user_id (FK)           |                              | id (PK)           |
-| lesson_id (FK)         |                              | lesson_id (FK)    |
-| is_completed           |                              | type (MC/TRANSL..)|
-+------------------------+                              | content (JSON)    |
-                                                        | correct_answer    |
-                                                        +-------------------+
+Unit
+  ↓
+Skill
+  ↓
+Lesson
+  ↓
+Exercises
+  ↓
+Lesson Complete
+  ↓
+XP + Progress
+  ↓
+Next Content Unlocked
 ```
 
----
+### 2. Interactive Lesson Player
 
-## ⚡ Key Core Features
+The lesson player is the core learning experience and supports multiple exercise types:
 
-### 1. Learning Path / Skill Tree (`/learn`)
-- Serpentine vertical path rendering Units and Skills with lock/available/completed states.
-- Progress percentage rings and crown badges per skill.
-- Animated mascot avatar positioned on the active lesson node.
-- Unit Guidebook modal (`GuidebookModal`) with grammar tips and audio phrase pronunciations.
+- Multiple Choice
+- Translation
+- Word Bank / Tap the Words
+- Match Pairs
+- Fill in the Blank
+- Type the Answer
 
-### 2. Lesson Player (The Core Loop) (`/lesson/[id]`)
-- Renders a sequence of exercises covering **5 Exercise Types**:
-  1. `MULTIPLE_CHOICE`: Options with audio speaker button and keyboard shortcuts (`1`, `2`, `3`, `4`).
-  2. `TRANSLATE`: Tap word bank chips to construct translated sentences.
-  3. `MATCH_PAIRS`: 2-column interactive word pair matching with real-time feedback.
-  4. `FILL_BLANK`: Sentence card with inline option tiles.
-  5. `TYPE_ANSWER`: Spanish text input with character accent shortcuts (`á`, `é`, `í`, `ó`, `ú`, `ñ`) and speech recognition (`MicrophoneButton`).
-- Signature bottom feedback bar (`SKIP` / `CHECK` / `CONTINUE`) with green/red result panels.
-- Hands-free keyboard navigation (`Enter` key checks answer and advances to next exercise).
+Each exercise provides:
 
-### 3. Server-Side Gamification & Security
-- **Server-Side Answer Validation**: Evaluated via `POST /api/lessons/{id}/answer`.
-- **Security (Req #15)**: Correct answer hidden from `GET /api/lessons/{id}` to prevent DevTools network tab cheating.
-- **Heart Loss & Refill**: Deducts 1 heart on incorrect answer. Out of hearts modal triggers practice or gem refill (`POST /api/hearts/refill`).
-- **Streak & XP Calculation**: Increments daily streak (`POST /api/streak/check`) and awards +10 XP completion bonus.
+- Progress tracking
+- Immediate correct/incorrect feedback
+- Heart deduction for incorrect answers
+- Correct answer feedback
+- Lesson completion state
+- XP rewards
+- Skill progress updates
 
-### 4. Secondary Navigation Views
-- **`/profile`**: User avatar, aggregate stats, daily goal progress, achievements grid.
-- **`/leaderboard`**: Top 3 Podium (🥇 🥈 🥉) and league list with current user highlight card.
-- **`/sounds`**: Interactive Spanish phonetics chart with audio pronunciation samples.
-- **`/practice`**: Mistakes review & targeted practice hub to earn back hearts.
-- **`/quests`**: Daily challenges board with claimable gem chest rewards.
-- **`/shop`**: Item store to buy Heart Refills, Streak Freezes, and Super Duolingo free trial.
+### Lesson Flow
 
----
-
-## 🔌 API Endpoint Overview
-
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/api/course` | Returns active course with unit hierarchy, skill states, and crown levels |
-| `GET` | `/api/lessons/{id}` | Returns lesson details and exercise questions (correct answer hidden for security) |
-| `POST` | `/api/lessons/{id}/start` | Starts a lesson session attempt (verifies hearts > 0) |
-| `POST` | `/api/lessons/{id}/answer` | Submits exercise answer; returns correctness, hearts remaining, and XP earned |
-| `POST` | `/api/lessons/{id}/complete` | Finalizes lesson completion, awards +10 XP bonus, updates skill progress & streak |
-| `GET` | `/api/user` | Returns default learner profile (XP, streak, hearts, gems) |
-| `POST` | `/api/hearts/refill` | Restores hearts to 5 in exchange for 100 gems |
-| `POST` | `/api/streak/check` | Recalculates consecutive daily streak status |
-| `GET` | `/api/leaderboard` | Returns sorted XP leaderboard with user rankings |
-| `GET` | `/api/achievements` | Returns learner achievements progress list |
-
----
-
-## 🚀 Quick Start & Local Setup Instructions
-
-### Prerequisites
-- Node.js 18+ & npm
-- Python 3.10+ & pip
-
-### 1. Clone the Repository
-```bash
-git clone https://github.com/krishnachaitanyabalasa-del/Duolingo.git
-cd Duolingo
+```text
+Start Lesson
+     ↓
+Load Exercise
+     ↓
+Submit Answer
+     ↓
+Correct / Incorrect
+     ↓
+Update Hearts
+     ↓
+Next Exercise
+     ↓
+Lesson Complete
+     ↓
+Award XP
+     ↓
+Update Progress
 ```
 
-### 2. Start the Backend API Server
+### 3. Gamification
+
+The application implements the main Duolingo-style gamification mechanics.
+
+| Feature | Description |
+|---|---|
+| Streak | Tracks consecutive learning activity |
+| XP | Earned through lesson completion |
+| Hearts | Lost when an exercise is answered incorrectly |
+| Gems | Used as an in-app reward currency |
+| Daily Goal | Tracks learner XP progress |
+| Leaderboard | Displays learner rankings |
+| Rewards | Unlockable reward chests |
+| Achievements | Progress-based achievements |
+
+### 4. Reward Chest System
+
+Reward chests are integrated into the learning path.
+
+- Rewards remain locked until prerequisites are completed
+- Locked rewards cannot be claimed
+- XP and gems can be awarded
+- Reward state is persisted
+- Animated reward modal
+- Confetti celebration for rewards
+
+The reward modal uses React `createPortal()` and is rendered directly into `document.body`, preventing the learning-path layout and transforms from affecting its positioning.
+
+### 5. Learner Profile
+
+A complete Duolingo-style profile is available at:
+
+```text
+/profile
+```
+
+The profile includes:
+
+- Custom cartoon learner avatar
+- Display name
+- Username
+- Bio
+- Join date
+- Total XP
+- Day streak
+- Current league
+- Top 3 finishes
+- Course badges
+- Achievement progress
+- Followers
+- Following
+- Add Friends
+- Profile editing
+
+### Custom Avatars
+
+The application includes **8 custom SVG learner avatars** with different:
+
+- Hairstyles
+- Accessories
+- Glasses
+- Headphones
+- Clothing styles
+
+The avatars are implemented locally without external image dependencies.
+
+### 6. Social Features
+
+The profile includes lightweight social functionality:
+
+- Followers / Following
+- Follow and unfollow
+- User search
+- Add Friends
+- Profile sharing/invites
+
+These operations are handled through FastAPI APIs.
+
+## Architecture
+
+```text
+                         Browser
+                            │
+                            ▼
+                  ┌──────────────────┐
+                  │    Next.js 16    │
+                  │ React + TypeScript│
+                  └────────┬─────────┘
+                           │
+                        REST API
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │     FastAPI      │
+                  │      Python      │
+                  └────────┬─────────┘
+                           │
+                       SQLAlchemy
+                           │
+                           ▼
+                         SQLite
+```
+
+## Project Structure
+
+### Frontend
+
+```text
+frontend/
+├── app/
+│   ├── layout.tsx
+│   ├── learn/
+│   │   └── page.tsx
+│   ├── profile/
+│   │   └── page.tsx
+│   └── lesson/
+│       └── [id]/
+│           └── page.tsx
+│
+├── components/
+│   ├── layout/
+│   │   ├── Sidebar.tsx
+│   │   └── AppLayoutClient.tsx
+│   │
+│   ├── lesson/
+│   │   └── RewardNode.tsx
+│   │
+│   └── profile/
+│       ├── Avatars.tsx
+│       ├── EditProfileModal.tsx
+│       └── ...
+│
+└── lib/
+    └── mockData.ts
+```
+
+### Backend
+
+```text
+backend/
+├── main.py
+├── models.py
+└── routers/
+    ├── auth.py
+    ├── courses.py
+    ├── profile.py
+    └── user.py
+```
+
+## Database Design
+
+The application uses **SQLite with SQLAlchemy**.
+
+The database separates course content from learner-specific progress.
+
+```text
+User
+ │
+ ├── User Progress
+ ├── Achievements
+ ├── Followers / Following
+ │
+ └── Course
+       │
+       └── Unit
+            │
+            └── Skill
+                 │
+                 └── Lesson
+                      │
+                      └── Exercise
+```
+
+### Main Entities
+
+| Entity | Purpose |
+|---|---|
+| User | Learner profile and account |
+| Course | Language course |
+| Unit | Course section |
+| Skill | Learning skill |
+| Lesson | Individual lesson |
+| Exercise | Lesson question |
+| User Progress | Learner-specific progress |
+| Achievement | Achievement tracking |
+| Follow Relationship | Social connections |
+
+Course content is seeded so the application can be used immediately.
+
+## State Management
+
+React Context is used for application-wide state.
+
+| Data | Storage |
+|---|---|
+| User information | UserContext |
+| Theme | ThemeContext |
+| Exercise answers | React state |
+| Lesson UI state | React state |
+| Modal state | React state |
+| XP | Backend / Database |
+| Streak | Backend / Database |
+| Hearts | Backend / Database |
+| Skill progress | Backend / Database |
+
+No external state-management library was required.
+
+## Backend API
+
+The FastAPI backend is organized into feature-specific routers.
+
+| Router | Responsibility |
+|---|---|
+| `auth.py` | Authentication |
+| `courses.py` | Courses, units, skills and lessons |
+| `profile.py` | Profile and social features |
+| `user.py` | User progression, XP and hearts |
+
+### Example APIs
+
+```text
+GET  /api/profile
+PUT  /api/profile
+```
+
+Additional endpoints handle course data, learner progression, user search, and follow/unfollow operations.
+
+## UI / UX
+
+The application is designed to closely reproduce the Duolingo visual experience.
+
+Key UI elements include:
+
+- Playful gamified interface
+- Rounded cards and buttons
+- Curved learning path
+- Progress indicators
+- Animated feedback
+- Reward celebrations
+- Toast notifications
+- Hearts and XP indicators
+- Profile statistics
+- Responsive layouts
+- Custom mascot-style visuals
+
+## Getting Started
+
+### Backend
+
 ```bash
 cd backend
-py -m pip install -r requirements.txt
-py -m uvicorn app.main:app --reload --port 8000
-```
-- API Server: [`http://127.0.0.1:8000`](http://127.0.0.1:8000)
-- Swagger Interactive Docs: [`http://127.0.0.1:8000/docs`](http://127.0.0.1:8000/docs)
 
-### 3. Start the Next.js Frontend Server
-In a second terminal window:
+python -m venv venv
+```
+
+For Windows:
+
+```bash
+venv\Scripts\activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Start the backend:
+
+```bash
+uvicorn main:app --reload
+```
+
+Backend:
+
+```text
+http://localhost:8000
+```
+
+FastAPI documentation:
+
+```text
+http://localhost:8000/docs
+```
+
+### Frontend
+
+Open another terminal:
+
 ```bash
 cd frontend
+```
+
+Install dependencies:
+
+```bash
 npm install
+```
+
+Start the development server:
+
+```bash
 npm run dev
 ```
-- Web Application: [`http://localhost:3000`](http://localhost:3000)
 
----
+Frontend:
 
-## 🧪 Automated Testing
-
-Run the backend pytest test suite covering all 25 core requirements:
-```bash
-cd backend
-py -m pytest -v
+```text
+http://localhost:3000
 ```
 
----
+## Assumptions / Mocked Data / Notes
 
-## 🤖 AI Tools Usage Statement
+- The application uses a seeded language course with a limited set of units, skills, lessons, and exercises as allowed by the assignment.
+- Firebase Authentication is used for user authentication.
+- Leaderboard and social users are seeded for demonstration purposes.
+- Gems, rewards, and heart refill mechanics are implemented with simplified game-economy rules.
+- Course content is seeded and designed to demonstrate the complete learning flow rather than represent a full production language curriculum.
+- Speech/pronunciation-related recommendations are included as part of the learning experience.
+- The primary focus is on reproducing the Duolingo-style UI/UX, lesson flow, progression, gamification, and persistent learner data.
 
-AI development tools (Claude 3.6, Antigravity IDE, ChatGPT) were utilized during development to accelerate UI component generation, TypeScript type definitions, database seeding scripts, and automated test cases. All architecture decisions, data transformers, and business logic rules were verified, tested, and understood for presentation.
+## Author
+
+**Balasa Krishna Chaitanya**
+
+Computer Science Engineering  
+VIT-AP University
