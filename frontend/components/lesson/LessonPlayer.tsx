@@ -21,6 +21,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lessonId }) => {
     currentExercise,
     totalExercises,
     selectedAnswer,
+    isChecking,
     isSubmitted,
     answerResult,
     hearts,
@@ -77,7 +78,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lessonId }) => {
           exercise={currentExercise}
           selectedAnswer={selectedAnswer}
           onSelect={handleSelectAnswer}
-          disabled={isSubmitted}
+          disabled={isSubmitted || isChecking}
         />
       </main>
 
@@ -90,6 +91,7 @@ export const LessonPlayer: React.FC<LessonPlayerProps> = ({ lessonId }) => {
       <AnswerFeedback
         hasAnswer={selectedAnswer !== null && selectedAnswer !== ''}
         isSubmitted={isSubmitted}
+        isChecking={isChecking}
         result={answerResult}
         onCheck={handleCheckAnswer}
         onContinue={handleNextExercise}

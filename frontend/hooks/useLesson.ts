@@ -12,6 +12,7 @@ export function useLesson(lessonId: string, initialHearts = 5) {
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<unknown>(null);
+  const [isChecking, setIsChecking] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [answerResult, setAnswerResult] = useState<AnswerResult | null>(null);
   const [hearts, setHearts] = useState(initialHearts);
@@ -34,6 +35,10 @@ export function useLesson(lessonId: string, initialHearts = 5) {
     setXpEarnedTotal(0);
     setAccuracyEarned(100);
     setStreakEarned(user?.streak || 1);
+    setIsSubmitted(false);
+    setIsChecking(false);
+    setSelectedAnswer(null);
+    setAnswerResult(null);
 
     // Register lesson start on backend (marks status IN_PROGRESS)
     try {
@@ -54,38 +59,45 @@ export function useLesson(lessonId: string, initialHearts = 5) {
   const currentExercise = lesson ? lesson.exercises[currentIndex] : null;
 
   const handleSelectAnswer = (ans: unknown) => {
-    if (isSubmitted) return;
+    if (isSubmitted || isChecking) return;
     sounds.playClick();
     setSelectedAnswer(ans);
   };
 
   const handleCheckAnswer = async () => {
-    if (!lesson || !currentExercise || selectedAnswer === null || isSubmitted) return;
+    if (!lesson || !currentExercise || selectedAnswer === null || isSubmitted || isChecking) return;
 
-    setIsSubmitted(true);
+    setIsChecking(true);
 
-    const result = await apiSubmitAnswer(
-      lesson.id.toString(),
-      currentExercise.id,
-      selectedAnswer,
-      hearts,
-      currentExercise
-    );
+    try {
+      const result = await apiSubmitAnswer(
+        lesson.id.toString(),
+        currentExercise.id,
+        selectedAnswer,
+        hearts,
+        currentExercise
+      );
 
-    setAnswerResult(result);
-    setHearts(result.heartsRemaining);
+      setAnswerResult(result);
+      setIsSubmitted(true);
+      setHearts(result.heartsRemaining);
 
-    if (result.isCorrect) {
-      sounds.playCorrect();
-      const gained = result.xpEarned || 1;
-      answersXpRef.current += gained;
-      correctCountRef.current += 1;
-      setXpEarnedTotal(answersXpRef.current);
-    } else {
-      sounds.playIncorrect();
-      if (result.isOutOfHearts) {
-        setIsOutOfHearts(true);
+      if (result.isCorrect) {
+        sounds.playCorrect();
+        const gained = result.xpEarned || 1;
+        answersXpRef.current += gained;
+        correctCountRef.current += 1;
+        setXpEarnedTotal(answersXpRef.current);
+      } else {
+        sounds.playIncorrect();
+        if (result.isOutOfHearts) {
+          setIsOutOfHearts(true);
+        }
       }
+    } catch (err) {
+      console.error('Error in handleCheckAnswer:', err);
+    } finally {
+      setIsChecking(false);
     }
   };
 
@@ -94,6 +106,7 @@ export function useLesson(lessonId: string, initialHearts = 5) {
 
     sounds.playClick();
     setIsSubmitted(false);
+    setIsChecking(false);
     setSelectedAnswer(null);
     setAnswerResult(null);
 
@@ -144,6 +157,7 @@ export function useLesson(lessonId: string, initialHearts = 5) {
     currentExercise,
     totalExercises: lesson?.exercises.length || 0,
     selectedAnswer,
+    isChecking,
     isSubmitted,
     answerResult,
     hearts,
